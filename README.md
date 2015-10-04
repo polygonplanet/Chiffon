@@ -42,9 +42,10 @@ bower install chiffon
 
 ## Parse
 
-* {_Array_} Chiffon.**parse** ( code )
-  @param {_string_} _code_ Target script code
-  @return {_Array_}  Return an array of tokens
+* {_Array_} Chiffon.**parse** ( code )  
+  @param {_string_} _code_ Target script code  
+  @return {_Array_}  Return an array of tokens  
+
 
 ```javascript
 var tokens = Chiffon.parse('var a = 1');
