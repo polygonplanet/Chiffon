@@ -1,0 +1,226 @@
+[
+  {
+    "type": "Keyword",
+    "token": "var"
+  },
+  {
+    "type": "Identifier",
+    "token": "regex"
+  },
+  {
+    "type": "Punctuator",
+    "token": "="
+  },
+  {
+    "type": "Keyword",
+    "token": "var"
+  },
+  {
+    "type": "Identifier",
+    "token": "str"
+  },
+  {
+    "type": "Punctuator",
+    "token": "="
+  },
+  {
+    "type": "String",
+    "token": "'string'"
+  },
+  {
+    "type": "Keyword",
+    "token": "var"
+  },
+  {
+    "type": "Identifier",
+    "token": "multilineString"
+  },
+  {
+    "type": "Punctuator",
+    "token": "="
+  },
+  {
+    "type": "String",
+    "token": "\"aaa\\\"bbb'\\\nccc\""
+  },
+  {
+    "type": "Keyword",
+    "token": "var"
+  },
+  {
+    "type": "Identifier",
+    "token": "array"
+  },
+  {
+    "type": "Punctuator",
+    "token": "="
+  },
+  {
+    "type": "Punctuator",
+    "token": "["
+  },
+  {
+    "type": "Numeric",
+    "token": "0x0FFF"
+  },
+  {
+    "type": "Punctuator",
+    "token": ","
+  },
+  {
+    "type": "Numeric",
+    "token": "1e8"
+  },
+  {
+    "type": "Punctuator",
+    "token": ","
+  },
+  {
+    "type": "Numeric",
+    "token": "0"
+  },
+  {
+    "type": "Punctuator",
+    "token": ","
+  },
+  {
+    "type": "Numeric",
+    "token": "12345"
+  },
+  {
+    "type": "Punctuator",
+    "token": ","
+  },
+  {
+    "type": "Numeric",
+    "token": "3.524603890386048e+24"
+  },
+  {
+    "type": "Punctuator",
+    "token": ","
+  },
+  {
+    "type": "Numeric",
+    "token": "0.0006215"
+  },
+  {
+    "type": "Punctuator",
+    "token": "]"
+  },
+  {
+    "type": "Keyword",
+    "token": "var"
+  },
+  {
+    "type": "Identifier",
+    "token": "i"
+  },
+  {
+    "type": "Punctuator",
+    "token": "="
+  },
+  {
+    "type": "Numeric",
+    "token": "0"
+  },
+  {
+    "type": "Keyword",
+    "token": "var"
+  },
+  {
+    "type": "Identifier",
+    "token": "もじ"
+  },
+  {
+    "type": "Punctuator",
+    "token": "="
+  },
+  {
+    "type": "String",
+    "token": "'/*\"もじ\"*/'"
+  },
+  {
+    "type": "Keyword",
+    "token": "var"
+  },
+  {
+    "type": "Identifier",
+    "token": "a"
+  },
+  {
+    "type": "Punctuator",
+    "token": "="
+  },
+  {
+    "type": "Numeric",
+    "token": "1"
+  },
+  {
+    "type": "Punctuator",
+    "token": "&&"
+  },
+  {
+    "type": "Numeric",
+    "token": "2"
+  },
+  {
+    "type": "Punctuator",
+    "token": "||"
+  },
+  {
+    "type": "Numeric",
+    "token": "3"
+  },
+  {
+    "type": "Keyword",
+    "token": "var"
+  },
+  {
+    "type": "Identifier",
+    "token": "i"
+  },
+  {
+    "type": "Punctuator",
+    "token": "="
+  },
+  {
+    "type": "Numeric",
+    "token": "0"
+  },
+  {
+    "type": "Keyword",
+    "token": "var"
+  },
+  {
+    "type": "Identifier",
+    "token": "n"
+  },
+  {
+    "type": "Punctuator",
+    "token": "="
+  },
+  {
+    "type": "Punctuator",
+    "token": "("
+  },
+  {
+    "type": "Identifier",
+    "token": "i"
+  },
+  {
+    "type": "Punctuator",
+    "token": "++"
+  },
+  {
+    "type": "Punctuator",
+    "token": "+"
+  },
+  {
+    "type": "Identifier",
+    "token": "i"
+  },
+  {
+    "type": "Punctuator",
+    "token": ")"
+  }
+]
