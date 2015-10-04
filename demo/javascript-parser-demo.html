@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chiffon - Small JavaScript Parser - Demo</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<style>
+#input, #output {
+  width: 99%;
+  height: 300px;
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-10">
+        <h1>Chiffon - Small JavaScript Parser - Demo</h1>
+        <p>
+          ECMAScript parser library
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <fieldset>
+          <legend>Input</legend>
+          <textarea id="input" class="form-control">var a = 1;</textarea>
+        </fieldset>
+      </div>
+      <div class="col-md-6">
+        <fieldset>
+          <legend>Output</legend>
+          <textarea id="output" class="form-control" readonly></textarea>
+        </fieldset>
+      </div>
+    </div>
+    <div class="row footer">
+      <div class="col-md-10">
+        <a href="https://github.com/polygonplanet/Chiffon">Repository in GitHub</a>
+      </div>
+    </div>
+  </div>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="js/chiffon.min.js"></script>
+  <script>
+  $(function() {
+    var $input = $('#input');
+    var $output = $('#output');
+
+    var parse = function() {
+      var tokens = Chiffon.parse($input.val());
+      $output.val(JSON.stringify(tokens, null, '\t'));
+    };
+
+    $input.on('change keyup keypress paste', parse);
+    parse();
+
+    $(window).on('load resize', function() {
+      var height = Math.max(200, $(window).height() - 250);
+      $input.height(height);
+      $output.height(height);
+    });
+  });
+  </script>
+</body>
+</html>
