@@ -1,0 +1,29 @@
+{
+  "name": "chiffon",
+  "main": "chiffon.js",
+  "version": "1.0.0",
+  "homepage": "https://github.com/polygonplanet/Chiffon",
+  "authors": [
+    "polygonplanet <polygon.planet.aqua@gmail.com>"
+  ],
+  "description": "Small JavaScript Parser",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "ecmascript",
+    "javascript",
+    "parser",
+    "syntax"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
