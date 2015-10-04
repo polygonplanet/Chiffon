@@ -1,0 +1,32 @@
+{
+  "name": "chiffon",
+  "version": "1.0.0",
+  "description": "Small JavaScript Parser",
+  "main": "chiffon.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": ""
+  },
+  "scripts": {
+    "test": "mocha tests/test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polygonplanet/Chiffon.git"
+  },
+  "keywords": [
+    "ecmascript",
+    "javascript",
+    "parser",
+    "syntax"
+  ],
+  "author": "polygon planet",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/polygonplanet/Chiffon/issues"
+  },
+  "homepage": "https://github.com/polygonplanet/Chiffon"
+}
