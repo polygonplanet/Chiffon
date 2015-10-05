@@ -71,6 +71,19 @@
   var lineTerminator = '\\r\\n\\u2028\\u2029';
   var lineTerminatorSequence = '(?:\\r\\n|[' + lineTerminator + '])';
   var whiteSpace = '(?:(?![' + lineTerminator + '])\\s)+';
+  var regexpFlags = makeRegExpFlagPattern('gimuy');
+  var literalSuffix = '(?=' +
+    '\\s*' +
+    '(?:' + '(?!\\s*[/\\\\<>*+%`^"\'\\w$-])' +
+            '[^/\\\\<>*+%`^\'"({[\\w$-]' +
+      '|' + '[!=]==?' +
+      '|' + '[|][|]' +
+      '|' + '[&][&]' +
+      '|' + '/(?:[*]|/)' +
+      '|' + '[,.;:!?)}\\]' + lineTerminator + ']' +
+      '|' + '$' +
+    ')' +
+  ')';
 
   var tokenizePattern = new RegExp(
     '(' + // (2) multiline comment
@@ -87,7 +100,7 @@
           ')' +
           // (6) template literal
     '|' + '(' + '`(?:\\\\[\\s\\S]|[^`\\\\])*`' +
-          ')' +
+          ')' + literalSuffix +
           // (7) string literal
     '|' + '(' + '"(?:\\\\[\\s\\S]|[^"' + lineTerminator + '\\\\])*"' +
           '|' + "'(?:\\\\[\\s\\S]|[^'" + lineTerminator + "\\\\])*'" +
@@ -99,25 +112,13 @@
           '(?:' + whiteSpace +
           // (9) line terminators
           '|' + '(' + lineTerminatorSequence + ')' +
-          ')' +
+          ')?' +
           '(?:' +
             // (10) regular expression literal
             '(' +
                 '(?:/(?![*])(?:\\\\.|[^/' + lineTerminator + '\\\\])+/)' +
-                '(?:[gimuy]{0,5}|\\b)' +
-            ')' +
-            '(?=\\s*' +
-              '(?:' + '(?!\\s*[/\\\\<>*+%`^"\'\\w$-])' +
-                      '[^/\\\\<>*+%`^\'"@({[\\w$-]' +
-                '|' + '===?' +
-                '|' + '!==?' +
-                '|' + '[|][|]' +
-                '|' + '[&][&]' +
-                '|' + '/(?:[*]|/)' +
-                '|' + '[,.;:!?)}\\]\\r\\n]' +
-                '|' + '$' +
-              ')' +
-            ')' +
+                '(?:' + regexpFlags + '|)' +
+            ')' + literalSuffix +
           ')' +
           // (11) operators
     '|' + '(' + '>>>=?|[.][.][.]|<<=|===|!==|>>=' +
@@ -146,6 +147,49 @@
     ')',
     'g'
   );
+
+
+  function makeRegExpFlagPattern(flags) {
+    flags = flags.split('');
+
+    var len = flags.length;
+    var patterns = {};
+    var i, j, k, l, m;
+    var c, c2, c3, c4, c5;
+
+    var add = function(f) {
+      if (!/(.).*\1/.test(f)) {
+        patterns[f] = 1;
+      }
+    };
+
+    for (i = 0; i < len; i++) {
+      c = flags[i];
+      patterns[c] = 1;
+
+      for (j = 0; j < len; j++) {
+        c2 = flags[j];
+        add(c + c2);
+
+        for (k = 0; k < len; k++) {
+          c3 = flags[k];
+          add(c + c2 + c3);
+
+          for (l = 0; l < len; l++) {
+            c4 = flags[l];
+            add(c + c2 + c3 + c4);
+
+            for (m = 0; m < len; m++) {
+              c5 = flags[m];
+              add(c + c2 + c3 + c4 + c5);
+            }
+          }
+        }
+      }
+    }
+
+    return '(?:' + getKeys(patterns).join('|') + ')';
+  }
 
 
   function parseMatches(match, options) {
