@@ -12,6 +12,10 @@
     "token": "="
   },
   {
+    "type": "RegularExpression",
+    "token": "/[\\/\\\\\"']*/g"
+  },
+  {
     "type": "Keyword",
     "token": "var"
   },

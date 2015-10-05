@@ -3,7 +3,7 @@
  *
  * @description  Small JavaScript Parser
  * @fileoverview JavaScript parser library
- * @version      1.0.0
+ * @version      1.0.1
  * @date         2015-10-05
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
@@ -56,7 +56,6 @@
     '|' + '(' + '"(?:\\\\[\\s\\S]|[^"\\r\\n\\\\])*"' + // (3) string literal
           '|' + "'(?:\\\\[\\s\\S]|[^'\\r\\n\\\\])*'" +
           ')' +
-
     '|' + '(' + '^' + // (4) regexp literal prefix
           '|' + '[-!%&*+,/:;<=>?[{(^|~]' +
           ')' +
@@ -127,7 +126,9 @@
   var tokenKeyNumbers = getKeys(tokenKeys);
 
 
-  function getToken(match) {
+  function getTokens(match) {
+    var tokens = [];
+
     for (var i = 0, len = tokenKeyNumbers.length; i < len; i++) {
       var n = tokenKeyNumbers[i];
       var token = match[n];
@@ -147,27 +148,29 @@
         type = tokenKey.name;
       }
 
-      return {
+      tokens[tokens.length] = {
         type: type,
         token: token
       };
     }
+
+    return tokens;
   }
 
 
   function parse(code) {
-    var tokens = [];
+    var results = [];
     var m;
 
     parseRe.lastIndex = 0;
     while ((m = parseRe.exec(code)) != null) {
-      var token = getToken(m);
-      if (token) {
-        tokens[tokens.length] = token;
+      var tokens = getTokens(m);
+      for (var i = 0, len = tokens.length; i < len; i++) {
+        results[results.length] = tokens[i];
       }
     }
 
-    return tokens;
+    return results;
   }
 
   Chiffon.parse = parse;
