@@ -3,7 +3,7 @@
  *
  * @description  A very small ECMAScript parser, tokenizer and minify written in JavaScript
  * @fileoverview JavaScript parser, tokenizer and minify library
- * @version      1.1.2
+ * @version      1.1.3
  * @date         2015-10-06
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
@@ -33,8 +33,14 @@
 
   var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-
-  var Keywords = makeDict(
+  var Keywords = (function(words) {
+    words = words.split(/\s+/);
+    var kw = {};
+    for (var i = 0, len = words.length; i < len; i++) {
+      kw[words[i]] = 1;
+    }
+    return kw;
+  }(
     // ECMA-262 11.6.2.1 Keywords
     'break do in typeof case else instanceof var ' +
     'catch export new void class extends return while const finally ' +
@@ -44,27 +50,38 @@
     // ECMA-262 11.6.2.2 Future Reserved Words
     'enum await ' +
     'implements package protected interface private public'
-  );
+  ));
+
+
+  var _Comment = 'Comment',
+      _LineTerminator = 'LineTerminator',
+      _Template = 'Template',
+      _String = 'String',
+      _Punctuator = 'Punctuator',
+      _RegularExpression = 'RegularExpression',
+      _Numeric = 'Numeric',
+      _UnicodeEscapeSequence = 'UnicodeEscapeSequence',
+      _Identifier = 'Identifier',
+      _Null = 'Null',
+      _Boolean = 'Boolean',
+      _Keyword = 'Keyword';
 
 
   var TokenName = {
-    2: 'Comment',
-    3: 'Comment',
-    4: 'LineTerminator',
-    5: 'Comment',
-    6: 'Template',
-    7: 'String',
-    8: 'Punctuator',
-    9: 'LineTerminator',
-    10: 'RegularExpression',
-    11: 'Punctuator',
-    12: 'Numeric',
-    13: 'UnicodeEscapeSequence',
-    14: 'LineTerminator',
-    15: 'Identifier',
-    Null: 'Null',
-    Boolean: 'Boolean',
-    Keyword: 'Keyword'
+    2: _Comment,
+    3: _Comment,
+    4: _LineTerminator,
+    5: _Comment,
+    6: _Template,
+    7: _String,
+    8: _Punctuator,
+    9: _LineTerminator,
+    10: _RegularExpression,
+    11: _Punctuator,
+    12: _Numeric,
+    13: _UnicodeEscapeSequence,
+    14: _LineTerminator,
+    15: _Identifier
   };
 
 
@@ -78,7 +95,7 @@
             '[^/\\\\<>*+%`^\'"({[\\w$-]' +
       '|' + '[!=]==?' +
       '|' + '[|][|]' +
-      '|' + '[&][&]' +
+      '|' + '&&' +
       '|' + '/(?:[*]|/)' +
       '|' + '[,.;:!?)}\\]' + lineTerminator + ']' +
       '|' + '$' +
@@ -122,9 +139,9 @@
           ')' +
           // (11) operators
     '|' + '(' + '>>>=?|[.][.][.]|<<=|===|!==|>>=' +
-          '|' + '[+][+](?=[+])|[-][-](?=[-])' +
+          '|' + '[+][+](?=[+])|--(?=-)' +
           '|' + '[=!<>*%+/&|^-]=' +
-          '|' + '[&][&]|[|][|]|[+][+]|[-][-]|<<|>>|=>' +
+          '|' + '&&|[|][|]|[+][+]|--|<<|>>|=>' +
           '|' + '[-+*/%<>=&|^~!?:;,.()[\\]{}]' +
           ')' +
           // (12) numeric literal
@@ -204,19 +221,19 @@
       }
 
       var name = TokenName[key];
-      if ((name === 'Comment' && !options.comment) ||
-          (name === 'LineTerminator' && !options.lineTerminator)) {
+      if ((name === _Comment && !options.comment) ||
+          (name === _LineTerminator && !options.lineTerminator)) {
         continue;
       }
 
       var type = name;
-      if (name === 'Identifier') {
+      if (name === _Identifier) {
         if (value === 'null') {
-          type = TokenName.Null;
+          type = _Null;
         } else if (value === 'true' || value === 'false') {
-          type = TokenName.Boolean;
+          type = _Boolean;
         } else if (hasOwnProperty.call(Keywords, value)) {
-          type = TokenName.Keyword;
+          type = _Keyword;
         }
       }
 
@@ -264,7 +281,6 @@
   function untokenize(tokens) {
     var ident = /[^\s+\/%*=&|^~<>!?:;,.()[\]{}'"`-]/;
     var sign = /[+-]/;
-    var LT = 'LineTerminator';
 
     var results = [];
     var prev;
@@ -273,13 +289,13 @@
       var token = tokens[i];
 
       if (!prev) {
-        if (token.type !== LT) {
+        if (token.type !== _LineTerminator) {
           results[results.length] = token.value;
         }
         continue;
       }
 
-      if (prev.type === LT && token.type === LT) {
+      if (prev.type === _LineTerminator && token.type === _LineTerminator) {
         continue;
       }
 
@@ -329,16 +345,6 @@
       }
     }
     return keys;
-  }
-
-
-  function makeDict(string) {
-    var dict = {};
-    var words = string.split(/\s+/);
-    for (var i = 0, len = words.length; i < len; i++) {
-      dict[words[i]] = true;
-    }
-    return dict;
   }
 
 
