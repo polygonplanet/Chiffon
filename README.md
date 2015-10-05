@@ -66,6 +66,22 @@ JavaScript AST is not currently supported.
 Chiffon work simply tokenizing.
 
 
+### Defined token type
+
+* Comment
+* LineTerminator
+* Template
+* String
+* Punctuator
+* RegularExpression
+* Numeric
+* UnicodeEscapeSequence
+* Identifier
+* Null
+* Boolean
+* Keyword
+
+
 ### Options
 
 * **comment** : {boolean} default=false  
