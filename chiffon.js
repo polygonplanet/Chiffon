@@ -1,9 +1,9 @@
 /**
  * Chiffon
  *
- * @description  Small JavaScript Parser
- * @fileoverview JavaScript parser library
- * @version      1.0.1
+ * @description  A very small ECMAScript parser, tokenizer and minify written in JavaScript
+ * @fileoverview JavaScript parser, tokenizer and minify library
+ * @version      1.1.0
  * @date         2015-10-05
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
@@ -34,13 +34,12 @@
   var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 
-  var keywords = makeDict(
+  var Keywords = makeDict(
     // ECMA-262 11.6.2.1 Keywords
     'break do in typeof case else instanceof var ' +
     'catch export new void class extends return while const finally ' +
     'super with continue for switch yield debugger function this default ' +
     'if throw delete import try ' +
-    'null true false ' +
     'arguments eval ' +
     // ECMA-262 11.6.2.2 Future Reserved Words
     'enum await ' +
@@ -48,27 +47,63 @@
   );
 
 
-  var parseRe = new RegExp(
-    '(' + '/[*][\\s\\S]*?[*]/' + // multiline comment
-    '|' + '/{2,}[^\\r\\n]*(?:\\r\\n|\\r|\\n|)' + // single line comment
-    '|' + '(' + '`(?:\\\\[\\s\\S]|[^`\\\\])*`' + // (2) template literal
+  var TokenName = {
+    2: 'Comment',
+    3: 'Comment',
+    4: 'LineTerminator',
+    5: 'Comment',
+    6: 'Template',
+    7: 'String',
+    8: 'Punctuator',
+    9: 'LineTerminator',
+    10: 'RegularExpression',
+    11: 'Punctuator',
+    12: 'Numeric',
+    13: 'UnicodeEscapeSequence',
+    14: 'LineTerminator',
+    15: 'Identifier',
+    Null: 'Null',
+    Boolean: 'Boolean',
+    Keyword: 'Keyword'
+  };
+
+
+  var lineTerminator = '\\r\\n\\u2028\\u2029';
+  var lineTerminatorSequence = '(?:\\r\\n|[' + lineTerminator + '])';
+  var whiteSpace = '(?:(?![' + lineTerminator + '])\\s)+';
+
+  var tokenizePattern = new RegExp(
+    '(' + // (2) multiline comment
+          '(/[*][\\s\\S]*?[*]/)' +
+          // (3) single line comment
+    '|' + '(' + '//[^' + lineTerminator + ']*' +
+          '|' + '<!--[^' + lineTerminator + ']*' +
           ')' +
-    '|' + '(' + '"(?:\\\\[\\s\\S]|[^"\\r\\n\\\\])*"' + // (3) string literal
-          '|' + "'(?:\\\\[\\s\\S]|[^'\\r\\n\\\\])*'" +
+          // (4) line terminators
+    '|' + '(?:^|(' + lineTerminatorSequence + '))' +
+          '(?:' + whiteSpace + '|)' +
+          // (5) single line comment
+          '(' + '-->[^' + lineTerminator + ']*' +
           ')' +
-    '|' + '(' + '^' + // (4) regexp literal prefix
+          // (6) template literal
+    '|' + '(' + '`(?:\\\\[\\s\\S]|[^`\\\\])*`' +
+          ')' +
+          // (7) string literal
+    '|' + '(' + '"(?:\\\\[\\s\\S]|[^"' + lineTerminator + '\\\\])*"' +
+          '|' + "'(?:\\\\[\\s\\S]|[^'" + lineTerminator + "\\\\])*'" +
+          ')' +
+          // (8) regexp literal prefix
+    '|' + '(' + '^' +
           '|' + '[-!%&*+,/:;<=>?[{(^|~]' +
           ')' +
-          '(?:' +
-              '(' + // (5) line feed
-                '(?!' + '[\\r\\n])\\s+' +
-                  '|' + '(?:\\r\\n|\\r|\\n)' +
-               ')' +
-            '|' + '\\s*' +
+          '(?:' + whiteSpace +
+          // (9) line terminators
+          '|' + '(' + lineTerminatorSequence + ')' +
           ')' +
           '(?:' +
-            '(' + // (6) regular expression literal
-                '(?:/(?![*])(?:\\\\.|[^/\\r\\n\\\\])+/)' +
+            // (10) regular expression literal
+            '(' +
+                '(?:/(?![*])(?:\\\\.|[^/' + lineTerminator + '\\\\])+/)' +
                 '(?:[gimuy]{0,5}|\\b)' +
             ')' +
             '(?=\\s*' +
@@ -84,73 +119,66 @@
               ')' +
             ')' +
           ')' +
-    '|' + '(' + 'instanceof|return|typeof' + // (7) operators
-          '|' + 'delete|throw|case|void|new|in' +
-          '|' + '>>>=?|[.][.][.]|<<=|===|!==|>>=' +
+          // (11) operators
+    '|' + '(' + '>>>=?|[.][.][.]|<<=|===|!==|>>=' +
           '|' + '[+][+](?=[+])|[-][-](?=[-])' +
           '|' + '[=!<>*%+/&|^-]=' +
           '|' + '[&][&]|[|][|]|[+][+]|[-][-]|<<|>>|=>' +
-          '|' + '[-+*/%<>=&|^~!?:,.()[\\]{}]' +
+          '|' + '[-+*/%<>=&|^~!?:;,.()[\\]{}]' +
           ')' +
-    '|' + '(' + '0(?:' + '[xX][0-9a-fA-F]+' + // (8) numeric literal
+          // (12) numeric literal
+    '|' + '(' + '0(?:' + '[xX][0-9a-fA-F]+' +
                    '|' + '[oO]?[0-7]+' +
                    '|' + '[bB][01]+' +
                    ')' +
           '|' + '\\d+(?:[.]\\d+)?(?:[eE][+-]?\\d+)?' +
           '|' + '[1-9]\\d*' +
           ')' +
-    '|' + '(' + '\\u[0-9a-fA-F]{4}' + // (9) unicode character
+          // (13) unicode character
+    '|' + '(' + '\\u[0-9a-fA-F]{4}' +
           ')' +
-    '|' + ';' +
-    '|' + '(?:(?![\\r\\n])\\s)+' + // white space
-    '|' + '(?:\\r\\n|\\r|\\n)' + // line feed
-    '|' + '(' + '[^\\s+/%*=&|^~<>!?:,;()[\\].{}\'"-]+' + // (10) identifier
+    '|' + whiteSpace +
+          // (14) line terminators
+    '|' + '(' + lineTerminatorSequence + ')' +
+          // (15) identifier
+    '|' + '(' + '[^\\s+/%*=&|^~<>!?:;,.()[\\]{}\'"`-]+' +
           ')' +
     ')',
     'g'
   );
 
 
-  var tokenKeys = {
-    2: { name: 'TemplateLiteral' },
-    3: { name: 'String' },
-    4: { name: 'Punctuator' },
-    5: { name: 'LineFeed', ignore: true },
-    6: { name: 'RegularExpression' },
-    7: { name: 'Punctuator' },
-    8: { name: 'Numeric' },
-    9: { name: 'UnicodeEscapeSequence' },
-    10: { name: 'Identifier', keywords: true }
-  };
-
-  var tokenKeyNumbers = getKeys(tokenKeys);
-
-
-  function getTokens(match) {
+  function parseMatches(match, options) {
     var tokens = [];
+    var tokenKeys = getKeys(TokenName);
 
-    for (var i = 0, len = tokenKeyNumbers.length; i < len; i++) {
-      var n = tokenKeyNumbers[i];
-      var token = match[n];
-      if (!token) {
+    for (var i = 0, len = tokenKeys.length; i < len; i++) {
+      var key = tokenKeys[i];
+      var value = match[key];
+      if (!value) {
         continue;
       }
 
-      var tokenKey = tokenKeys[n];
-      if (tokenKey.ignore) {
+      var name = TokenName[key];
+      if ((name === 'Comment' && !options.comment) ||
+          (name === 'LineTerminator' && !options.lineTerminator)) {
         continue;
       }
 
-      var type;
-      if (tokenKey.keywords && hasOwnProperty.call(keywords, token)) {
-        type = 'Keyword';
-      } else {
-        type = tokenKey.name;
+      var type = name;
+      if (name === 'Identifier') {
+        if (value === 'null') {
+          type = TokenName.Null;
+        } else if (value === 'true' || value === 'false') {
+          type = TokenName.Boolean;
+        } else if (hasOwnProperty.call(Keywords, value)) {
+          type = TokenName.Keyword;
+        }
       }
 
       tokens[tokens.length] = {
         type: type,
-        token: token
+        value: value
       };
     }
 
@@ -158,13 +186,15 @@
   }
 
 
-  function parse(code) {
+  function tokenize(code, options) {
+    options = options || {};
+
     var results = [];
     var m;
 
-    parseRe.lastIndex = 0;
-    while ((m = parseRe.exec(code)) != null) {
-      var tokens = getTokens(m);
+    tokenizePattern.lastIndex = 0;
+    while ((m = tokenizePattern.exec(code)) != null) {
+      var tokens = parseMatches(m, options);
       for (var i = 0, len = tokens.length; i < len; i++) {
         results[results.length] = tokens[i];
       }
@@ -173,7 +203,74 @@
     return results;
   }
 
-  Chiffon.parse = parse;
+  /**
+   * Tokenize a string code.
+   *
+   * @param {string} code Target code.
+   * @param {Object} [options] Tokenize options.
+   *   - comment: {boolean} (default=false)
+   *     true = Keep comment tokens.
+   *   - lineTerminator: {boolean} (default=false)
+   *     true = Keep line feed tokens.
+   * @return {string} Return an array of the parsed tokens.
+   */
+  Chiffon.tokenize = tokenize;
+
+
+  function untokenize(tokens) {
+    var ident = /[^\s+\/%*=&|^~<>!?:;,.()[\]{}'"`-]/;
+    var sign = /[+-]/;
+    var LT = 'LineTerminator';
+
+    var results = [];
+    var prev;
+
+    for (var i = 0, len = tokens.length; i < len; prev = tokens[i++]) {
+      var token = tokens[i];
+
+      if (!prev) {
+        if (token.type !== LT) {
+          results[results.length] = token.value;
+        }
+        continue;
+      }
+
+      if (prev.type === LT && token.type === LT) {
+        continue;
+      }
+
+      var space = '';
+      if ((sign.test(token.value) && sign.test(prev.value)) ||
+          (ident.test(prev.value.slice(-1)) && ident.test(token.value.charAt(0)))) {
+        space = ' ';
+      }
+
+      results[results.length] = space + token.value;
+    }
+
+    return results.join('');
+  }
+
+  /**
+   * Concatenate to string from the parsed tokens.
+   *
+   * @param {Array} tokens An array of the parsed tokens.
+   * @return {string} Return a concatenated string.
+   */
+  Chiffon.untokenize = untokenize;
+
+
+  function minify(code) {
+    return untokenize(tokenize(code, { lineTerminator: true }));
+  }
+
+  /**
+   * Minify JavaScript code.
+   *
+   * @param {string} code Target code.
+   * @return {string} Return a minified code.
+   */
+  Chiffon.minify = minify;
 
 
   function getKeys(object) {

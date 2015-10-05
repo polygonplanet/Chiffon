@@ -1,12 +1,12 @@
 {
   "name": "chiffon",
   "main": "chiffon.js",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "homepage": "https://github.com/polygonplanet/Chiffon",
   "authors": [
     "polygonplanet <polygon.planet.aqua@gmail.com>"
   ],
-  "description": "Small JavaScript Parser",
+  "description": "A very small ECMAScript parser, tokenizer and minify written in JavaScript",
   "moduleType": [
     "amd",
     "globals",

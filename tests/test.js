@@ -7,20 +7,29 @@ var fs = require('fs');
 
 describe('Chiffon', function() {
   var code;
-  var expected;
+  var expected_tokens;
+  var expected_minify;
 
   before(function() {
     code = fs.readFileSync(__dirname + '/ecma-code.js');
-    expected = require(__dirname + '/ecma-expected.json');
+    expected_tokens = require(__dirname + '/ecma-expected.json');
+    expected_minify = fs.readFileSync(__dirname + '/ecma-minify.js');
   });
 
-  describe('parse', function() {
-    it('parse code', function() {
-      var tokens = Chiffon.parse(code);
+  describe('tokenize', function() {
+    it('tokenize code', function() {
+      var tokens = Chiffon.tokenize(code);
 
       assert(Array.isArray(tokens));
       assert(tokens.length > 0);
-      assert.deepEqual(tokens, expected);
+      assert.deepEqual(tokens, expected_tokens);
+    });
+  });
+
+  describe('minify', function() {
+    it('minify code', function() {
+      var min = Chiffon.minify(code);
+      assert.equal(min, expected_minify);
     });
   });
 });
