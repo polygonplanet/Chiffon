@@ -51,12 +51,23 @@ h2 {
   <script src="js/chiffon.min.js"></script>
   <script>
   $(function() {
+    'use strict';
+
     var $input = $('#input');
     var $output = $('#output');
 
+    var processing = false;
     var parse = function() {
-      var tokens = Chiffon.tokenize($input.val());
-      $output.val(JSON.stringify(tokens, null, '\t'));
+      if (processing) {
+        return;
+      }
+      processing = true;
+
+      setTimeout(function() {
+        var tokens = Chiffon.tokenize($input.val());
+        $output.val(JSON.stringify(tokens, null, '\t'));
+        processing = false;
+      }, 20);
     };
 
     $input.on('change keyup keypress paste', parse);
