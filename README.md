@@ -3,9 +3,9 @@ Chiffon
 
 [![Build Status](https://travis-ci.org/polygonplanet/Chiffon.svg?branch=master)](https://travis-ci.org/polygonplanet/Chiffon)
 
-Simple JavaScript/ECMAScript Parser in JavaScript.
+A very small ECMAScript parser, tokenizer and minify written in JavaScript.
 
-Very small library `chiffon.min.js` is **2KB** now.
+`chiffon.min.js` is **3KB** now.
 
 ## Installation
 
@@ -40,27 +40,73 @@ var Chiffon = require('chiffon');
 bower install chiffon
 ```
 
-## Parse
+## Tokenize
 
-* {_Array_} Chiffon.**parse** ( code )  
-  @param {_string_} _code_ Target script code  
-  @return {_Array_}  Return an array of tokens  
+Tokenize a string code.
+
+* {_Array_} Chiffon.**tokenize** ( code [, options ] )  
+  @param {_string_} _code_ Target code.  
+  @param {_Object_} [_options_] Tokenize options.  
+  @return {_Array_}  Return an array of the parsed tokens.  
 
 
 ```javascript
-var tokens = Chiffon.parse('var a = 1');
+var tokens = Chiffon.tokenize('var a = 1');
 console.log(tokens);
 /*
-[ { type: 'Keyword',    token: 'var' },
-  { type: 'Identifier', token: 'a' },
-  { type: 'Punctuator', token: '=' },
-  { type: 'Numeric',    token: '1' } ]
+[ { type: 'Keyword',    value: 'var' },
+  { type: 'Identifier', value: 'a' },
+  { type: 'Punctuator', value: '=' },
+  { type: 'Numeric',    value: '1' } ]
 */
 ```
 
 JavaScript AST is not currently supported.
 
-Chiffon work simply parse code.
+Chiffon work simply tokenizing.
+
+
+### Options
+
+* **comment** : {boolean} default=false  
+  true = Keep comment tokens.
+
+* **lineTerminator** : {boolean} default=false  
+  true = Keep line terminator tokens.
+
+
+## Untokenize
+
+Concatenate to string from the parsed tokens.
+
+* {_string_} Chiffon.**untokenize** ( tokens )  
+  @param {_Array_} _tokens_ An array of the parsed tokens.  
+  @return {_string_}  Return a concatenated string.  
+
+
+## Minify
+
+Minify JavaScript code.
+
+* {_string_} Chiffon.**minify** ( code )  
+  @param {_string_} _code_ Target code.  
+  @return {_string_} Return a minified code.  
+
+
+```javascript
+var min = Chiffon.minify('var a = 1 + 1; // comment');
+console.log(min); // var a=1+1;
+```
+
+
+Minify is a simple implementation as following.
+
+
+```javascript
+function minify(code) {
+  return untokenize(tokenize(code, { lineTerminator: true }));
+}
+```
 
 ## Demo
 
