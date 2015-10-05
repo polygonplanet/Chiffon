@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chiffon - Small JavaScript Parser - Demo</title>
+<title>Chiffon - A very small ECMAScript parser, tokenizer and minify in JavaScript - Demo</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 <style>
 #input, #output {
@@ -16,9 +16,9 @@
   <div class="container">
     <div class="row">
       <div class="col-md-10">
-        <h1>Chiffon - Small JavaScript Parser - Demo</h1>
+        <h1>Chiffon - A very small ECMAScript parser, tokenizer and minify written in JavaScript - Demo</h1>
         <p>
-          ECMAScript parser library
+          Write JavaScript code to Input.
         </p>
       </div>
     </div>
@@ -50,7 +50,7 @@
     var $output = $('#output');
 
     var parse = function() {
-      var tokens = Chiffon.parse($input.val());
+      var tokens = Chiffon.tokenize($input.val());
       $output.val(JSON.stringify(tokens, null, '\t'));
     };
 
