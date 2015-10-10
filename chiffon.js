@@ -3,7 +3,7 @@
  *
  * @description  A very small ECMAScript parser, tokenizer and minify written in JavaScript
  * @fileoverview JavaScript parser, tokenizer and minify library
- * @version      1.1.4
+ * @version      1.2.0
  * @date         2015-10-10
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
@@ -168,7 +168,7 @@
   }
 
 
-  function parseMatches(match, tokens, options) {
+  function parseMatches(match, tokens, options, ignoreRegExp) {
     for (var i = 1; i < capturedTokenLen; i++) {
       var value = match[i];
       if (!value) {
@@ -194,6 +194,9 @@
           type = _Keyword;
         }
       } else if (type === _RegularExpression) {
+        if (ignoreRegExp) {
+          break;
+        }
         regex = parseRegExpFlags(value);
       }
 
@@ -263,7 +266,7 @@
     var m;
 
     while ((m = tokenizePattern.exec(value)) != null) {
-      parseMatches(m, tokens, options);
+      parseMatches(m, tokens, options, true);
     }
 
     return tokens;
