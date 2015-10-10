@@ -56,17 +56,18 @@ h2 {
     var $input = $('#input');
     var $output = $('#output');
 
-    var processing = false;
+    var timerId;
     var parse = function() {
-      if (processing) {
+      if (timerId) {
+        clearTimeout(timerId);
+        timerId = null;
         return;
       }
-      processing = true;
 
-      setTimeout(function() {
+      timerId = setTimeout(function() {
         var tokens = Chiffon.tokenize($input.val());
-        $output.val(JSON.stringify(tokens, null, '\t'));
-        processing = false;
+        $output.val(JSON.stringify(tokens, null, '    '));
+        timerId = null;
       }, 20);
     };
 
