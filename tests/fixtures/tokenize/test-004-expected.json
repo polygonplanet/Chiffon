@@ -1,0 +1,22 @@
+[
+    {
+        "type": "Identifier",
+        "value": "tokenize"
+    },
+    {
+        "type": "Punctuator",
+        "value": "("
+    },
+    {
+        "type": "RegularExpression",
+        "value": "/42/",
+        "regex": {
+            "pattern": "42",
+            "flags": ""
+        }
+    },
+    {
+        "type": "Punctuator",
+        "value": ")"
+    }
+]

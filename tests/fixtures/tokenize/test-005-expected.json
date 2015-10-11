@@ -1,0 +1,34 @@
+[
+    {
+        "type": "Keyword",
+        "value": "if"
+    },
+    {
+        "type": "Punctuator",
+        "value": "("
+    },
+    {
+        "type": "Boolean",
+        "value": "false"
+    },
+    {
+        "type": "Punctuator",
+        "value": ")"
+    },
+    {
+        "type": "Punctuator",
+        "value": "{"
+    },
+    {
+        "type": "RegularExpression",
+        "value": "/42/",
+        "regex": {
+            "pattern": "42",
+            "flags": ""
+        }
+    },
+    {
+        "type": "Punctuator",
+        "value": "}"
+    }
+]
