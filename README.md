@@ -126,7 +126,7 @@ function minify(code) {
 
 ## Demo
 
-* [Demo](http://polygonplanet.github.io/Chiffon/demo/javascript-parser-demo.html)
+* [Demo](https://polygonplanet.github.io/Chiffon/demo/javascript-parser-demo.html)
 
 ## License
 
