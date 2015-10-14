@@ -1,0 +1,14 @@
+[
+    {
+        "type": "Numeric",
+        "value": ".5"
+    },
+    {
+        "type": "Punctuator",
+        "value": "/"
+    },
+    {
+        "type": "Numeric",
+        "value": "42"
+    }
+]

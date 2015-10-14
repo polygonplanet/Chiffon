@@ -1,0 +1,26 @@
+[
+    {
+        "type": "Identifier",
+        "value": "foo"
+    },
+    {
+        "type": "Punctuator",
+        "value": "["
+    },
+    {
+        "type": "Numeric",
+        "value": "1"
+    },
+    {
+        "type": "Punctuator",
+        "value": "/"
+    },
+    {
+        "type": "Numeric",
+        "value": "42"
+    },
+    {
+        "type": "Punctuator",
+        "value": "]"
+    }
+]
