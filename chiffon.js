@@ -113,8 +113,9 @@
   ')';
   var validRegExpPrefix = new RegExp('(?:' +
           '(?:^(?:typeof|in|void|case|instanceof|yield|throw|delete)$)' +
-    '|' + '(?:' + '(?![.)\\]])' + punctuators + '$)' +
+    '|' + '(?:' + '(?![.\\]])' + punctuators + '$)' +
   ')');
+  var validRegExpParenToken = /^(?:if|while|for|with)$/;
 
   var tokenizePatternAll = new RegExp(getPattern(true), 'g');
   var tokenizePattern = new RegExp(getPattern(), 'g');
@@ -236,8 +237,16 @@
           continue;
         }
 
-        if ((type === _Punctuator || type === _Keyword) &&
-            validRegExpPrefix.test(token.value)) {
+        var value = token.value;
+        if (type === _Punctuator) {
+          if (value === ')') {
+            if (isValidRegExpPrefix(tokens, index + 1)) {
+              break;
+            }
+          } else if (validRegExpPrefix.test(value)) {
+            break;
+          }
+        } else if (type === _Keyword && validRegExpPrefix.test(value)) {
           break;
         }
 
@@ -246,6 +255,35 @@
         break;
       }
     }
+  }
+
+
+  function isValidRegExpPrefix(tokens, i) {
+    var level = 0;
+
+    while (--i >= 0) {
+      var token = tokens[i];
+      var type = token.type;
+      if (type !== _Punctuator) {
+        continue;
+      }
+
+      var value = token.value;
+      if (value === '(') {
+        if (--level === 0) {
+          var prevToken = tokens[i - 1];
+          if (prevToken && prevToken.type === _Keyword &&
+              validRegExpParenToken.test(prevToken.value)) {
+            return true;
+          }
+          return false;
+        }
+      } else if (value === ')') {
+        level++;
+      }
+    }
+
+    return false;
   }
 
 
