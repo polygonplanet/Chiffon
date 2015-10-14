@@ -38,7 +38,7 @@ describe('Chiffon', function() {
         var code = libs[name];
         assert(code.length > 0);
         var chiffon_tokens = Chiffon.tokenize(code);
-        var esprima_tokens = esprima.tokenize(code);
+        var esprima_tokens = esprima.parse(code, { tokens: true }).tokens;
         assert.deepEqual(chiffon_tokens, esprima_tokens);
       });
     });
