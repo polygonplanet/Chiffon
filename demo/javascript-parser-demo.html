@@ -14,6 +14,11 @@ h2 {
   width: 99%;
   height: 300px;
 }
+
+.footer {
+  margin-top: 1em;
+  margin-bottom: 2em;
+}
 </style>
 </head>
 <body>
@@ -32,6 +37,9 @@ h2 {
         <fieldset>
           <legend>Input</legend>
           <textarea id="input" class="form-control">var a = 1;</textarea>
+          <div>
+            <label><input type="checkbox" id="range"> Includes an index-based location range</label>
+          </div>
         </fieldset>
       </div>
       <div class="col-md-6">
@@ -55,7 +63,9 @@ h2 {
 
     var $input = $('#input');
     var $output = $('#output');
+    var $range = $('#range');
 
+    var options = {};
     var timerId;
     var parse = function() {
       if (timerId) {
@@ -65,17 +75,22 @@ h2 {
       }
 
       timerId = setTimeout(function() {
-        var tokens = Chiffon.tokenize($input.val());
+        var tokens = Chiffon.tokenize($input.val(), options);
         $output.val(JSON.stringify(tokens, null, '    '));
         timerId = null;
       }, 20);
     };
 
+    $range.on('change', function() {
+      options.range = $range.prop('checked');
+      parse();
+    });
+
     $input.on('change keyup keypress paste', parse);
     parse();
 
     $(window).on('load resize', function() {
-      var height = Math.max(200, $(window).height() - 250);
+      var height = Math.max(200, $(window).height() - 300);
       $input.height(height);
       $output.height(height);
     });
