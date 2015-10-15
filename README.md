@@ -85,10 +85,13 @@ Chiffon work simply tokenizing.
 ### Options
 
 * **comment** : {boolean} default=false  
-  true = Keep comment tokens.
+  Keep comment tokens.
 
 * **lineTerminator** : {boolean} default=false  
-  true = Keep line terminator tokens.
+  Keep line terminator tokens.
+
+* **range** : {boolean} default=false  
+  Includes an index-based location range (array)
 
 
 ## Untokenize

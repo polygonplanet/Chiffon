@@ -213,6 +213,14 @@
         token.regex = regex;
       }
 
+      if (!ignoreRegExp && options.range) {
+        var lastIndex = tokenizePatternAll.lastIndex;
+        token.range = [
+          lastIndex - value.length,
+          lastIndex
+        ];
+      }
+
       tokens[tokens.length] = token;
 
       if (value === match[0]) {
@@ -320,6 +328,7 @@
     var tokens = [];
     var m;
 
+    tokenizePatternAll.lastIndex = 0;
     while ((m = tokenizePatternAll.exec(code)) != null) {
       parseMatches(m, tokens, options);
     }
@@ -335,9 +344,11 @@
    * @param {string} code Target code.
    * @param {Object} [options] Tokenize options.
    *   - comment: {boolean} (default=false)
-   *     true = Keep comment tokens.
+   *     Keep comment tokens.
    *   - lineTerminator: {boolean} (default=false)
-   *     true = Keep line feed tokens.
+   *     Keep line feed tokens.
+   *   - range: {boolean} (default=false)
+   *     Includes an index-based location range (array)
    * @return {string} Return an array of the parsed tokens.
    */
   Chiffon.tokenize = tokenize;
