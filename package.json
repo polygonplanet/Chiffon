@@ -11,7 +11,7 @@
     "mocha": ""
   },
   "scripts": {
-    "test": "mocha tests/test"
+    "test": "mocha --timeout 5000 tests/test"
   },
   "repository": {
     "type": "git",
