@@ -117,56 +117,59 @@
   ')');
   var validRegExpParenToken = /^(?:if|while|for|with)$/;
 
-  var tokenizePatternAll = new RegExp(getPattern(true), 'g');
-  var tokenizePattern = new RegExp(getPattern(), 'g');
+  var tokenizePatternAll = getPattern(true);
+  var tokenizePattern = getPattern();
 
   function getPattern(all) {
-    return '(?:' +
-          // (1) multiline comment
-          '(' + '/[*][\\s\\S]*?[*]/' + ')' +
-          // (2) single line comment
-    '|' + '(' + '//[^' + lineTerminator + ']*' +
-          '|' + '<!--[^' + lineTerminator + ']*' +
-          ')' +
-          // (3) line terminators
-    '|' + '(?:^|(' + lineTerminatorSequence + '))' +
-          '(?:' + whiteSpace + '|)' +
-          // (4) single line comment
-          '(' + '-->[^' + lineTerminator + ']*' +
-          ')' +
-          // (5) template literal
-    '|' + '(' + '`(?:\\\\[\\s\\S]|[^`\\\\])*`' +
-          ')' + literalSuffix +
-          // (6) string literal
-    '|' + '(' + '"(?:\\\\[\\s\\S]|[^"' + lineTerminator + '\\\\])*"' +
-          '|' + "'(?:\\\\[\\s\\S]|[^'" + lineTerminator + "\\\\])*'" +
-          ')' +
-          // (7) regular expression literal
-    '|' + '(' + (all ? regexpLiteral : whiteSpace) +
-          ')' + literalSuffix +
-          // (8) numeric literal
-    '|' + '(' + '0(?:' + '[xX][0-9a-fA-F]+' +
-                   '|' + '[oO][0-7]+' +
-                   '|' + '[bB][01]+' +
-                   ')' +
-          '|' + '(?:\\d+(?:[.]\\d*)?|[.]\\d+)(?:[eE][+-]?\\d+)?' +
-          '|' + '[1-9]\\d*' +
-          '|' + '0[0-7]+' +
-          ')' +
-          // (9) operators
-    '|' + '(' + punctuators +
-          ')' +
-          // (10) unicode character
-    '|' + '(' + '\\\\u[0-9a-fA-F]{4}' +
-          ')' +
-    '|' + whiteSpace +
-          // (11) line terminators
-    '|' + '(' + lineTerminatorSequence + ')' +
-          // (12) identifier
-    '|' + '(' + '[^\\s+/%*=&|^~<>!?:;,.()[\\]{}\'"`-]+' +
-          ')' +
-    ')';
-  }
+    return new RegExp(
+        '(?:' +
+              // (1) multiline comment
+              '(' + '/[*][\\s\\S]*?[*]/' + ')' +
+              // (2) single line comment
+        '|' + '(' + '//[^' + lineTerminator + ']*' +
+              '|' + '<!--[^' + lineTerminator + ']*' +
+              ')' +
+              // (3) line terminators
+        '|' + '(?:^|(' + lineTerminatorSequence + '))' +
+              '(?:' + whiteSpace + '|)' +
+              // (4) single line comment
+              '(' + '-->[^' + lineTerminator + ']*' +
+              ')' +
+              // (5) template literal
+        '|' + '(' + '`(?:\\\\[\\s\\S]|[^`\\\\])*`' +
+              ')' + literalSuffix +
+              // (6) string literal
+        '|' + '(' + '"(?:\\\\[\\s\\S]|[^"' + lineTerminator + '\\\\])*"' +
+              '|' + "'(?:\\\\[\\s\\S]|[^'" + lineTerminator + "\\\\])*'" +
+              ')' +
+              // (7) regular expression literal
+        '|' + '(' + (all ? regexpLiteral : whiteSpace) +
+              ')' + literalSuffix +
+              // (8) numeric literal
+        '|' + '(' + '0(?:' + '[xX][0-9a-fA-F]+' +
+                       '|' + '[oO][0-7]+' +
+                       '|' + '[bB][01]+' +
+                       ')' +
+              '|' + '(?:\\d+(?:[.]\\d*)?|[.]\\d+)(?:[eE][+-]?\\d+)?' +
+              '|' + '[1-9]\\d*' +
+              '|' + '0[0-7]+' +
+              ')' +
+              // (9) operators
+        '|' + '(' + punctuators +
+              ')' +
+              // (10) unicode character
+        '|' + '(' + '\\\\u[0-9a-fA-F]{4}' +
+              ')' +
+        '|' + whiteSpace +
+              // (11) line terminators
+        '|' + '(' + lineTerminatorSequence + ')' +
+              // (12) identifier
+        '|' + '(' + '[^\\s+/%*=&|^~<>!?:;,.()[\\]{}\'"`-]+' +
+              ')' +
+        ')',
+        'g'
+      );
+    }
 
 
   function parseMatches(match, tokens, options, ignoreRegExp) {
