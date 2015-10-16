@@ -33,24 +33,6 @@
 
   var DEFAULT_MAXLINELEN = 32000;
 
-  var isKeyword = (function(words) {
-    var keywords = new RegExp('^(?:' + words.split(/\s+/).join('|') + ')$');
-    return function(ident) {
-      return keywords.test(ident);
-    };
-  }(
-    // ECMA-262 11.6.2.1 Keywords
-    'var function this return if else typeof for const new break do ' +
-    'in void case instanceof catch export class extends while finally ' +
-    'super with continue switch yield debugger default ' +
-    'throw delete import try ' +
-    // Reserved keywords
-    'let static ' +
-    // ECMA-262 11.6.2.2 Future Reserved Words
-    'enum await ' +
-    'implements package protected interface private public'
-  ));
-
   var _Comment = 'Comment',
       _LineTerminator = 'LineTerminator',
       _Template = 'Template',
@@ -80,14 +62,12 @@
     _Identifier
   ];
   var capturedTokenLen = capturedToken.length;
-  var regularExpressionIndex = 7;
 
-  var identRe = /[^\s+\/%*=&|^~<>!?:;,.()[\]{}'"`-]/;
-  var signRe = /[+-]/;
-
+  // ECMA-262 11.3 Line Terminators
   var lineTerminator = '\\r\\n\\u2028\\u2029';
   var lineTerminatorSequence = '(?:\\r\\n|[' + lineTerminator + '])';
   var whiteSpace = '(?:(?![' + lineTerminator + '])\\s)+';
+
   var literalSuffix = '(?=' +
     '\\s*' +
     '(?:' + '(?!\\s*[/\\\\<>*+%`^"\'\\w$-])' +
@@ -100,6 +80,8 @@
       '|' + '$' +
     ')' +
   ')';
+
+  // ECMA-262 11.7 Punctuators
   var punctuators = '(?:' +
           '>>>=?|[.]{3}|<<=|===|!==|>>=' +
     '|' + '[+][+](?=[+])|--(?=-)' +
@@ -107,18 +89,44 @@
     '|' + '&&|[|][|]|[+][+]|--|<<|>>|=>' +
     '|' + '[-+*/%<>=&|^~!?:;,.()[\\]{}]' +
   ')';
+
   var regexpLiteral = '(?:' +
     '/(?![*])(?:\\\\.|[^/' + lineTerminator + '\\\\])+/' +
     '(?:[gimuy]{0,5}|\\b)' +
   ')';
-  var validRegExpPrefix = new RegExp('(?:' +
-          '(?:^(?:typeof|in|void|case|instanceof|yield|throw|delete)$)' +
+
+  var identToken = '[^\\s+/%*=&|^~<>!?:;,.()[\\]{}\'"`-]';
+
+  // Valid keywords for Regular Expression Literal. e.g. `typeof /a/`
+  var regexPreWords = 'typeof|in|void|case|instanceof|yield|throw|delete';
+  // Valid keywords when previous token of the regex literal is a paren.
+  // e.g. `if (1) /a/`
+  var regexParenWords = 'if|while|for|with';
+
+  var keywordsRe = new RegExp('^(?:' +
+    // ECMA-262 11.6.2.1 Keywords
+    regexParenWords + '|' + regexPreWords + '|' +
+    'var|else|function|this|return|new|break|do|' +
+    'catch|finally|try|default|continue|switch|' +
+    'const|export|import|class|extends|debugger|super|' +
+    // Reserved keywords
+    'let|static|' +
+    // ECMA-262 11.6.2.2 Future Reserved Words
+    'enum|await|' +
+    'implements|package|protected|interface|private|public' +
+  ')$');
+
+  var identRe = new RegExp(identToken);
+  var signRe = /[+-]/;
+
+  var regexPrefixRe = new RegExp('(?:' +
+          '(?:^(?:' + regexPreWords + ')$)' +
     '|' + '(?:' + '(?![.\\]])' + punctuators + '$)' +
   ')');
-  var validRegExpParenToken = /^(?:if|while|for|with)$/;
+  var regexParenWordsRe = new RegExp('^(?:' + regexParenWords + ')$');
 
-  var tokenizePatternAll = getPattern(true);
-  var tokenizePattern = getPattern();
+  var tokenizeRe = getPattern();
+  var tokenizeAllRe = getPattern(true);
 
   function getPattern(all) {
     return new RegExp(
@@ -164,7 +172,7 @@
             // (11) line terminators
       '|' + '(' + lineTerminatorSequence + ')' +
             // (12) identifier
-      '|' + '(' + '[^\\s+/%*=&|^~<>!?:;,.()[\\]{}\'"`-]+' +
+      '|' + '(' + identToken + '+' +
             ')' +
       ')',
       'g'
@@ -194,7 +202,7 @@
           type = _Null;
         } else if (value === 'true' || value === 'false') {
           type = _Boolean;
-        } else if (isKeyword(value)) {
+        } else if (keywordsRe.test(value)) {
           type = _Keyword;
         }
       } else if (type === _RegularExpression) {
@@ -214,7 +222,7 @@
       }
 
       if (!ignoreRegExp && options.range) {
-        var lastIndex = tokenizePatternAll.lastIndex;
+        var lastIndex = tokenizeAllRe.lastIndex;
         token.range = [
           lastIndex - value.length,
           lastIndex
@@ -254,10 +262,10 @@
             if (isValidRegExpPrefix(tokens, index + 1)) {
               break;
             }
-          } else if (validRegExpPrefix.test(value)) {
+          } else if (regexPrefixRe.test(value)) {
             break;
           }
-        } else if (type === _Keyword && validRegExpPrefix.test(value)) {
+        } else if (type === _Keyword && regexPrefixRe.test(value)) {
           break;
         }
 
@@ -284,7 +292,7 @@
         if (--level === 0) {
           var prevToken = tokens[i - 1];
           if (prevToken && prevToken.type === _Keyword &&
-              validRegExpParenToken.test(prevToken.value)) {
+              regexParenWordsRe.test(prevToken.value)) {
             return true;
           }
           return false;
@@ -314,7 +322,7 @@
     var tokens = [];
     var m;
 
-    while ((m = tokenizePattern.exec(value)) != null) {
+    while ((m = tokenizeRe.exec(value)) != null) {
       parseMatches(m, tokens, options, true);
     }
 
@@ -328,8 +336,8 @@
     var tokens = [];
     var m;
 
-    tokenizePatternAll.lastIndex = 0;
-    while ((m = tokenizePatternAll.exec(code)) != null) {
+    tokenizeAllRe.lastIndex = 0;
+    while ((m = tokenizeAllRe.exec(code)) != null) {
       parseMatches(m, tokens, options);
     }
     fixRegExpTokens(tokens, options);
