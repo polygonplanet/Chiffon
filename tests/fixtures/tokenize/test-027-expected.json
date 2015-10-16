@@ -1,0 +1,50 @@
+[
+    {
+        "type": "Keyword",
+        "value": "let"
+    },
+    {
+        "type": "Identifier",
+        "value": "a"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Numeric",
+        "value": "1"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    },
+    {
+        "type": "Keyword",
+        "value": "const"
+    },
+    {
+        "type": "Identifier",
+        "value": "b"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Numeric",
+        "value": "2"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    },
+    {
+        "type": "Keyword",
+        "value": "debugger"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    }
+]
