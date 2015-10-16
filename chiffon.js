@@ -223,8 +223,8 @@
         token.regex = regex;
       }
 
-      if (!_regexParsing && _options.range) {
-        var lastIndex = tokenizeAllRe.lastIndex;
+      if (_options.range) {
+        var lastIndex = _regexParsing ? tokenizeRe.lastIndex : tokenizeAllRe.lastIndex;
         token.range = [
           lastIndex - value.length,
           lastIndex
@@ -271,7 +271,7 @@
           break;
         }
 
-        var parts = parseRegExp(regexToken.value);
+        var parts = parseRegExp(regexToken);
         Array.prototype.splice.apply(tokens, [i, 1].concat(parts));
         break;
       }
@@ -320,7 +320,8 @@
   }
 
 
-  function parseRegExp(value) {
+  function parseRegExp(regexToken) {
+    var value = regexToken.value;
     var tokens = [];
     var m;
 
@@ -328,6 +329,15 @@
     tokenizeRe.lastIndex = 0;
     while ((m = tokenizeRe.exec(value)) != null) {
       parseMatches(m, tokens);
+    }
+
+    if (_options.range) {
+      var index = regexToken.range[0];
+      for (var i = 0, len = tokens.length; i < len; i++) {
+        var range = tokens[i].range;
+        range[0] += index;
+        range[1] += index;
+      }
     }
 
     _regexParsing = false;
