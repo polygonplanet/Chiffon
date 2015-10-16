@@ -26,6 +26,7 @@ var esprima = require(__dirname + '/thirdparty/esprima');
 
 var fixtures = {
   tokenize: getFixtureFiles('tokenize'),
+  tokenizeRange: getFixtureFiles('tokenize/range'),
   minify: getFixtureFiles('minify')
 };
 
@@ -51,6 +52,18 @@ describe('Chiffon', function() {
         assert.equal(getFixturesNo(expectedName), no);
         var expected = require(expectedName);
         var tokens = Chiffon.tokenize(code);
+        assert.deepEqual(tokens, expected);
+      });
+    });
+
+    fixtures.tokenizeRange.test.forEach(function(testName, i) {
+      var no = getFixturesNo(testName);
+      it('fixtures range ' + no, function() {
+        var code = fs.readFileSync(testName).toString();
+        var expectedName = fixtures.tokenizeRange.expected[i];
+        assert.equal(getFixturesNo(expectedName), no);
+        var expected = require(expectedName);
+        var tokens = Chiffon.tokenize(code, { range: true });
         assert.deepEqual(tokens, expected);
       });
     });
@@ -125,8 +138,8 @@ function testSyntax(code) {
 }
 
 
-function getFiles(dir, files_) {
-  files_ = files_ || [];
+function getFiles(dir) {
+  var results = [];
 
   var files = fs.readdirSync(dir);
   for (var i in files) {
@@ -135,12 +148,10 @@ function getFiles(dir, files_) {
     }
 
     var name = dir + '/' + files[i];
-    if (fs.statSync(name).isDirectory()) {
-      getFiles(name, files_);
-    } else {
-      files_.push(name);
+    if (!fs.statSync(name).isDirectory()) {
+      results.push(name);
     }
   }
 
-  return files_;
+  return results;
 }

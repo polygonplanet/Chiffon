@@ -1,0 +1,106 @@
+[
+    {
+        "type": "Keyword",
+        "value": "var",
+        "range": [
+            0,
+            3
+        ]
+    },
+    {
+        "type": "Identifier",
+        "value": "g",
+        "range": [
+            4,
+            5
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": "=",
+        "range": [
+            6,
+            7
+        ]
+    },
+    {
+        "type": "Numeric",
+        "value": "1",
+        "range": [
+            8,
+            9
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": ",",
+        "range": [
+            9,
+            10
+        ]
+    },
+    {
+        "type": "Identifier",
+        "value": "a",
+        "range": [
+            11,
+            12
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": "=",
+        "range": [
+            13,
+            14
+        ]
+    },
+    {
+        "type": "Numeric",
+        "value": "2",
+        "range": [
+            15,
+            16
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": "/",
+        "range": [
+            16,
+            17
+        ]
+    },
+    {
+        "type": "Numeric",
+        "value": "1",
+        "range": [
+            17,
+            18
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": "/",
+        "range": [
+            18,
+            19
+        ]
+    },
+    {
+        "type": "Identifier",
+        "value": "g",
+        "range": [
+            19,
+            20
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": ";",
+        "range": [
+            20,
+            21
+        ]
+    }
+]
