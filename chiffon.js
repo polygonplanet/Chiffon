@@ -179,8 +179,10 @@
     );
   }
 
+  var _regexParsing;
+  var _options;
 
-  function parseMatches(match, tokens, options, ignoreRegExp) {
+  function parseMatches(match, tokens) {
     for (var i = 1; i < capturedTokenLen; i++) {
       var value = match[i];
       if (!value) {
@@ -190,11 +192,11 @@
       var regex;
       var type = capturedToken[i];
       if (type === _Comment) {
-        if (!options.comment) {
+        if (!_options.comment) {
           break;
         }
       } else if (type === _LineTerminator) {
-        if (!options.lineTerminator) {
+        if (!_options.lineTerminator) {
           continue;
         }
       } else if (type === _Identifier) {
@@ -206,7 +208,7 @@
           type = _Keyword;
         }
       } else if (type === _RegularExpression) {
-        if (ignoreRegExp) {
+        if (_regexParsing) {
           break;
         }
         regex = parseRegExpFlags(value);
@@ -221,7 +223,7 @@
         token.regex = regex;
       }
 
-      if (!ignoreRegExp && options.range) {
+      if (!_regexParsing && _options.range) {
         var lastIndex = tokenizeAllRe.lastIndex;
         token.range = [
           lastIndex - value.length,
@@ -239,7 +241,7 @@
 
 
   // Fix Regular Expression missing matches e.g. `var g=1,a=2/3/g;`
-  function fixRegExpTokens(tokens, options) {
+  function fixRegExpTokens(tokens) {
     for (var i = 0; i < tokens.length; i++) {
       if (tokens[i].type !== _RegularExpression) {
         continue;
@@ -269,7 +271,7 @@
           break;
         }
 
-        var parts = parseRegExp(regexToken.value, options);
+        var parts = parseRegExp(regexToken.value);
         Array.prototype.splice.apply(tokens, [i, 1].concat(parts));
         break;
       }
@@ -318,30 +320,35 @@
   }
 
 
-  function parseRegExp(value, options) {
+  function parseRegExp(value) {
     var tokens = [];
     var m;
 
+    _regexParsing = true;
+    tokenizeRe.lastIndex = 0;
     while ((m = tokenizeRe.exec(value)) != null) {
-      parseMatches(m, tokens, options, true);
+      parseMatches(m, tokens);
     }
 
+    _regexParsing = false;
     return tokens;
   }
 
 
   function tokenize(code, options) {
-    options = options || {};
+    _options = options || {};
 
     var tokens = [];
     var m;
 
+    _regexParsing = false;
     tokenizeAllRe.lastIndex = 0;
     while ((m = tokenizeAllRe.exec(code)) != null) {
-      parseMatches(m, tokens, options);
+      parseMatches(m, tokens);
     }
-    fixRegExpTokens(tokens, options);
 
+    fixRegExpTokens(tokens);
+    _options = null;
     return tokens;
   }
 
