@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chiffon - A very small ECMAScript parser, tokenizer and minify in JavaScript - Demo</title>
+<title>Chiffon - A very small ECMAScript parser, tokenizer and minifier in JavaScript - Demo</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 <style>
 h2 {
@@ -26,7 +26,7 @@ h2 {
     <div class="row">
       <div class="col-md-10">
         <h1>Chiffon - A Small JavaScript parser, tokenizer - Demo</h1>
-        <h2>Chiffon is a very small ECMAScript parser, tokenizer and minify written in JavaScript</h2>
+        <h2>Chiffon is a very small ECMAScript parser, tokenizer and minifier written in JavaScript</h2>
         <p>
           Write JavaScript code to Input.
         </p>
@@ -38,7 +38,10 @@ h2 {
           <legend>Input</legend>
           <textarea id="input" class="form-control">var a = 1;</textarea>
           <div>
-            <label><input type="checkbox" id="range"> Includes an index-based location range</label>
+            <label><input type="checkbox" id="range"> Include an index-based location range</label>
+          </div>
+          <div>
+            <label><input type="checkbox" id="loc"> Include line number and column-based location info</label>
           </div>
         </fieldset>
       </div>
@@ -64,14 +67,14 @@ h2 {
     var $input = $('#input');
     var $output = $('#output');
     var $range = $('#range');
+    var $loc = $('#loc');
 
     var options = {};
     var timerId;
-    var parse = function() {
+
+    function parse() {
       if (timerId) {
         clearTimeout(timerId);
-        timerId = null;
-        return;
       }
 
       timerId = setTimeout(function() {
@@ -81,16 +84,24 @@ h2 {
       }, 20);
     };
 
-    $range.on('change', function() {
+    function onRangeChange() {
       options.range = $range.prop('checked');
       parse();
-    });
+    }
 
+    function onLocChange() {
+      options.loc = $loc.prop('checked');
+      parse();
+    }
+
+    $range.on('change', onRangeChange);
+    $loc.on('change', onLocChange);
     $input.on('change keyup keypress paste', parse);
-    parse();
+    onRangeChange();
+    onLocChange();
 
     $(window).on('load resize', function() {
-      var height = Math.max(200, $(window).height() - 300);
+      var height = Math.max(200, $(window).height() - 320);
       $input.height(height);
       $output.height(height);
     });
