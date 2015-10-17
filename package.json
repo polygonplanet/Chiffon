@@ -1,7 +1,7 @@
 {
   "name": "chiffon",
-  "version": "1.3.2",
-  "description": "A very small ECMAScript parser, tokenizer and minify written in JavaScript.",
+  "version": "1.4.0",
+  "description": "A very small ECMAScript parser, tokenizer and minifier written in JavaScript.",
   "main": "chiffon.js",
   "directories": {
     "test": "tests"
@@ -20,8 +20,9 @@
   "keywords": [
     "ecmascript",
     "javascript",
-    "tokenizer",
     "parser",
+    "tokenizer",
+    "minify",
     "syntax"
   ],
   "author": "polygon planet",

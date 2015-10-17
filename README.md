@@ -3,9 +3,9 @@ Chiffon
 
 [![Build Status](https://travis-ci.org/polygonplanet/Chiffon.svg?branch=master)](https://travis-ci.org/polygonplanet/Chiffon)
 
-A very small ECMAScript parser, tokenizer and minify written in JavaScript.
+A very small ECMAScript parser, tokenizer and minifier written in JavaScript.
 
-`chiffon.min.js` is **3KB** now.
+`chiffon.min.js` is **4KB** now.
 
 ## Installation
 
@@ -91,8 +91,22 @@ Chiffon work simply tokenizing.
   Keep line terminator tokens.
 
 * **range** : {boolean} default=false  
-  Includes an index-based location range (array)
+  Include an index-based location range. (array)
 
+* **loc** : {boolean} default=false  
+  Include line number and column-based location info.
+
+
+Full options are following.
+
+```javascript
+var options = {
+  comment: Boolean,
+  lineTerminator: Boolean,
+  range: Boolean,
+  loc: Boolean
+};
+```
 
 ## Untokenize
 
@@ -114,7 +128,7 @@ Minify JavaScript code.
 
 ```javascript
 var min = Chiffon.minify('var a = 1 + 1; // comment');
-console.log(min); // var a=1+1;
+console.log(min); // 'var a=1+1;'
 ```
 
 
