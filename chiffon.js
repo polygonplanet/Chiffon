@@ -116,6 +116,8 @@
     'implements|package|protected|interface|private|public' +
   ')$');
 
+  var lineTerminatorSequenceRe = new RegExp(lineTerminatorSequence);
+
   var identLeftRe = new RegExp('^' + identToken);
   var identRightRe = new RegExp(identToken + '$');
   var signLeftRe = /^[+-]/;
@@ -181,26 +183,50 @@
     );
   }
 
+  var _line;
+  var _prevLineIndex;
   var _regexParsing;
+  var _currentRegexToken;
   var _options;
 
+
   function parseMatches(match, tokens) {
+    var lineStart = _line;
+    var lastIndex;
+    if (_regexParsing) {
+      lastIndex = _currentRegexToken._loc.rangeStart + tokenizeRe.lastIndex;
+    } else {
+      lastIndex = tokenizeAllRe.lastIndex;
+    }
+
     for (var i = 1; i < capturedTokenLen; i++) {
       var value = match[i];
       if (!value) {
         continue;
       }
 
+      var columnStart = lastIndex - value.length - _prevLineIndex;
       var regex;
       var type = capturedToken[i];
+
       if (type === _Comment) {
+        if (value.charAt(1) === '*') {
+          // multiline comment
+          updateLine(value, lastIndex);
+        }
+
         if (!_options.comment) {
           break;
         }
       } else if (type === _LineTerminator) {
+        _line++;
+        _prevLineIndex = lastIndex;
+
         if (!_options.lineTerminator) {
           continue;
         }
+      } else if (type === _String || type === _Template) {
+        updateLine(value, lastIndex);
       } else if (type === _Identifier) {
         if (value === 'null') {
           type = _Null;
@@ -223,20 +249,50 @@
 
       if (regex) {
         token.regex = regex;
+
+        // Regex is required additional information because of the mismatches.
+        token._loc = {
+          line: _line,
+          rangeStart: lastIndex - value.length,
+          prevLineIndex: _prevLineIndex
+        };
       }
 
       if (_options.range) {
-        var lastIndex = _regexParsing ? tokenizeRe.lastIndex : tokenizeAllRe.lastIndex;
         token.range = [
           lastIndex - value.length,
           lastIndex
         ];
       }
 
+      if (_options.loc) {
+        token.loc = {
+          start: {
+            line: lineStart,
+            column: columnStart
+          },
+          end: {
+            line: _line,
+            column: lastIndex - _prevLineIndex
+          }
+        };
+      }
+
       tokens[tokens.length] = token;
 
       if (value === match[0]) {
         break;
+      }
+    }
+  }
+
+
+  function updateLine(value, lastIndex) {
+    if (_options.loc) {
+      var lines = value.split(lineTerminatorSequenceRe);
+      if (lines.length > 1) {
+        _line += lines.length - 1;
+        _prevLineIndex = lastIndex - lines.pop().length;
       }
     }
   }
@@ -251,6 +307,7 @@
 
       var index = i;
       var regexToken = tokens[i];
+      var parsed;
 
       while (--index >= 0) {
         var token = tokens[index];
@@ -275,7 +332,12 @@
 
         var parts = parseRegExp(regexToken);
         Array.prototype.splice.apply(tokens, [i, 1].concat(parts));
+        parsed = true;
         break;
+      }
+
+      if (!parsed) {
+        delete regexToken._loc;
       }
     }
   }
@@ -323,37 +385,40 @@
 
 
   function parseRegExp(regexToken) {
+    _currentRegexToken = regexToken;
+
     var value = regexToken.value;
     var tokens = [];
     var m;
 
+    if (_options.loc) {
+      _line = regexToken.loc.start.line;
+      _prevLineIndex = regexToken._loc.prevLineIndex;
+    }
     _regexParsing = true;
+
     tokenizeRe.lastIndex = 0;
     while ((m = tokenizeRe.exec(value)) != null) {
       parseMatches(m, tokens);
     }
 
-    if (_options.range) {
-      var index = regexToken.range[0];
-      for (var i = 0, len = tokens.length; i < len; i++) {
-        var range = tokens[i].range;
-        range[0] += index;
-        range[1] += index;
-      }
-    }
-
     _regexParsing = false;
+    _currentRegexToken = null;
     return tokens;
   }
 
 
   function tokenize(code, options) {
+    code = '' + code;
     _options = options || {};
 
     var tokens = [];
     var m;
 
+    _line = 1;
+    _prevLineIndex = 0;
     _regexParsing = false;
+
     tokenizeAllRe.lastIndex = 0;
     while ((m = tokenizeAllRe.exec(code)) != null) {
       parseMatches(m, tokens);
@@ -371,11 +436,13 @@
    * @param {string} code Target code.
    * @param {Object} [options] Tokenize options.
    *   - comment: {boolean} (default=false)
-   *     Keep comment tokens.
+   *         Keep comment tokens.
    *   - lineTerminator: {boolean} (default=false)
-   *     Keep line feed tokens.
+   *         Keep line feed tokens.
    *   - range: {boolean} (default=false)
-   *     Includes an index-based location range (array)
+   *         Include an index-based location range (array)
+   *   - loc: {boolean} (default=false)
+   *         Include line number and column-based location info
    * @return {string} Return an array of the parsed tokens.
    */
   Chiffon.tokenize = tokenize;

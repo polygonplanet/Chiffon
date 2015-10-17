@@ -27,6 +27,7 @@ var esprima = require(__dirname + '/thirdparty/esprima');
 var fixtures = {
   tokenize: getFixtureFiles('tokenize'),
   tokenizeRange: getFixtureFiles('tokenize/range'),
+  tokenizeLoc: getFixtureFiles('tokenize/loc'),
   minify: getFixtureFiles('minify')
 };
 
@@ -64,6 +65,18 @@ describe('Chiffon', function() {
         assert.equal(getFixturesNo(expectedName), no);
         var expected = require(expectedName);
         var tokens = Chiffon.tokenize(code, { range: true });
+        assert.deepEqual(tokens, expected);
+      });
+    });
+
+    fixtures.tokenizeLoc.test.forEach(function(testName, i) {
+      var no = getFixturesNo(testName);
+      it('fixtures loc ' + no, function() {
+        var code = fs.readFileSync(testName).toString();
+        var expectedName = fixtures.tokenizeLoc.expected[i];
+        assert.equal(getFixturesNo(expectedName), no);
+        var expected = require(expectedName);
+        var tokens = Chiffon.tokenize(code, { loc: true });
         assert.deepEqual(tokens, expected);
       });
     });
