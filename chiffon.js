@@ -116,8 +116,10 @@
     'implements|package|protected|interface|private|public' +
   ')$');
 
-  var identRe = new RegExp(identToken);
-  var signRe = /[+-]/;
+  var identLeftRe = new RegExp('^' + identToken);
+  var identRightRe = new RegExp(identToken + '$');
+  var signLeftRe = /^[+-]/;
+  var signRightRe = /[+-]$/;
 
   var regexPrefixRe = new RegExp('(?:' +
           '(?:^(?:' + regexPreWords + ')$)' +
@@ -389,38 +391,43 @@
 
     for (var i = 0, len = tokens.length; i < len; prev = tokens[i++]) {
       var token = tokens[i];
+      var tokenType = token.type;
+      var tokenValue = token.value;
       var next = tokens[i + 1];
 
       if (!prev) {
-        if (token.type !== _LineTerminator) {
-          results[results.length] = token.value;
+        if (tokenType !== _LineTerminator) {
+          results[results.length] = tokenValue;
         }
         continue;
       }
 
       var ws = '';
-      if (token.type === _LineTerminator) {
-        if (prev.type === _LineTerminator) {
+      var prevType = prev.type;
+      var prevValue = prev.value;
+
+      if (tokenType === _LineTerminator) {
+        if (prevType === _LineTerminator) {
           continue;
         }
-        if (prev.type === _Punctuator || (next && next.type === _Punctuator)) {
-          token.value = '';
+        if (prevType === _Punctuator || (next && next.type === _Punctuator)) {
+          tokenValue = '';
         } else {
           lineLen = 0;
         }
       } else {
-        if ((signRe.test(token.value.slice(-1)) && signRe.test(prev.value.charAt(0))) ||
-            (identRe.test(prev.value.slice(-1)) && identRe.test(token.value.charAt(0)))) {
+        if ((signLeftRe.test(tokenValue) && signRightRe.test(prevValue)) ||
+            (identLeftRe.test(tokenValue) && identRightRe.test(prevValue))) {
           ws = ' ';
         }
 
-        if (token.type === _Punctuator && lineLen > maxLineLen) {
-          token.value += '\n';
+        if (tokenType === _Punctuator && lineLen > maxLineLen) {
+          tokenValue += '\n';
           lineLen = 0;
         }
       }
 
-      var value = ws + token.value;
+      var value = ws + tokenValue;
       lineLen += value.length;
       results[results.length] = value;
     }
