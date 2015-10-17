@@ -395,8 +395,8 @@
       this.currentRegexToken = null;
       return tokens;
     },
-    tokenize: function(code) {
-      code = '' + code;
+    tokenize: function(source) {
+      source = '' + source;
 
       this.line = 1;
       this.prevLineIndex = 0;
@@ -406,7 +406,7 @@
       var m;
 
       tokenizeAllRe.lastIndex = 0;
-      while ((m = tokenizeAllRe.exec(code)) != null) {
+      while ((m = tokenizeAllRe.exec(source)) != null) {
         this.parseMatches(m, tokens);
       }
 
@@ -416,9 +416,9 @@
   };
 
   /**
-   * Tokenize a string code.
+   * Tokenize a string source.
    *
-   * @param {string} code Target code.
+   * @param {string} source Target source.
    * @param {Object} [options] Tokenize options.
    *   - comment: {boolean} (default=false)
    *         Keep comment tokens.
@@ -430,8 +430,8 @@
    *         Include line number and column-based location info
    * @return {string} Return an array of the parsed tokens.
    */
-  var tokenize = Chiffon.tokenize = function(code, options) {
-    return new Tokenizer(options).tokenize(code);
+  var tokenize = Chiffon.tokenize = function(source, options) {
+    return new Tokenizer(options).tokenize(source);
   };
 
 
@@ -498,18 +498,18 @@
   Chiffon.untokenize = untokenize;
 
 
-  function minify(code, options) {
-    return untokenize(tokenize(code, { lineTerminator: true }), options);
+  function minify(source, options) {
+    return untokenize(tokenize(source, { lineTerminator: true }), options);
   }
 
   /**
-   * Minify JavaScript code.
+   * Minify JavaScript source.
    *
-   * @param {string} code Target code.
+   * @param {string} source Target source.
    * @param {Object} [options] minify options.
    *   - maxLineLen: {number} (default=32000)
    *     Limit the line length in symbols.
-   * @return {string} Return a minified code.
+   * @return {string} Return a minified source.
    */
   Chiffon.minify = minify;
 

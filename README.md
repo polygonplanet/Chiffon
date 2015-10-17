@@ -42,10 +42,10 @@ bower install chiffon
 
 ## Tokenize
 
-Tokenize a string code.
+Tokenize a string source.
 
-* {_Array_} Chiffon.**tokenize** ( code [, options ] )  
-  @param {_string_} _code_ Target code.  
+* {_Array_} Chiffon.**tokenize** ( source [, options ] )  
+  @param {_string_} _source_ Target source.  
   @param {_Object_} [_options_] Tokenize options.  
   @return {_Array_}  Return an array of the parsed tokens.  
 
@@ -119,11 +119,11 @@ Concatenate to string from the parsed tokens.
 
 ## Minify
 
-Minify JavaScript code.
+Minify JavaScript source.
 
-* {_string_} Chiffon.**minify** ( code )  
-  @param {_string_} _code_ Target code.  
-  @return {_string_} Return a minified code.  
+* {_string_} Chiffon.**minify** ( source )  
+  @param {_string_} _source_ Target source.  
+  @return {_string_} Return a minified source.  
 
 
 ```javascript
@@ -136,8 +136,8 @@ Minify is a simple implementation as following.
 
 
 ```javascript
-function minify(code) {
-  return untokenize(tokenize(code, { lineTerminator: true }));
+function minify(source) {
+  return untokenize(tokenize(source, { lineTerminator: true }));
 }
 ```
 
