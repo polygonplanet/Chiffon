@@ -183,252 +183,237 @@
     );
   }
 
-  var _line;
-  var _prevLineIndex;
-  var _regexParsing;
-  var _currentRegexToken;
-  var _options;
 
+  function Tokenizer(options) {
+    this.options = options || {};
+  }
 
-  function parseMatches(match, tokens) {
-    var lineStart = _line;
-    var lastIndex;
-    if (_regexParsing) {
-      lastIndex = _currentRegexToken._loc.rangeStart + tokenizeRe.lastIndex;
-    } else {
-      lastIndex = tokenizeAllRe.lastIndex;
-    }
-
-    for (var i = 1; i < capturedTokenLen; i++) {
-      var value = match[i];
-      if (!value) {
-        continue;
+  Tokenizer.prototype = {
+    parseMatches: function(match, tokens) {
+      var lineStart = this.line;
+      var lastIndex;
+      if (this.regexParsing) {
+        lastIndex = this.currentRegexToken._loc.rangeStart + tokenizeRe.lastIndex;
+      } else {
+        lastIndex = tokenizeAllRe.lastIndex;
       }
 
-      var columnStart = lastIndex - value.length - _prevLineIndex;
-      var regex;
-      var type = capturedToken[i];
-
-      if (type === _Comment) {
-        if (value.charAt(1) === '*') {
-          // multiline comment
-          updateLine(value, lastIndex);
-        }
-
-        if (!_options.comment) {
-          break;
-        }
-      } else if (type === _LineTerminator) {
-        _line++;
-        _prevLineIndex = lastIndex;
-
-        if (!_options.lineTerminator) {
+      for (var i = 1; i < capturedTokenLen; i++) {
+        var value = match[i];
+        if (!value) {
           continue;
         }
-      } else if (type === _String || type === _Template) {
-        updateLine(value, lastIndex);
-      } else if (type === _Identifier) {
-        if (value === 'null') {
-          type = _Null;
-        } else if (value === 'true' || value === 'false') {
-          type = _Boolean;
-        } else if (keywordsRe.test(value)) {
-          type = _Keyword;
+
+        var columnStart = lastIndex - value.length - this.prevLineIndex;
+        var regex;
+        var type = capturedToken[i];
+
+        if (type === _Comment) {
+          if (value.charAt(1) === '*') {
+            // multiline comment
+            this.updateLine(value, lastIndex);
+          }
+
+          if (!this.options.comment) {
+            break;
+          }
+        } else if (type === _LineTerminator) {
+          this.line++;
+          this.prevLineIndex = lastIndex;
+
+          if (!this.options.lineTerminator) {
+            continue;
+          }
+        } else if (type === _String || type === _Template) {
+          this.updateLine(value, lastIndex);
+        } else if (type === _Identifier) {
+          if (value === 'null') {
+            type = _Null;
+          } else if (value === 'true' || value === 'false') {
+            type = _Boolean;
+          } else if (keywordsRe.test(value)) {
+            type = _Keyword;
+          }
+        } else if (type === _RegularExpression) {
+          if (this.regexParsing) {
+            break;
+          }
+          regex = this.parseRegExpFlags(value);
         }
-      } else if (type === _RegularExpression) {
-        if (_regexParsing) {
+
+        var token = {
+          type: type,
+          value: value
+        };
+
+        if (regex) {
+          token.regex = regex;
+
+          // Regex is required additional information because of the mismatches.
+          token._loc = {
+            line: this.line,
+            rangeStart: lastIndex - value.length,
+            prevLineIndex: this.prevLineIndex
+          };
+        }
+
+        if (this.options.range) {
+          token.range = [
+            lastIndex - value.length,
+            lastIndex
+          ];
+        }
+
+        if (this.options.loc) {
+          token.loc = {
+            start: {
+              line: lineStart,
+              column: columnStart
+            },
+            end: {
+              line: this.line,
+              column: lastIndex - this.prevLineIndex
+            }
+          };
+        }
+
+        tokens[tokens.length] = token;
+
+        if (value === match[0]) {
           break;
         }
-        regex = parseRegExpFlags(value);
       }
-
-      var token = {
-        type: type,
-        value: value
-      };
-
-      if (regex) {
-        token.regex = regex;
-
-        // Regex is required additional information because of the mismatches.
-        token._loc = {
-          line: _line,
-          rangeStart: lastIndex - value.length,
-          prevLineIndex: _prevLineIndex
-        };
+    },
+    updateLine: function(value, lastIndex) {
+      if (this.options.loc) {
+        var lines = value.split(lineTerminatorSequenceRe);
+        if (lines.length > 1) {
+          this.line += lines.length - 1;
+          this.prevLineIndex = lastIndex - lines.pop().length;
+        }
       }
+    },
+    // Fix Regular Expression missing matches e.g. `var g=1,a=2/3/g;`
+    fixRegExpTokens: function(tokens) {
+      for (var i = 0; i < tokens.length; i++) {
+        if (tokens[i].type !== _RegularExpression) {
+          continue;
+        }
 
-      if (_options.range) {
-        token.range = [
-          lastIndex - value.length,
-          lastIndex
-        ];
-      }
+        var index = i;
+        var regexToken = tokens[i];
+        var parsed;
 
-      if (_options.loc) {
-        token.loc = {
-          start: {
-            line: lineStart,
-            column: columnStart
-          },
-          end: {
-            line: _line,
-            column: lastIndex - _prevLineIndex
+        while (--index >= 0) {
+          var token = tokens[index];
+          var type = token.type;
+
+          if (type === _Comment || type === _LineTerminator) {
+            continue;
           }
-        };
+
+          var value = token.value;
+          if (type === _Punctuator) {
+            if (value === ')') {
+              if (this.isValidRegExpPrefix(tokens, index + 1)) {
+                break;
+              }
+            } else if (regexPrefixRe.test(value)) {
+              break;
+            }
+          } else if (type === _Keyword && regexPrefixRe.test(value)) {
+            break;
+          }
+
+          var parts = this.parseRegExp(regexToken);
+          Array.prototype.splice.apply(tokens, [i, 1].concat(parts));
+          parsed = true;
+          break;
+        }
+
+        if (!parsed) {
+          delete regexToken._loc;
+        }
       }
+    },
+    isValidRegExpPrefix: function(tokens, i) {
+      var level = 0;
 
-      tokens[tokens.length] = token;
-
-      if (value === match[0]) {
-        break;
-      }
-    }
-  }
-
-
-  function updateLine(value, lastIndex) {
-    if (_options.loc) {
-      var lines = value.split(lineTerminatorSequenceRe);
-      if (lines.length > 1) {
-        _line += lines.length - 1;
-        _prevLineIndex = lastIndex - lines.pop().length;
-      }
-    }
-  }
-
-
-  // Fix Regular Expression missing matches e.g. `var g=1,a=2/3/g;`
-  function fixRegExpTokens(tokens) {
-    for (var i = 0; i < tokens.length; i++) {
-      if (tokens[i].type !== _RegularExpression) {
-        continue;
-      }
-
-      var index = i;
-      var regexToken = tokens[i];
-      var parsed;
-
-      while (--index >= 0) {
-        var token = tokens[index];
+      while (--i >= 0) {
+        var token = tokens[i];
         var type = token.type;
-
-        if (type === _Comment || type === _LineTerminator) {
+        if (type !== _Punctuator) {
           continue;
         }
 
         var value = token.value;
-        if (type === _Punctuator) {
-          if (value === ')') {
-            if (isValidRegExpPrefix(tokens, index + 1)) {
-              break;
+        if (value === '(') {
+          if (--level === 0) {
+            var prevToken = tokens[i - 1];
+            if (prevToken && prevToken.type === _Keyword &&
+                regexParenWordsRe.test(prevToken.value)) {
+              return true;
             }
-          } else if (regexPrefixRe.test(value)) {
-            break;
+            return false;
           }
-        } else if (type === _Keyword && regexPrefixRe.test(value)) {
-          break;
+        } else if (value === ')') {
+          level++;
         }
-
-        var parts = parseRegExp(regexToken);
-        Array.prototype.splice.apply(tokens, [i, 1].concat(parts));
-        parsed = true;
-        break;
       }
 
-      if (!parsed) {
-        delete regexToken._loc;
+      return false;
+    },
+    parseRegExpFlags: function(value) {
+      var index = value.lastIndexOf('/');
+      var flags = value.substring(index + 1);
+      var pattern = value.substr(1, index - 1);
+
+      return {
+        pattern: pattern,
+        flags: flags
+      };
+    },
+    parseRegExp: function(regexToken) {
+      this.currentRegexToken = regexToken;
+
+      var value = regexToken.value;
+      var tokens = [];
+      var m;
+
+      if (this.options.loc) {
+        this.line = regexToken.loc.start.line;
+        this.prevLineIndex = regexToken._loc.prevLineIndex;
       }
-    }
-  }
+      this.regexParsing = true;
 
-
-  function isValidRegExpPrefix(tokens, i) {
-    var level = 0;
-
-    while (--i >= 0) {
-      var token = tokens[i];
-      var type = token.type;
-      if (type !== _Punctuator) {
-        continue;
+      tokenizeRe.lastIndex = 0;
+      while ((m = tokenizeRe.exec(value)) != null) {
+        this.parseMatches(m, tokens);
       }
 
-      var value = token.value;
-      if (value === '(') {
-        if (--level === 0) {
-          var prevToken = tokens[i - 1];
-          if (prevToken && prevToken.type === _Keyword &&
-              regexParenWordsRe.test(prevToken.value)) {
-            return true;
-          }
-          return false;
-        }
-      } else if (value === ')') {
-        level++;
+      this.regexParsing = false;
+      this.currentRegexToken = null;
+      return tokens;
+    },
+    tokenize: function(code) {
+      code = '' + code;
+
+      this.line = 1;
+      this.prevLineIndex = 0;
+      this.regexParsing = false;
+
+      var tokens = [];
+      var m;
+
+      tokenizeAllRe.lastIndex = 0;
+      while ((m = tokenizeAllRe.exec(code)) != null) {
+        this.parseMatches(m, tokens);
       }
+
+      this.fixRegExpTokens(tokens);
+      return tokens;
     }
-
-    return false;
-  }
-
-
-  function parseRegExpFlags(value) {
-    var index = value.lastIndexOf('/');
-    var flags = value.substring(index + 1);
-    var pattern = value.substr(1, index - 1);
-
-    return {
-      pattern: pattern,
-      flags: flags
-    };
-  }
-
-
-  function parseRegExp(regexToken) {
-    _currentRegexToken = regexToken;
-
-    var value = regexToken.value;
-    var tokens = [];
-    var m;
-
-    if (_options.loc) {
-      _line = regexToken.loc.start.line;
-      _prevLineIndex = regexToken._loc.prevLineIndex;
-    }
-    _regexParsing = true;
-
-    tokenizeRe.lastIndex = 0;
-    while ((m = tokenizeRe.exec(value)) != null) {
-      parseMatches(m, tokens);
-    }
-
-    _regexParsing = false;
-    _currentRegexToken = null;
-    return tokens;
-  }
-
-
-  function tokenize(code, options) {
-    code = '' + code;
-    _options = options || {};
-
-    var tokens = [];
-    var m;
-
-    _line = 1;
-    _prevLineIndex = 0;
-    _regexParsing = false;
-
-    tokenizeAllRe.lastIndex = 0;
-    while ((m = tokenizeAllRe.exec(code)) != null) {
-      parseMatches(m, tokens);
-    }
-
-    fixRegExpTokens(tokens);
-    _options = null;
-    return tokens;
-  }
-
+  };
 
   /**
    * Tokenize a string code.
@@ -445,7 +430,9 @@
    *         Include line number and column-based location info
    * @return {string} Return an array of the parsed tokens.
    */
-  Chiffon.tokenize = tokenize;
+  var tokenize = Chiffon.tokenize = function(code, options) {
+    return new Tokenizer(options).tokenize(code);
+  };
 
 
   function untokenize(tokens, options) {
