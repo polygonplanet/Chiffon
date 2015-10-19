@@ -5,7 +5,8 @@ Chiffon
 
 A very small ECMAScript parser, tokenizer and minifier written in JavaScript.
 
-`chiffon.min.js` is **4KB** now.
+`chiffon.min.js` is **6KB** now.
+
 
 ## Installation
 
@@ -137,7 +138,7 @@ Minify is a simple implementation as following.
 
 ```javascript
 function minify(source) {
-  return untokenize(tokenize(source, { lineTerminator: true }));
+  return untokenize(tokenize(source));
 }
 ```
 
