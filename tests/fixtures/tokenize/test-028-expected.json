@@ -1,0 +1,22 @@
+[
+    {
+        "type": "Keyword",
+        "value": "const"
+    },
+    {
+        "type": "Identifier",
+        "value": "t"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Template",
+        "value": "`template`"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    }
+]

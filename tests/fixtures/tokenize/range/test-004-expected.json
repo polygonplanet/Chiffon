@@ -1,0 +1,42 @@
+[
+    {
+        "type": "Keyword",
+        "value": "const",
+        "range": [
+            0,
+            5
+        ]
+    },
+    {
+        "type": "Identifier",
+        "value": "t",
+        "range": [
+            6,
+            7
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": "=",
+        "range": [
+            8,
+            9
+        ]
+    },
+    {
+        "type": "Template",
+        "value": "`temp\nlate`",
+        "range": [
+            10,
+            21
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": ";",
+        "range": [
+            21,
+            22
+        ]
+    }
+]

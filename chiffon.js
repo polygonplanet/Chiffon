@@ -31,6 +31,15 @@
 
   var Chiffon = {};
 
+  var arrayProto = Array.prototype;
+  var objectProto = Object.prototype;
+  var push = arrayProto.push;
+  var slice = arrayProto.slice;
+  var splice = arrayProto.splice;
+  var hasOwnProperty = objectProto.hasOwnProperty;
+  var fromCharCode = String.fromCharCode;
+
+
   var DEFAULT_MAXLINELEN = 32000;
 
   var _Comment = 'Comment',
@@ -184,8 +193,29 @@
   }
 
 
+  function isLineTerminator(c) {
+    return c === 0x0A || c === 0x0D || c === 0x2028 || c === 0x2029;
+  }
+
+
+  function mixin(target) {
+    var sources = slice.call(arguments, 1);
+    for (var i = 0, len = sources.length; i < len; i++) {
+      var source = sources[i];
+      for (var key in source) {
+        if (hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  }
+
+
+  var _retokenize;
+
   function Tokenizer(options) {
-    this.options = options || {};
+    this.options = mixin({}, options || {});
   }
 
   Tokenizer.prototype = {
@@ -193,9 +223,12 @@
       var lineStart = this.line;
       var lastIndex;
       if (this.regexParsing) {
-        lastIndex = this.currentRegexToken._loc.rangeStart + tokenizeRe.lastIndex;
+        lastIndex = this._currentRegexToken._loc.rangeStart + tokenizeRe.lastIndex;
       } else {
         lastIndex = tokenizeAllRe.lastIndex;
+        if (_retokenize) {
+          lastIndex += this.rangeStart;
+        }
       }
 
       for (var i = 1; i < capturedTokenLen; i++) {
@@ -205,7 +238,7 @@
         }
 
         var columnStart = lastIndex - value.length - this.prevLineIndex;
-        var regex;
+        var regex, addLoc;
         var type = capturedToken[i];
 
         if (type === _Comment) {
@@ -224,8 +257,10 @@
           if (!this.options.lineTerminator) {
             continue;
           }
-        } else if (type === _String || type === _Template) {
+        } else if (type === _String) {
           this.updateLine(value, lastIndex);
+        } else if (type === _Template) {
+          addLoc = true;
         } else if (type === _Identifier) {
           if (value === 'null') {
             type = _Null;
@@ -238,6 +273,7 @@
           if (this.regexParsing) {
             break;
           }
+          addLoc = true;
           regex = this.parseRegExpFlags(value);
         }
 
@@ -248,34 +284,25 @@
 
         if (regex) {
           token.regex = regex;
+        }
 
+        if (addLoc) {
           // Regex is required additional information because of the mismatches.
           token._loc = {
             line: this.line,
+            columnStart: columnStart,
             rangeStart: lastIndex - value.length,
             prevLineIndex: this.prevLineIndex
           };
         }
 
-        if (this.options.range) {
-          token.range = [
-            lastIndex - value.length,
-            lastIndex
-          ];
+        if (type === _Template) {
+          this.updateLine(value, lastIndex);
         }
 
-        if (this.options.loc) {
-          token.loc = {
-            start: {
-              line: lineStart,
-              column: columnStart
-            },
-            end: {
-              line: this.line,
-              column: lastIndex - this.prevLineIndex
-            }
-          };
-        }
+        var columnEnd = lastIndex - this.prevLineIndex;
+        this.addRange(token, lastIndex);
+        this.addLoc(token, lineStart, columnStart, this.line, columnEnd);
 
         tokens[tokens.length] = token;
 
@@ -284,12 +311,165 @@
         }
       }
     },
+    addRange: function(token, lastIndex) {
+      if (this.options.range) {
+        token.range = [
+          lastIndex - token.value.length,
+          lastIndex
+        ];
+      }
+    },
+    addLoc: function(token, lineStart, columnStart, lineEnd, columnEnd) {
+      if (this.options.loc) {
+        token.loc = {
+          start: {
+            line: lineStart,
+            column: columnStart
+          },
+          end: {
+            line: lineEnd,
+            column: columnEnd
+          }
+        };
+      }
+    },
     updateLine: function(value, lastIndex) {
       if (this.options.loc) {
         var lines = value.split(lineTerminatorSequenceRe);
         if (lines.length > 1) {
           this.line += lines.length - 1;
           this.prevLineIndex = lastIndex - lines.pop().length;
+        }
+      }
+    },
+    parseTemplate: function(tokens) {
+      for (var i = 0; i < tokens.length; i++) {
+        var token = tokens[i];
+        if (token.type !== _Template) {
+          continue;
+        }
+
+        var blocks = this.parseTemplateBlock(token);
+        var newTokens = this.parseTemplateExpr(blocks, token);
+        splice.apply(tokens, [i, 1].concat(newTokens));
+        i += newTokens.length;
+      }
+    },
+    parseTemplateExpr: function(blocks, templateToken) {
+      var results = [];
+
+      for (var i = 0, len = blocks.length; i < len; i++) {
+        var block = blocks[i];
+        if (block.type === 'tmp-source') {
+          _retokenize = mixin({}, block._loc, { type: _Template });
+          var tokens = tokenize(block.value, this.options);
+          _retokenize = null;
+          push.apply(results, tokens);
+        } else {
+          results[results.length] = block;
+        }
+      }
+
+      return results;
+    },
+    parseTemplateBlock: function(templateToken) {
+      var value = templateToken.value;
+      var loc = templateToken._loc;
+
+      var line = loc.line;
+      var lineStart = line;
+      var columnStart = loc.columnStart;
+      var rangeStart = loc.rangeStart;
+      var newlines = [loc.prevLineIndex];
+
+      var tokens = [];
+      var escapeCount = 0;
+      var s = '';
+      var type = _Template;
+
+      var lastIndex, prevLineIndex, columnEnd;
+      var prev, inExpr, tail, append, token;
+
+      for (var i = 0, len = value.length; i < len; prev = value.charCodeAt(i++)) {
+        var c = value.charCodeAt(i);
+
+        if (isLineTerminator(c)) {
+          if (prev === 0x0D && c === 0x0A) {
+            line--;
+          }
+          line++;
+          newlines[newlines.length] = rangeStart + i + 1;
+        }
+
+        if (inExpr) {
+          if (i + 1 < len && value.charCodeAt(i + 1) === 0x7D) { // '}'
+            append = true;
+            type = 'tmp-source'; // Temporary token type
+            inExpr = false;
+          }
+        } else if (c === 0x5C) { // '\'
+          if (prev === 0x5C) {
+            escapeCount++;
+          } else {
+            escapeCount = 1;
+          }
+        } else if (c === 0x24) { // '$'
+          tail = (prev !== 0x5C || escapeCount % 2 === 0);
+        } else if (c === 0x7B) { // '{'
+          if (tail && prev === 0x24) {
+            append = true;
+            type = _Template;
+            inExpr = true;
+          }
+        }
+
+        s += fromCharCode(c);
+
+        if (i === len - 1) {
+          append = true;
+          type = _Template;
+        }
+
+        if (append) {
+          token = {
+            type: type,
+            value: s
+          };
+
+          lastIndex = rangeStart + i + 1;
+          prevLineIndex = this.findPrevLineIndex(newlines, lastIndex);
+          columnEnd = lastIndex - prevLineIndex;
+
+          if (type === _Template) {
+            this.addRange(token, lastIndex);
+            this.addLoc(token, lineStart, columnStart, line, columnEnd);
+            columnStart = columnEnd + 1;
+          } else {
+            lastIndex = rangeStart + i + 1 - s.length;
+            prevLineIndex = this.findPrevLineIndex(newlines, lastIndex);
+
+            token._loc = {
+              line: lineStart,
+              rangeStart: lastIndex,
+              prevLineIndex: prevLineIndex
+            };
+            columnStart = columnEnd;
+          }
+
+          tokens[tokens.length] = token;
+          s = '';
+          lineStart = line;
+          append = false;
+        }
+      }
+
+      return tokens;
+    },
+    findPrevLineIndex: function(newlines, lastIndex) {
+      for (var i = newlines.length - 1; i >= 0; --i) {
+        var newline = newlines[i];
+        if (lastIndex >= newline) {
+          return newline;
         }
       }
     },
@@ -321,12 +501,13 @@
             } else if (regexPrefixRe.test(value)) {
               break;
             }
-          } else if (type === _Keyword && regexPrefixRe.test(value)) {
+          } else if ((type === _Keyword && regexPrefixRe.test(value)) ||
+                     (type === _Template && value.slice(-2) === '${')) {
             break;
           }
 
           var parts = this.parseRegExp(regexToken);
-          Array.prototype.splice.apply(tokens, [i, 1].concat(parts));
+          splice.apply(tokens, [i, 1].concat(parts));
           parsed = true;
           break;
         }
@@ -374,7 +555,7 @@
       };
     },
     parseRegExp: function(regexToken) {
-      this.currentRegexToken = regexToken;
+      this._currentRegexToken = regexToken;
 
       var value = regexToken.value;
       var tokens = [];
@@ -392,14 +573,19 @@
       }
 
       this.regexParsing = false;
-      this.currentRegexToken = null;
+      this._currentRegexToken = null;
       return tokens;
     },
     tokenize: function(source) {
       source = '' + source;
 
-      this.line = 1;
-      this.prevLineIndex = 0;
+      if (_retokenize) {
+        // Recursive internal call.
+        mixin(this, _retokenize);
+      } else {
+        this.line = 1;
+        this.prevLineIndex = 0;
+      }
       this.regexParsing = false;
 
       var tokens = [];
@@ -410,7 +596,11 @@
         this.parseMatches(m, tokens);
       }
 
+      if (!_retokenize || _retokenize.type !== _Template) {
+        this.parseTemplate(tokens);
+      }
       this.fixRegExpTokens(tokens);
+
       return tokens;
     }
   };
@@ -436,7 +626,7 @@
 
 
   function untokenize(tokens, options) {
-    options = options || {};
+    options = mixin({}, options || {});
 
     var results = [];
     var maxLineLen = options.maxLineLen || DEFAULT_MAXLINELEN;
