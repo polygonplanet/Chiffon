@@ -150,6 +150,7 @@ h2 {
     onLocChange();
     parseURL();
     parse();
+    $input.focus();
 
     $(window).on('load resize', function() {
       var height = Math.max(200, $(window).height() - 320);
