@@ -15,6 +15,10 @@ h2 {
   height: 300px;
 }
 
+.sub {
+  margin-top: 0.5em;
+}
+
 .footer {
   margin-top: 1em;
   margin-bottom: 2em;
@@ -37,7 +41,7 @@ h2 {
         <fieldset>
           <legend>Input</legend>
           <textarea id="input" class="form-control">var a = 1;</textarea>
-          <div>
+          <div class="sub">
             <label><input type="checkbox" id="range"> Include an index-based location range</label>
           </div>
           <div>
@@ -49,6 +53,10 @@ h2 {
         <fieldset>
           <legend>Output</legend>
           <textarea id="output" class="form-control" readonly></textarea>
+          <div class="sub">
+            <label for="url" class="control-label">URL:</label>
+            <input type="text" class="form-control" id="url" value="" readonly>
+          </div>
         </fieldset>
       </div>
     </div>
@@ -68,6 +76,7 @@ h2 {
     var $output = $('#output');
     var $range = $('#range');
     var $loc = $('#loc');
+    var $url = $('#url');
 
     var options = {};
     var timerId;
@@ -80,9 +89,49 @@ h2 {
       timerId = setTimeout(function() {
         var tokens = Chiffon.tokenize($input.val(), options);
         $output.val(JSON.stringify(tokens, null, '    '));
+        updateURL();
         timerId = null;
       }, 20);
     };
+
+    function updateURL() {
+      var params = {
+        code: $input.val(),
+        range: $range.prop('checked'),
+        loc: $loc.prop('checked')
+      };
+      var href = location.href.replace(/[?#].*$/, '');
+      var url = href + '?' + buildParams(params);
+      $url.val(url);
+    }
+
+    function parseURL() {
+      var params = parseParams(location.search.substring(1));
+      if (params.range === 'true') {
+        $range.prop('checked', true);
+      }
+      if (params.loc === 'true') {
+        $loc.prop('checked', true);
+      }
+      if (params.code) {
+        $input.val(params.code);
+      }
+    }
+
+    function parseParams(query) {
+      return query.split('&').reduce(function(params, param) {
+        var pairs = param.split('=').map(decodeURIComponent);
+        params[pairs[0]] = pairs[1];
+        return params;
+      }, {});
+    }
+
+    function buildParams(params) {
+      return Object.keys(params).reduce(function(items, key) {
+        items.push([key, params[key]].map(encodeURIComponent).join('='));
+        return items;
+      }, []).join('&');
+    }
 
     function onRangeChange() {
       options.range = $range.prop('checked');
@@ -99,6 +148,8 @@ h2 {
     $input.on('change keyup keypress paste', parse);
     onRangeChange();
     onLocChange();
+    parseURL();
+    parse();
 
     $(window).on('load resize', function() {
       var height = Math.max(200, $(window).height() - 320);
