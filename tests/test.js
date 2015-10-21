@@ -1,6 +1,7 @@
 'use strict';
 
 var Chiffon = require('../chiffon');
+var ChiffonMin = require('../chiffon.min');
 
 var assert = require('assert');
 var fs = require('fs');
@@ -32,81 +33,86 @@ var fixtures = {
 };
 
 
-describe('Chiffon', function() {
+test('Chiffon', Chiffon);
+test('Chiffon (min)', ChiffonMin);
 
-  describe('tokenize', function() {
-    Object.keys(libs).forEach(function(name) {
-      it(name, function() {
-        var code = libs[name];
-        assert(code.length > 0);
-        var chiffon_tokens = Chiffon.tokenize(code, { range: true });
-        var esprima_tokens = esprima.parse(code, { tokens: true, range: true }).tokens;
-        assert.deepEqual(chiffon_tokens, esprima_tokens);
+
+function test(desc, parser) {
+  describe(desc, function() {
+    describe('tokenize', function() {
+      Object.keys(libs).forEach(function(name) {
+        it(name, function() {
+          var code = libs[name];
+          assert(code.length > 0);
+          var chiffon_tokens = parser.tokenize(code, { range: true });
+          var esprima_tokens = esprima.parse(code, { tokens: true, range: true }).tokens;
+          assert.deepEqual(chiffon_tokens, esprima_tokens);
+        });
+      });
+
+      fixtures.tokenize.test.forEach(function(testName, i) {
+        var no = getFixturesNo(testName);
+        it('fixtures ' + no, function() {
+          var code = fs.readFileSync(testName).toString();
+          var expectedName = fixtures.tokenize.expected[i];
+          assert.equal(getFixturesNo(expectedName), no);
+          var expected = require(expectedName);
+          var tokens = parser.tokenize(code);
+          assert.deepEqual(tokens, expected);
+        });
+      });
+
+      fixtures.tokenizeRange.test.forEach(function(testName, i) {
+        var no = getFixturesNo(testName);
+        it('fixtures range ' + no, function() {
+          var code = fs.readFileSync(testName).toString();
+          var expectedName = fixtures.tokenizeRange.expected[i];
+          assert.equal(getFixturesNo(expectedName), no);
+          var expected = require(expectedName);
+          var tokens = parser.tokenize(code, { range: true });
+          assert.deepEqual(tokens, expected);
+        });
+      });
+
+      fixtures.tokenizeLoc.test.forEach(function(testName, i) {
+        var no = getFixturesNo(testName);
+        it('fixtures loc ' + no, function() {
+          var code = fs.readFileSync(testName).toString();
+          var expectedName = fixtures.tokenizeLoc.expected[i];
+          assert.equal(getFixturesNo(expectedName), no);
+          var expected = require(expectedName);
+          var tokens = parser.tokenize(code, { loc: true });
+          assert.deepEqual(tokens, expected);
+        });
       });
     });
 
-    fixtures.tokenize.test.forEach(function(testName, i) {
-      var no = getFixturesNo(testName);
-      it('fixtures ' + no, function() {
-        var code = fs.readFileSync(testName).toString();
-        var expectedName = fixtures.tokenize.expected[i];
-        assert.equal(getFixturesNo(expectedName), no);
-        var expected = require(expectedName);
-        var tokens = Chiffon.tokenize(code);
-        assert.deepEqual(tokens, expected);
+    describe('minify', function() {
+      Object.keys(libs).forEach(function(name) {
+        it(name, function() {
+          var code = libs[name];
+          assert(code.length > 0);
+          var minCode = parser.minify(code);
+          assert(minCode.length > 0);
+          assert(code.length > minCode.length);
+          testSyntax(minCode);
+        });
       });
-    });
 
-    fixtures.tokenizeRange.test.forEach(function(testName, i) {
-      var no = getFixturesNo(testName);
-      it('fixtures range ' + no, function() {
-        var code = fs.readFileSync(testName).toString();
-        var expectedName = fixtures.tokenizeRange.expected[i];
-        assert.equal(getFixturesNo(expectedName), no);
-        var expected = require(expectedName);
-        var tokens = Chiffon.tokenize(code, { range: true });
-        assert.deepEqual(tokens, expected);
-      });
-    });
-
-    fixtures.tokenizeLoc.test.forEach(function(testName, i) {
-      var no = getFixturesNo(testName);
-      it('fixtures loc ' + no, function() {
-        var code = fs.readFileSync(testName).toString();
-        var expectedName = fixtures.tokenizeLoc.expected[i];
-        assert.equal(getFixturesNo(expectedName), no);
-        var expected = require(expectedName);
-        var tokens = Chiffon.tokenize(code, { loc: true });
-        assert.deepEqual(tokens, expected);
+      fixtures.minify.test.forEach(function(testName, i) {
+        var no = getFixturesNo(testName);
+        it('fixtures ' + no, function() {
+          var code = fs.readFileSync(testName).toString();
+          var expectedName = fixtures.minify.expected[i];
+          assert.equal(getFixturesNo(expectedName), no);
+          var expected = fs.readFileSync(expectedName).toString();
+          var minCode = parser.minify(code);
+          assert.equal(minCode, expected);
+        });
       });
     });
   });
-
-  describe('minify', function() {
-    Object.keys(libs).forEach(function(name) {
-      it(name, function() {
-        var code = libs[name];
-        assert(code.length > 0);
-        var minCode = Chiffon.minify(code);
-        assert(minCode.length > 0);
-        assert(code.length > minCode.length);
-        testSyntax(minCode);
-      });
-    });
-
-    fixtures.minify.test.forEach(function(testName, i) {
-      var no = getFixturesNo(testName);
-      it('fixtures ' + no, function() {
-        var code = fs.readFileSync(testName).toString();
-        var expectedName = fixtures.minify.expected[i];
-        assert.equal(getFixturesNo(expectedName), no);
-        var expected = fs.readFileSync(expectedName).toString();
-        var minCode = Chiffon.minify(code);
-        assert.equal(minCode, expected);
-      });
-    });
-  });
-});
+}
 
 
 function getFixtureFiles(type) {
