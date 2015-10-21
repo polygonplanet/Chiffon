@@ -50,6 +50,17 @@ function test(desc, parser) {
         });
       });
 
+      Object.keys(libs).forEach(function(name) {
+        it(name + ' (CRLF)', function() {
+          var code = libs[name].replace(/\r\n|\r|\n/g, '\r\n');
+          assert(code.length > 0);
+          assert(/\r\n/.test(code));
+          var chiffon_tokens = parser.tokenize(code, { range: true });
+          var esprima_tokens = esprima.parse(code, { tokens: true, range: true }).tokens;
+          assert.deepEqual(chiffon_tokens, esprima_tokens);
+        });
+      });
+
       fixtures.tokenize.test.forEach(function(testName, i) {
         var no = getFixturesNo(testName);
         it('fixtures ' + no, function() {
