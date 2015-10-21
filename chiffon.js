@@ -39,9 +39,6 @@
   var hasOwnProperty = objectProto.hasOwnProperty;
   var fromCharCode = String.fromCharCode;
 
-
-  var DEFAULT_MAXLINELEN = 32000;
-
   var _Comment = 'Comment',
       _LineTerminator = 'LineTerminator',
       _Template = 'Template',
@@ -160,8 +157,16 @@
       '|' + '(' + '`(?:\\\\[\\s\\S]|[^`\\\\])*`' +
             ')' + literalSuffix +
             // (6) string literal
-      '|' + '(' + '"(?:\\\\[\\s\\S]|[^"' + lineTerminator + '\\\\])*"' +
-            '|' + "'(?:\\\\[\\s\\S]|[^'" + lineTerminator + "\\\\])*'" +
+      '|' + '(' + '"(?:' + '\\\\[\\s\\S]' +
+                     '|' + '(?:' + '[^"' + lineTerminator + '\\\\]' +
+                             '|' + '[^"\\r\\\\][^"\\n\\\\]' +
+                            ')' +
+                   ')*"' +
+            '|' + "'(?:" + '\\\\[\\s\\S]' +
+                     '|' + '(?:' + "[^'" + lineTerminator + "\\\\]" +
+                             '|' + "[^'\\r\\\\][^'\\n\\\\]" +
+                            ')' +
+                    ")*'" +
             ')' +
             // (7) regular expression literal
       '|' + '(' + (all ? regexpLiteral : whiteSpace) +
@@ -624,6 +629,8 @@
     return new Tokenizer(options).tokenize(source);
   };
 
+
+  var DEFAULT_MAXLINELEN = 32000;
 
   function untokenize(tokens, options) {
     options = mixin({}, options || {});
