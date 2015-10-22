@@ -1,7 +1,7 @@
 'use strict';
 
 var Chiffon = require('../chiffon');
-var ChiffonMin = require('../chiffon.min');
+var ChiffonMin;
 
 var assert = require('assert');
 var fs = require('fs');
@@ -32,9 +32,14 @@ var fixtures = {
   minify: getFixtureFiles('minify')
 };
 
+var min = process.argv.slice().pop() === '--min';
 
 test('Chiffon', Chiffon);
-test('Chiffon (min)', ChiffonMin);
+
+if (min) {
+  ChiffonMin = require('../chiffon.min');
+  test('Chiffon (min)', ChiffonMin);
+}
 
 
 function test(desc, parser) {
@@ -114,11 +119,15 @@ function test(desc, parser) {
         var no = getFixturesNo(testName);
         it('fixtures ' + no, function() {
           var code = fs.readFileSync(testName).toString();
-          var expectedName = fixtures.minify.expected[i];
-          assert.equal(getFixturesNo(expectedName), no);
-          var expected = fs.readFileSync(expectedName).toString();
+          var func = require(testName);
+          assert(func() === true);
           var minCode = parser.minify(code);
-          assert.equal(minCode, expected);
+
+          assert(code.length > minCode.length);
+          testSyntax(minCode);
+
+          var minFunc = fakeRequire(minCode);
+          assert(func() === minFunc());
         });
       });
     });
@@ -165,6 +174,15 @@ function getFixturesNo(filename) {
 
 function testSyntax(code) {
   Function('return;' + code)();
+}
+
+
+function fakeRequire(code) {
+  return Function(
+    'var module = { exports: {} };' +
+    code + ';' +
+    'return module.exports;'
+  )();
 }
 
 
