@@ -287,103 +287,86 @@
       var c = value.charAt(0);
       var ch;
 
-      if (c === '"' || c === "'") {
-        return _String;
-      }
+      switch (c) {
+        case '"':
+        case "'":
+          return _String;
+        case '/':
+          if (len === 1) {
+            return _Punctuator;
+          }
 
-      if (c === '/') {
-        if (len === 1) {
+          c = value.charAt(1);
+          if (c === '/' || c === '*') {
+            return _Comment;
+          }
+          return _RegularExpression;
+        case '.':
+          if (len === 1) {
+            return _Punctuator;
+          }
+
+          c = value.charAt(1);
+          if (c === '.') {
+            return _Punctuator;
+          }
+          return _Numeric;
+        case '<':
+          if (len === 1) {
+            return _Punctuator;
+          }
+
+          c = value.charAt(1);
+          if (c === '!') {
+            return _Comment;
+          }
           return _Punctuator;
-        }
-
-        c = value.charAt(1);
-        if (c === '/' || c === '*') {
+        case '-':
+          if (len < 3) {
+            return _Punctuator;
+          }
           return _Comment;
-        }
+        case '`':
+          return _Template;
+        case '}':
+          if (len === 1) {
+            return _Punctuator;
+          }
+          return _Template;
+        case '\\':
+          if (len > 1) {
+            return _UnicodeEscapeSequence;
+          }
+          return;
+        default:
+          ch = c.charCodeAt(0);
+          if (ch === 0x20 || ch === 0x09 || whiteSpaceRe.test(c)) {
+            return;
+          }
 
-        return _RegularExpression;
+          if (isLineTerminator(ch)) {
+            return _LineTerminator;
+          }
+
+          if (value === 'true' || value === 'false') {
+            return _Boolean;
+          }
+          if (value === 'null') {
+            return _Null;
+          }
+
+          if (isPunctuator(c)) {
+            return _Punctuator;
+          }
+          if (isDigit(c)) {
+            return _Numeric;
+          }
+
+          if (keywordsRe.test(value)) {
+            return _Keyword;
+          }
+          return _Identifier;
       }
-
-      if (c === '.') {
-        if (len === 1) {
-          return _Punctuator;
-        }
-
-        c = value.charAt(1);
-        if (c === '.') {
-          return _Punctuator;
-        }
-        return _Numeric;
-      }
-
-      if (c === '<') {
-        if (len === 1) {
-          return _Punctuator;
-        }
-
-        c = value.charAt(1);
-        if (c === '!') {
-          return _Comment;
-        }
-
-        return _Punctuator;
-      }
-
-      if (c === '-') {
-        if (len < 3) {
-          return _Punctuator;
-        }
-        return _Comment;
-      }
-
-      if (c === '`') {
-        return _Template;
-      }
-
-      if (c === '}') {
-        if (len === 1) {
-          return _Punctuator;
-        }
-        return _Template;
-      }
-
-      if (c === '\\') {
-        if (len > 1) {
-          return _UnicodeEscapeSequence;
-        }
-        return;
-      }
-
-      ch = c.charCodeAt(0);
-      if (ch === 0x20 || ch === 0x09 || whiteSpaceRe.test(c)) {
-        return;
-      }
-
-      if (isLineTerminator(ch)) {
-        return _LineTerminator;
-      }
-
-      if (value === 'true' || value === 'false') {
-        return _Boolean;
-      }
-
-      if (value === 'null') {
-        return _Null;
-      }
-
-      if (isPunctuator(c)) {
-        return _Punctuator;
-      }
-
-      if (isDigit(c)) {
-        return _Numeric;
-      }
-
-      if (keywordsRe.test(value)) {
-        return _Keyword;
-      }
-
-      return _Identifier;
     },
     addRange: function(token, lastIndex) {
       token.range = [
