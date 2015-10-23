@@ -445,6 +445,10 @@
       var s = '';
       var type = _Template;
 
+      var bracketLevel = 0;
+      var braceLevel = 0;
+      var parenLevel = 0;
+
       var lastIndex, prevLineIndex, columnEnd;
       var prev, inExpr, tail, append, token;
 
@@ -460,7 +464,22 @@
         }
 
         if (inExpr) {
-          if (i + 1 < len && value.charCodeAt(i + 1) === 0x7D) { // '}'
+          if (c === 0x7B) { // '{'
+            braceLevel++;
+          } else if (c === 0x7D) { // '}'
+            braceLevel--;
+          } else if (c === 0x28) { // '('
+            parenLevel++;
+          } else if (c === 0x29) { // ')'
+            parenLevel--;
+          } else if (c === 0x5B) { // '['
+            bracketLevel++;
+          } else if (c === 0x5D) { // ']'
+            bracketLevel--;
+          }
+
+          if (bracketLevel === 0 && braceLevel === 0 && parenLevel === 0 &&
+              i + 1 < len && value.charCodeAt(i + 1) === 0x7D) { // '}'
             append = true;
             type = 'tmp-source'; // Temporary token type
             inExpr = false;
