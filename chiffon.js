@@ -52,23 +52,6 @@
       _Boolean = 'Boolean',
       _Keyword = 'Keyword';
 
-  var capturedToken = [
-    '',
-    _Comment,
-    _Comment,
-    _LineTerminator,
-    _Comment,
-    _Template,
-    _String,
-    _RegularExpression,
-    _Numeric,
-    _Punctuator,
-    _UnicodeEscapeSequence,
-    _LineTerminator,
-    _Identifier
-  ];
-  var capturedTokenLen = capturedToken.length;
-
   // ECMA-262 11.3 Line Terminators
   var lineTerminator = '\\r\\n\\u2028\\u2029';
   var lineTerminatorSequence = '(?:\\r\\n|[' + lineTerminator + '])';
