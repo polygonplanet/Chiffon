@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chiffon - Small JavaScript Parser - Test</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<style>
+#input, #output {
+  width: 99%;
+  height: 300px;
+}
+
+.load-libraries-container, .library, .methods,
+.options, .benchmark, .result-options, .tests {
+  margin-top: 0.5em;
+}
+
+.library label, .options label {
+  margin-right: 0.5em;
+}
+
+.methods button, .tests button {
+  margin-right: 0.5em;
+  font-weight: bold;
+}
+
+.download-number {
+  font-size: 14px;
+  padding: 1px 1px 1px 5px;
+  width: 60px;
+  height: 30px;
+}
+
+#download-link {
+  font-weight: bold;
+  margin-left: 1em;
+}
+
+.download-filename {
+  background-color: #ffefcf;
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-10">
+        <h1>Chiffon - Test</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <fieldset>
+          <legend>Input</legend>
+          <textarea id="input" class="form-control">var a = 1 + 1; // comment</textarea>
+          <div class="row">
+            <div class="load-libraries-container col-md-4">
+              <select class="form-control" id="load-libraries">
+              </select>
+            </div>
+          </div>
+          <div class="library">
+            <label><input type="radio" name="library" value="chiffon" checked> Chiffon</label>
+            <label><input type="radio" name="library" value="esprima"> Esprima</label>
+          </div>
+          <div class="methods">
+            <button id="tokenize" class="btn btn-primary" title="Tokenize source">tokenize</button>
+            <button id="minify" class="btn btn-info" title="Minify source">minify</button>
+          </div>
+          <div class="options">
+            <label><input type="checkbox" id="range"> range</label>
+            <label><input type="checkbox" id="loc"> loc</label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="col-md-6">
+        <fieldset>
+          <legend>Output</legend>
+          <textarea id="output" class="form-control" readonly></textarea>
+          <div class="benchmark">
+            <span id="benchmark-time"></span>
+          </div>
+          <div class="result-options">
+            <label for="download-number">filename:</label>
+            <span class="download-filename">
+              test-
+              <input type="number" class="download-number" id="download-number" value="0" max="999" min="0" step="1">
+              -expected.json
+            </span>
+            <span id="download-link"></span>
+          </div>
+          <div class="tests">
+            <button id="lint" class="btn btn-info" title="Check Syntax">Lint</button>
+            <button id="run" class="btn btn-info" title="Run Output code">Run</button>
+            <button id="equals" class="btn btn-info" title="Chiffon equals Esprima">Equals</button>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <div class="row footer">
+      <div class="col-md-10">
+      </div>
+    </div>
+  </div>
+  <script src="../chiffon.js"></script>
+  <script src="./thirdparty/esprima.js"></script>
+  <script src="./thirdparty/jquery.js"></script>
+  <script src="./thirdparty/underscore.js"></script>
+  <script src="./thirdparty/backbone.js"></script>
+  <script src="./thirdparty/moment.js"></script>
+  <script>
+  (function() {
+    var EventBus = _.extend({}, Backbone.Events);
+
+    var WindowView = Backbone.View.extend({
+      el: window,
+      events: {
+        'resize': 'onResize'
+      },
+      onResize: function() {
+        EventBus.trigger('resize:window');
+      }
+    });
+
+    var AppView = Backbone.View.extend({
+      el: 'body',
+      events: {
+        'change #load-libraries': 'onLoadLibrariesChange',
+        'change input[name="library"]': 'onLibraryChange',
+        'change #download-number': 'onDownloadNumberChange',
+        'click #tokenize': 'onTokenizeClick',
+        'click #minify': 'onMinifyClick',
+        'change #range': 'onRangeChange',
+        'change #loc': 'onLocChange',
+        'click #lint': 'onLintClick',
+        'click #run': 'onRunClick',
+        'click #equals': 'onEqualsClick'
+      },
+
+      filenameTemplate: _.template(
+        'test-<%- number %>-expected.<%- ext %>'
+      ),
+      benchmarkTemplate: _.template(
+        'Processed time: <%- time %>ms. by <%- library %>'
+      ),
+      downloadTemplate: _.template(
+        '<a href="<%- href %>" download="<%- download %>"><%- text %></a>'
+      ),
+      optionTemplate: _.template(
+        '<option value="<%- value %>"><%- text %></option>'
+      ),
+
+      _thirdpartyLibs: [
+        'angular',
+        'backbone',
+        'bluebird',
+        'esprima',
+        'jquery-ui',
+        'jquery',
+        'moment',
+        'react-with-addons',
+        'underscore.js'
+      ],
+      _library: null,
+      _ext: 'json',
+      _timerId: null,
+      _options: {},
+      _objectURL: null,
+
+      initialize: function(attributes, options) {
+        _.bindAll.apply(_, [this].concat(_.functions(this)));
+
+        this.$input = this.$el.find('#input');
+        this.$output = this.$el.find('#output');
+        this.$minify = this.$el.find('#minify');
+        this.$equals = this.$el.find('#equals');
+        this.$library = this.$el.find('input[name="library"]');
+        this.$loadLibraries = this.$el.find('#load-libraries');
+        this.$benchmarkTime = this.$el.find('#benchmark-time');
+        this.$downloadNumber = this.$el.find('#download-number');
+        this.$downloadLink = this.$el.find('#download-link');
+
+        EventBus.on('resize:window', this.onWindowResize);
+
+        this.onLibraryChange({
+          currentTarget: this.$library.filter(':checked')
+        });
+        this.onWindowResize();
+        this.createLibraryOptions();
+      },
+
+      render: function() {
+        return this;
+      },
+
+      onLoadLibrariesChange: function(event) {
+        this.$output.val('');
+        var lib = $(event.currentTarget).find(':selected').val();
+
+        if (!lib) {
+          this.$input.val('');
+        } else {
+          this.$input.val('Loading...');
+          $.get('thirdparty/' + lib + '.js').always(this._loadLibrary);
+        }
+      },
+      _loadLibrary: function(res) {
+        if (!_.isString(res)) {
+          res = res && res.responseText || 'Failed to load file';
+        }
+        this.$input.val(res);
+      },
+
+      onLibraryChange: function(event) {
+        this._library = $(event.currentTarget).val();
+        if (this._library === 'esprima') {
+          this.$minify.prop('disabled', true);
+        } else {
+          this.$minify.prop('disabled', false);
+        }
+      },
+
+      onDownloadNumberChange: function(event) {
+        this.createDownloadLink(this.$output.val());
+      },
+
+      onTokenizeClick: function() {
+        this._ext = 'json';
+        this.$downloadNumber.prop('disabled', false);
+        this.$equals.prop('disabled', false);
+        this.parse();
+      },
+      onMinifyClick: function() {
+        this._ext = 'js';
+        this.$downloadNumber.prop('disabled', true);
+        this.$equals.prop('disabled', true);
+        var source = Chiffon.minify(this.$input.val());
+        this.$output.val(source);
+        this.createDownloadLink(source);
+      },
+
+      onRangeChange: function(event) {
+        this._options.range = $(event.currentTarget).prop('checked');
+        this.parse();
+      },
+      onLocChange: function(event) {
+        this._options.loc = $(event.currentTarget).prop('checked');
+        this.parse();
+      },
+
+      onLintClick: function() {
+        this.test('lint');
+      },
+      onRunClick: function() {
+        this.test('run');
+      },
+      onEqualsClick: function() {
+        this.test('equals');
+      },
+
+      onWindowResize: function() {
+        var height = Math.max(200, $(window).height() - 300);
+        this.$input.height(height);
+        this.$output.height(height);
+      },
+
+      tokenize: function(source) {
+        switch (this._library) {
+          case 'chiffon':
+            return Chiffon.tokenize(source, this._options);
+          case 'esprima':
+            var opts = _.extend({}, { tokens: true }, this._options);
+            return esprima.parse(source, opts).tokens;
+          default:
+            throw 'library is not defined';
+        }
+      },
+
+      test: function(method) {
+        var source = this.$input.val();
+        var result = this[method](source);
+        if (result === true) {
+          alert('OK');
+        } else {
+          alert('Fail: ' + result);
+        }
+      },
+
+      equals: function(source) {
+        var originalLibrary = this._library;
+        try {
+          this._library = 'esprima';
+          var esprimaTokens = this.tokenize(source);
+          this._library = 'chiffon';
+          var chiffonTokens = this.tokenize(source);
+          return _.isEqual(esprimaTokens, chiffonTokens);
+        } catch (e) {
+          return e;
+        } finally {
+          this._library = originalLibrary;
+        }
+      },
+      lint: function(source) {
+        try {
+          Function('return;' + source)();
+          return true;
+        } catch (e) {
+          return e;
+        }
+      },
+      run: function(source) {
+        try {
+          eval(source);
+          return true;
+        } catch (e) {
+          return e;
+        }
+      },
+
+      parse: function() {
+        if (this._timerId) {
+          clearTimeout(this._timerId);
+        }
+        this._timerId = setTimeout(this._parse, 20);
+      },
+      _parse: function() {
+        var result;
+        try {
+          var startTime = Date.now();
+          var tokens = this.tokenize(this.$input.val());
+          var processedTime = Date.now() - startTime;
+          result = JSON.stringify(tokens, null, '    ');
+        } catch (e) {
+          result = e.message || e;
+        }
+
+        this.$output.val(result);
+        this.$benchmarkTime.text(this.benchmarkTemplate({
+          time: processedTime,
+          library: this._library
+        }));
+
+        this.createDownloadLink(result);
+        this._timerId = null;
+      },
+
+      createDownloadLink: function(data, filename) {
+        var blob = new Blob([data], { type: 'text/plain' });
+        var url = window.URL || window.webkitURL;
+        if (this._objectURL && url.revokeObjectURL) {
+          url.revokeObjectURL(this._objectURL);
+        }
+        this._objectURL = url.createObjectURL(blob);
+
+        var $a = $(this.downloadTemplate({
+          href: this._objectURL,
+          download: filename || this.generateFileName(),
+          text: 'Download Result'
+        }));
+
+        $a.hide();
+        this.$downloadLink.empty().append($a);
+        return $a.fadeIn();
+      },
+
+      generateFileName: function(ext) {
+        if (this._ext === 'js') {
+          return moment().format('YYYYMMDD-HHmmss') + '-min.' + this._ext;
+        }
+
+        var n = this.$downloadNumber.val();
+        return this.filenameTemplate({
+          number: ('000' + n).slice(-3),
+          ext: ext || this._ext || 'json'
+        });
+      },
+
+      createLibraryOptions: function() {
+        var $loadLibraries = this.$loadLibraries.empty();
+        var template = this.optionTemplate;
+        _.each([''].concat(this._thirdpartyLibs), function(lib) {
+          var option = template({
+            text: lib,
+            value: lib
+          });
+          $loadLibraries.append(option);
+        });
+      }
+    });
+
+    $(function() {
+      new WindowView();
+      new AppView();
+    });
+  }());
+  </script>
+</body>
+</html>
