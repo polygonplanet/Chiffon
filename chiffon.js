@@ -188,7 +188,7 @@
 
 
   function isPunctuator(c) {
-    return !!~'{}()[]>=!+*%&|^~?:;,'.indexOf(c);
+    return !!~'{}()[]<>=!+-*%/&|^~?:;,.'.indexOf(c);
   }
 
 
