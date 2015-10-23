@@ -3,8 +3,8 @@
  *
  * @description  A very small ECMAScript parser, tokenizer and minifier written in JavaScript
  * @fileoverview JavaScript parser, tokenizer and minifier library
- * @version      1.5.1
- * @date         2015-10-22
+ * @version      1.6.0
+ * @date         2015-10-23
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
  * @license      Licensed under the MIT license.
@@ -129,6 +129,7 @@
   var signLeftRe = /^[+-]/;
   var signRightRe = /[+-]$/;
 
+  var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
           '(?:^(?:' + regexPreWords + ')$)' +
     '|' + '(?:' + '(?![.\\]])' + punctuators + '$)' +
@@ -203,6 +204,16 @@
   }
 
 
+  function isPunctuator(c) {
+    return !!~'{}()[]>=!+*%&|^~?:;,'.indexOf(c);
+  }
+
+
+  function isDigit(c) {
+    return !!~'0123456789'.indexOf(c);
+  }
+
+
   function mixin(target) {
     var sources = slice.call(arguments, 1);
     for (var i = 0, len = sources.length; i < len; i++) {
@@ -224,119 +235,190 @@
   }
 
   Tokenizer.prototype = {
-    parseMatches: function(match, tokens) {
-      var lineStart = this.line;
-      var lastIndex;
-      if (this.regexParsing) {
-        lastIndex = this._currentRegexToken._loc.rangeStart + tokenizeRe.lastIndex;
-      } else {
-        lastIndex = tokenizeAllRe.lastIndex;
-        if (_retokenize) {
-          lastIndex += this.rangeStart;
-        }
-      }
+    parseMatches: function(matches, tokens) {
+      var token, value, len, range, loc;
+      var lineStart, columnStart, columnEnd;
+      var type, regex, ch, c;
 
-      for (var i = 1; i < capturedTokenLen; i++) {
-        var value = match[i];
-        if (!value) {
+      for (var i = 0; i < matches.length; i++) {
+        value = matches[i];
+        len = value.length;
+        if (len === 0) {
           continue;
         }
 
-        var columnStart = lastIndex - value.length - this.prevLineIndex;
-        var regex, addLoc;
-        var type = capturedToken[i];
+        lineStart = this.line;
+        columnStart = this.index - this.prevLineIndex;
 
-        if (type === _Comment) {
-          if (value.charAt(1) === '*') {
-            // multiline comment
-            this.updateLine(value, lastIndex);
-          }
+        regex = null;
+        type = this.getTokenType(value);
 
-          if (!this.options.comment) {
-            break;
-          }
+        if (type === _String ||
+            (type === _Comment && value.charAt(1) === '*')) {
+          this.updateLine(value, this.index + len);
         } else if (type === _LineTerminator) {
           this.line++;
-          this.prevLineIndex = lastIndex;
-
-          if (!this.options.lineTerminator) {
+          this.prevLineIndex = this.index + len;
+        } else if (type === _RegularExpression) {
+          if (this.fixRegExpTokens(matches, i, tokens, value)) {
+            i--;
             continue;
           }
-        } else if (type === _String) {
-          this.updateLine(value, lastIndex);
-        } else if (type === _Template) {
-          addLoc = true;
-        } else if (type === _Identifier) {
-          if (value === 'null') {
-            type = _Null;
-          } else if (value === 'true' || value === 'false') {
-            type = _Boolean;
-          } else if (keywordsRe.test(value)) {
-            type = _Keyword;
-          }
-        } else if (type === _RegularExpression) {
-          if (this.regexParsing) {
-            break;
-          }
-          addLoc = true;
           regex = this.parseRegExpFlags(value);
+        } else if (type === _Template) {
+          this.parseTemplate(value, tokens, columnStart);
+          continue;
         }
 
-        var token = {
-          type: type,
-          value: value
-        };
+        this.index += len;
 
-        if (regex) {
-          token.regex = regex;
+        if ((type === _Comment && !this.options.comment) ||
+            (type === _LineTerminator && !this.options.lineTerminator)) {
+          continue;
         }
 
-        if (addLoc) {
-          // Regex is required additional information because of the mismatches.
-          token._loc = {
-            line: this.line,
-            columnStart: columnStart,
-            rangeStart: lastIndex - value.length,
-            prevLineIndex: this.prevLineIndex
+        if (type) {
+          token = {
+            type: type,
+            value: value
           };
-        }
 
-        if (type === _Template) {
-          this.updateLine(value, lastIndex);
-        }
+          if (regex) {
+            token.regex = regex;
+          }
 
-        var columnEnd = lastIndex - this.prevLineIndex;
-        this.addRange(token, lastIndex);
-        this.addLoc(token, lineStart, columnStart, this.line, columnEnd);
+          if (this.options.range) {
+            this.addRange(token, this.index);
+          }
+          if (this.options.loc) {
+            columnEnd = this.index - this.prevLineIndex;
+            this.addLoc(token, lineStart, columnStart, this.line, columnEnd);
+          }
 
-        tokens[tokens.length] = token;
-
-        if (value === match[0]) {
-          break;
+          tokens[tokens.length] = token;
         }
       }
+    },
+    getTokenType: function(value) {
+      var len = value.length;
+      var c = value.charAt(0);
+      var ch;
+
+      if (c === '"' || c === "'") {
+        return _String;
+      }
+
+      if (c === '/') {
+        if (len === 1) {
+          return _Punctuator;
+        }
+
+        c = value.charAt(1);
+        if (c === '/' || c === '*') {
+          return _Comment;
+        }
+
+        return _RegularExpression;
+      }
+
+      if (c === '.') {
+        if (len === 1) {
+          return _Punctuator;
+        }
+
+        c = value.charAt(1);
+        if (c === '.') {
+          return _Punctuator;
+        }
+        return _Numeric;
+      }
+
+      if (c === '<') {
+        if (len === 1) {
+          return _Punctuator;
+        }
+
+        c = value.charAt(1);
+        if (c === '!') {
+          return _Comment;
+        }
+
+        return _Punctuator;
+      }
+
+      if (c === '-') {
+        if (len < 3) {
+          return _Punctuator;
+        }
+        return _Comment;
+      }
+
+      if (c === '`') {
+        return _Template;
+      }
+
+      if (c === '}') {
+        if (len === 1) {
+          return _Punctuator;
+        }
+        return _Template;
+      }
+
+      if (c === '\\') {
+        if (len > 1) {
+          return _UnicodeEscapeSequence;
+        }
+        return;
+      }
+
+      ch = c.charCodeAt(0);
+      if (ch === 0x20 || ch === 0x09 || whiteSpaceRe.test(c)) {
+        return;
+      }
+
+      if (isLineTerminator(ch)) {
+        return _LineTerminator;
+      }
+
+      if (value === 'true' || value === 'false') {
+        return _Boolean;
+      }
+
+      if (value === 'null') {
+        return _Null;
+      }
+
+      if (isPunctuator(c)) {
+        return _Punctuator;
+      }
+
+      if (isDigit(c)) {
+        return _Numeric;
+      }
+
+      if (keywordsRe.test(value)) {
+        return _Keyword;
+      }
+
+      return _Identifier;
     },
     addRange: function(token, lastIndex) {
-      if (this.options.range) {
-        token.range = [
-          lastIndex - token.value.length,
-          lastIndex
-        ];
-      }
+      token.range = [
+        lastIndex - token.value.length,
+        lastIndex
+      ];
     },
     addLoc: function(token, lineStart, columnStart, lineEnd, columnEnd) {
-      if (this.options.loc) {
-        token.loc = {
-          start: {
-            line: lineStart,
-            column: columnStart
-          },
-          end: {
-            line: lineEnd,
-            column: columnEnd
-          }
-        };
-      }
+      token.loc = {
+        start: {
+          line: lineStart,
+          column: columnStart
+        },
+        end: {
+          line: lineEnd,
+          column: columnEnd
+        }
+      };
     },
     updateLine: function(value, lastIndex) {
       if (this.options.loc) {
@@ -347,20 +429,12 @@
         }
       }
     },
-    parseTemplate: function(tokens) {
-      for (var i = 0; i < tokens.length; i++) {
-        var token = tokens[i];
-        if (token.type !== _Template) {
-          continue;
-        }
-
-        var blocks = this.parseTemplateBlock(token);
-        var newTokens = this.parseTemplateExpr(blocks, token);
-        splice.apply(tokens, [i, 1].concat(newTokens));
-        i += newTokens.length;
-      }
+    parseTemplate: function(template, tokens, columnStart) {
+      var blocks = this.parseTemplateBlock(template, columnStart);
+      var newTokens = this.parseTemplateExpr(blocks);
+      push.apply(tokens, newTokens);
     },
-    parseTemplateExpr: function(blocks, templateToken) {
+    parseTemplateExpr: function(blocks) {
       var results = [];
 
       for (var i = 0, len = blocks.length; i < len; i++) {
@@ -377,15 +451,11 @@
 
       return results;
     },
-    parseTemplateBlock: function(templateToken) {
-      var value = templateToken.value;
-      var loc = templateToken._loc;
-
-      var line = loc.line;
+    parseTemplateBlock: function(value, columnStart) {
+      var line = this.line;
       var lineStart = line;
-      var columnStart = loc.columnStart;
-      var rangeStart = loc.rangeStart;
-      var newlines = [loc.prevLineIndex];
+      var rangeStart = this.index;
+      var newlines = [this.prevLineIndex];
 
       var tokens = [];
       var escapeCount = 0;
@@ -446,8 +516,12 @@
           columnEnd = lastIndex - prevLineIndex;
 
           if (type === _Template) {
-            this.addRange(token, lastIndex);
-            this.addLoc(token, lineStart, columnStart, line, columnEnd);
+            if (this.options.range) {
+              this.addRange(token, lastIndex);
+            }
+            if (this.options.loc) {
+              this.addLoc(token, lineStart, columnStart, line, columnEnd);
+            }
             columnStart = columnEnd + 1;
           } else {
             lastIndex = rangeStart + i + 1 - s.length;
@@ -455,7 +529,7 @@
 
             token._loc = {
               line: lineStart,
-              rangeStart: lastIndex,
+              index: lastIndex,
               prevLineIndex: prevLineIndex
             };
             columnStart = columnEnd;
@@ -468,6 +542,10 @@
         }
       }
 
+      this.line = lineStart;
+      this.index = lastIndex;
+      this.prevLineIndex = prevLineIndex;
+
       return tokens;
     },
     findPrevLineIndex: function(newlines, lastIndex) {
@@ -479,48 +557,36 @@
       }
     },
     // Fix Regular Expression missing matches e.g. `var g=1,a=2/3/g;`
-    fixRegExpTokens: function(tokens) {
-      for (var i = 0; i < tokens.length; i++) {
-        if (tokens[i].type !== _RegularExpression) {
+    fixRegExpTokens: function(matches, index, tokens, regexValue) {
+      var i = tokens.length;
+
+      while (--i >= 0) {
+        var token = tokens[i];
+        var type = token.type;
+
+        if (type === _Comment || type === _LineTerminator) {
           continue;
         }
 
-        var index = i;
-        var regexToken = tokens[i];
-        var parsed;
-
-        while (--index >= 0) {
-          var token = tokens[index];
-          var type = token.type;
-
-          if (type === _Comment || type === _LineTerminator) {
-            continue;
-          }
-
-          var value = token.value;
-          if (type === _Punctuator) {
-            if (value === ')') {
-              if (this.isValidRegExpPrefix(tokens, index + 1)) {
-                break;
-              }
-            } else if (regexPrefixRe.test(value)) {
+        var value = token.value;
+        if (type === _Punctuator) {
+          if (value === ')') {
+            if (this.isValidRegExpPrefix(tokens, i + 1)) {
               break;
             }
-          } else if ((type === _Keyword && regexPrefixRe.test(value)) ||
-                     (type === _Template && value.slice(-2) === '${')) {
+          } else if (regexPrefixRe.test(value)) {
             break;
           }
-
-          var parts = this.parseRegExp(regexToken);
-          splice.apply(tokens, [i, 1].concat(parts));
-          parsed = true;
+        } else if ((type === _Keyword && regexPrefixRe.test(value)) ||
+                   (type === _Template && value.slice(-2) === '${')) {
           break;
         }
 
-        if (!parsed) {
-          delete regexToken._loc;
-        }
+        var parts = regexValue.match(tokenizeRe);
+        splice.apply(matches, [index, 1].concat(parts));
+        return true;
       }
+      return false;
     },
     isValidRegExpPrefix: function(tokens, i) {
       var level = 0;
@@ -559,28 +625,6 @@
         flags: flags
       };
     },
-    parseRegExp: function(regexToken) {
-      this._currentRegexToken = regexToken;
-
-      var value = regexToken.value;
-      var tokens = [];
-      var m;
-
-      if (this.options.loc) {
-        this.line = regexToken.loc.start.line;
-        this.prevLineIndex = regexToken._loc.prevLineIndex;
-      }
-      this.regexParsing = true;
-
-      tokenizeRe.lastIndex = 0;
-      while ((m = tokenizeRe.exec(value)) != null) {
-        this.parseMatches(m, tokens);
-      }
-
-      this.regexParsing = false;
-      this._currentRegexToken = null;
-      return tokens;
-    },
     tokenize: function(source) {
       source = '' + source;
 
@@ -589,22 +633,15 @@
         mixin(this, _retokenize);
       } else {
         this.line = 1;
+        this.index = 0;
         this.prevLineIndex = 0;
       }
-      this.regexParsing = false;
 
       var tokens = [];
-      var m;
-
-      tokenizeAllRe.lastIndex = 0;
-      while ((m = tokenizeAllRe.exec(source)) != null) {
-        this.parseMatches(m, tokens);
+      var matches = source.match(tokenizeAllRe);
+      if (matches) {
+        this.parseMatches(matches, tokens);
       }
-
-      if (!_retokenize || _retokenize.type !== _Template) {
-        this.parseTemplate(tokens);
-      }
-      this.fixRegExpTokens(tokens);
 
       return tokens;
     }
