@@ -23,6 +23,10 @@ h2 {
   margin-top: 1em;
   margin-bottom: 2em;
 }
+
+.footer a {
+  font-weight: bold;
+}
 </style>
 </head>
 <body>
@@ -40,7 +44,7 @@ h2 {
       <div class="col-md-6">
         <fieldset>
           <legend>Input</legend>
-          <textarea id="input" class="form-control">var a = 1;</textarea>
+          <textarea id="input" class="form-control" placeholder="Write JavaScript code here.">var a = 1;</textarea>
           <div class="sub">
             <label><input type="checkbox" id="range"> Include an index-based location range</label>
           </div>
@@ -66,98 +70,12 @@ h2 {
       </div>
     </div>
   </div>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="js/es5-shim.js"></script>
+  <script src="js/es5-sham.js"></script>
   <script src="js/chiffon.min.js"></script>
-  <script>
-  $(function() {
-    'use strict';
-
-    var $input = $('#input');
-    var $output = $('#output');
-    var $range = $('#range');
-    var $loc = $('#loc');
-    var $url = $('#url');
-
-    var options = {};
-    var timerId;
-
-    function parse() {
-      if (timerId) {
-        clearTimeout(timerId);
-      }
-
-      timerId = setTimeout(function() {
-        var tokens = Chiffon.tokenize($input.val(), options);
-        $output.val(JSON.stringify(tokens, null, '    '));
-        updateURL();
-        timerId = null;
-      }, 20);
-    };
-
-    function updateURL() {
-      var params = {
-        code: $input.val(),
-        range: $range.prop('checked'),
-        loc: $loc.prop('checked')
-      };
-      var href = location.href.replace(/[?#].*$/, '');
-      var url = href + '?' + buildParams(params);
-      $url.val(url);
-    }
-
-    function parseURL() {
-      var params = parseParams(location.search.substring(1));
-      if (params.range === 'true') {
-        $range.prop('checked', true);
-      }
-      if (params.loc === 'true') {
-        $loc.prop('checked', true);
-      }
-      if (params.code) {
-        $input.val(params.code);
-      }
-    }
-
-    function parseParams(query) {
-      return query.split('&').reduce(function(params, param) {
-        var pairs = param.split('=').map(decodeURIComponent);
-        params[pairs[0]] = pairs[1];
-        return params;
-      }, {});
-    }
-
-    function buildParams(params) {
-      return Object.keys(params).reduce(function(items, key) {
-        items.push([key, params[key]].map(encodeURIComponent).join('='));
-        return items;
-      }, []).join('&');
-    }
-
-    function onRangeChange() {
-      options.range = $range.prop('checked');
-      parse();
-    }
-
-    function onLocChange() {
-      options.loc = $loc.prop('checked');
-      parse();
-    }
-
-    $range.on('change', onRangeChange);
-    $loc.on('change', onLocChange);
-    $input.on('change keyup keypress paste', parse);
-    onRangeChange();
-    onLocChange();
-    parseURL();
-    parse();
-    $input.focus();
-
-    $(window).on('load resize', function() {
-      var height = Math.max(200, $(window).height() - 320);
-      $input.height(height);
-      $output.height(height);
-    });
-  });
-  </script>
+  <script src="js/jquery.js"></script>
+  <script src="js/underscore.js"></script>
+  <script src="js/backbone.js"></script>
+  <script src="js/demo.js"></script>
 </body>
 </html>
