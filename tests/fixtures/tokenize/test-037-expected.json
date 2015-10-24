@@ -1,0 +1,62 @@
+[
+    {
+        "type": "Keyword",
+        "value": "var"
+    },
+    {
+        "type": "Identifier",
+        "value": "a"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Numeric",
+        "value": "1"
+    },
+    {
+        "type": "Punctuator",
+        "value": ","
+    },
+    {
+        "type": "Identifier",
+        "value": "g"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Numeric",
+        "value": "2"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    },
+    {
+        "type": "Identifier",
+        "value": "a"
+    },
+    {
+        "type": "Punctuator",
+        "value": "/="
+    },
+    {
+        "type": "Numeric",
+        "value": "1"
+    },
+    {
+        "type": "Punctuator",
+        "value": "/"
+    },
+    {
+        "type": "Identifier",
+        "value": "g"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    }
+]

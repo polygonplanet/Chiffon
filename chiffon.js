@@ -300,6 +300,9 @@
           if (c === '/' || c === '*') {
             return _Comment;
           }
+          if (len === 2 && c === '=') {
+            return _Punctuator;
+          }
           return _RegularExpression;
         case '.':
           if (len === 1) {
