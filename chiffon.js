@@ -663,17 +663,10 @@
         var prevType = prev.type;
         var prevValue = prev.value;
 
-        switch (tokenType) {
-          case _Punctuator:
-            ws = signLeftRe.test(tokenValue) && signRightRe.test(prevValue);
-            break;
-          case _Identifier:
-          case _Keyword:
-          case _Numeric:
-          case _Null:
-          case _Boolean:
-          case _UnicodeEscapeSequence:
-            ws = identLeftRe.test(tokenValue) && identRightRe.test(prevValue);
+        if (tokenType === _Punctuator) {
+          ws = signLeftRe.test(tokenValue) && signRightRe.test(prevValue);
+        } else {
+          ws = identLeftRe.test(tokenValue) && identRightRe.test(prevValue);
         }
 
         results[results.length] = (ws ? ' ' : '') + tokenValue;
