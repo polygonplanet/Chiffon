@@ -1,0 +1,48 @@
+[
+    {
+        "type": "Identifier",
+        "value": "a",
+        "loc": {
+            "start": {
+                "line": 1,
+                "column": 0
+            },
+            "end": {
+                "line": 1,
+                "column": 1
+            }
+        }
+    },
+    {
+        "type": "Punctuator",
+        "value": "/=",
+        "loc": {
+            "start": {
+                "line": 1,
+                "column": 2
+            },
+            "end": {
+                "line": 1,
+                "column": 4
+            }
+        }
+    },
+    {
+        "type": "RegularExpression",
+        "value": "/ a[ 1 /g ] /",
+        "regex": {
+            "pattern": " a[ 1 /g ] ",
+            "flags": ""
+        },
+        "loc": {
+            "start": {
+                "line": 1,
+                "column": 8
+            },
+            "end": {
+                "line": 1,
+                "column": 21
+            }
+        }
+    }
+]

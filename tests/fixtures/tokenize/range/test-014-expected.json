@@ -1,0 +1,30 @@
+[
+    {
+        "type": "Identifier",
+        "value": "a",
+        "range": [
+            0,
+            1
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": "/",
+        "range": [
+            2,
+            3
+        ]
+    },
+    {
+        "type": "RegularExpression",
+        "value": "/a[1/g]/i",
+        "regex": {
+            "pattern": "a[1/g]",
+            "flags": "i"
+        },
+        "range": [
+            4,
+            13
+        ]
+    }
+]

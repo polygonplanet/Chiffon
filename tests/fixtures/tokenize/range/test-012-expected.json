@@ -1,0 +1,14 @@
+[
+    {
+        "type": "RegularExpression",
+        "value": "/a[1/g]/",
+        "regex": {
+            "pattern": "a[1/g]",
+            "flags": ""
+        },
+        "range": [
+            0,
+            8
+        ]
+    }
+]

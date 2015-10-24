@@ -1,0 +1,14 @@
+[
+    {
+        "type": "RegularExpression",
+        "value": "/[/]/",
+        "regex": {
+            "pattern": "[/]",
+            "flags": ""
+        },
+        "range": [
+            0,
+            5
+        ]
+    }
+]
