@@ -1,0 +1,10 @@
+[
+    {
+        "type": "RegularExpression",
+        "value": "/[/]/",
+        "regex": {
+            "pattern": "[/]",
+            "flags": ""
+        }
+    }
+]
