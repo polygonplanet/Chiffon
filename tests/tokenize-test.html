@@ -25,6 +25,10 @@
   font-weight: bold;
 }
 
+.load-libraries-container {
+  display: none;
+}
+
 .download-number {
   font-size: 14px;
   padding: 1px 1px 1px 5px;
@@ -378,6 +382,10 @@
       },
 
       createLibraryOptions: function() {
+        if (/chrome/i.test(navigator.userAgent)) {
+          // Chrome cannot load file from local
+          return;
+        }
         var $loadLibraries = this.$loadLibraries.empty();
         var template = this.optionTemplate;
         _.each([''].concat(this._thirdpartyLibs), function(lib) {
@@ -387,6 +395,7 @@
           });
           $loadLibraries.append(option);
         });
+        $loadLibraries.parent().show();
       }
     });
 
