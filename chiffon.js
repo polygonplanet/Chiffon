@@ -219,7 +219,7 @@
 
   Tokenizer.prototype = {
     parseMatches: function(matches, tokens) {
-      var token, value, len, range, loc;
+      var token, value, len, index, lines, range, loc;
       var lineStart, columnStart, columnEnd;
       var type, regex, ch, c;
 
@@ -238,7 +238,13 @@
 
         if (type === _String ||
             (type === _Comment && value.charAt(1) === '*')) {
-          this.updateLine(value, this.index + len);
+          if (this.options.loc) {
+            lines = value.split(lineTerminatorSequenceRe);
+            if (lines.length > 1) {
+              this.line += lines.length - 1;
+              this.prevLineIndex = this.index + len - lines.pop().length;
+            }
+          }
         } else if (type === _LineTerminator) {
           this.line++;
           this.prevLineIndex = this.index + len;
@@ -247,7 +253,11 @@
             i--;
             continue;
           }
-          regex = this.parseRegExpFlags(value);
+          index = value.lastIndexOf('/');
+          regex = {
+            pattern: value.substr(1, index - 1),
+            flags: value.substring(index + 1)
+          };
         } else if (type === _Template) {
           this.parseTemplate(value, tokens, columnStart);
           continue;
@@ -271,7 +281,7 @@
           }
 
           if (this.options.range) {
-            this.addRange(token, this.index);
+            token.range = [this.index - len, this.index];
           }
           if (this.options.loc) {
             columnEnd = this.index - this.prevLineIndex;
@@ -315,12 +325,7 @@
           }
           return _Numeric;
         case '<':
-          if (len === 1) {
-            return _Punctuator;
-          }
-
-          c = value.charAt(1);
-          if (c === '!') {
+          if (len > 1 && value.charAt(1) === '!') {
             return _Comment;
           }
           return _Punctuator;
@@ -342,6 +347,13 @@
           }
           return;
         default:
+          if (value === 'true' || value === 'false') {
+            return _Boolean;
+          }
+          if (value === 'null') {
+            return _Null;
+          }
+
           ch = c.charCodeAt(0);
           if (ch === 0x20 || ch === 0x09 || whiteSpaceRe.test(c)) {
             return;
@@ -350,14 +362,6 @@
           if (isLineTerminator(ch)) {
             return _LineTerminator;
           }
-
-          if (value === 'true' || value === 'false') {
-            return _Boolean;
-          }
-          if (value === 'null') {
-            return _Null;
-          }
-
           if (isPunctuator(c)) {
             return _Punctuator;
           }
@@ -371,12 +375,6 @@
           return _Identifier;
       }
     },
-    addRange: function(token, lastIndex) {
-      token.range = [
-        lastIndex - token.value.length,
-        lastIndex
-      ];
-    },
     addLoc: function(token, lineStart, columnStart, lineEnd, columnEnd) {
       token.loc = {
         start: {
@@ -388,15 +386,6 @@
           column: columnEnd
         }
       };
-    },
-    updateLine: function(value, lastIndex) {
-      if (this.options.loc) {
-        var lines = value.split(lineTerminatorSequenceRe);
-        if (lines.length > 1) {
-          this.line += lines.length - 1;
-          this.prevLineIndex = lastIndex - lines.pop().length;
-        }
-      }
     },
     parseTemplate: function(template, tokens, columnStart) {
       var blocks = this.parseTemplateBlock(template, columnStart);
@@ -450,18 +439,24 @@
         }
 
         if (inExpr) {
-          if (c === 0x7B) { // '{'
-            braceLevel++;
-          } else if (c === 0x7D) { // '}'
-            braceLevel--;
-          } else if (c === 0x28) { // '('
-            parenLevel++;
-          } else if (c === 0x29) { // ')'
-            parenLevel--;
-          } else if (c === 0x5B) { // '['
-            bracketLevel++;
-          } else if (c === 0x5D) { // ']'
-            bracketLevel--;
+          switch (c) {
+            case 0x7B: // '{'
+              braceLevel++;
+              break;
+            case 0x7D: // '}'
+              braceLevel--;
+              break;
+            case 0x28: // '('
+              parenLevel++;
+              break;
+            case 0x29: // ')'
+              parenLevel--;
+              break;
+            case 0x5B: // '['
+              bracketLevel++;
+              break;
+            case 0x5D: // ']'
+              bracketLevel--;
           }
 
           if (bracketLevel === 0 && braceLevel === 0 && parenLevel === 0 &&
@@ -505,7 +500,7 @@
 
           if (type === _Template) {
             if (this.options.range) {
-              this.addRange(token, lastIndex);
+              token.range = [lastIndex - s.length, lastIndex];
             }
             if (this.options.loc) {
               this.addLoc(token, lineStart, columnStart, line, columnEnd);
@@ -577,21 +572,21 @@
       return false;
     },
     isValidRegExpPrefix: function(tokens, i) {
+      var token, value, prev;
       var level = 0;
 
       while (--i >= 0) {
-        var token = tokens[i];
-        var type = token.type;
-        if (type !== _Punctuator) {
+        token = tokens[i];
+        if (token.type !== _Punctuator) {
           continue;
         }
 
-        var value = token.value;
+        value = token.value;
         if (value === '(') {
           if (--level === 0) {
-            var prevToken = tokens[i - 1];
-            if (prevToken && prevToken.type === _Keyword &&
-                regexParenWordsRe.test(prevToken.value)) {
+            prev = tokens[i - 1];
+            if (prev && prev.type === _Keyword &&
+                regexParenWordsRe.test(prev.value)) {
               return true;
             }
             return false;
@@ -602,16 +597,6 @@
       }
 
       return false;
-    },
-    parseRegExpFlags: function(value) {
-      var index = value.lastIndexOf('/');
-      var flags = value.substring(index + 1);
-      var pattern = value.substr(1, index - 1);
-
-      return {
-        pattern: pattern,
-        flags: flags
-      };
     },
     tokenize: function(source) {
       source = '' + source;
