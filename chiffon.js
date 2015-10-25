@@ -140,6 +140,18 @@
   var tokenizeRe = getPattern();
   var tokenizeAllRe = getPattern(true);
 
+  lineTerminator =
+  lineTerminatorSequence =
+  whiteSpace =
+  literalSuffix =
+  punctuators =
+  regexpLiteral =
+  templateLiteral =
+  identToken =
+  regexPreWords =
+  regexParenWords = null;
+
+
   function getPattern(all) {
     return new RegExp(
       '(?:' +
