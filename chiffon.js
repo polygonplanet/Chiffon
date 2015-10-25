@@ -722,14 +722,12 @@
     maxLineLen: 32000
   };
 
-  function Minifier(source, options) {
+  function Minifier(options) {
     this.options = mixin({}, options || {}, minifyDefaultOptions);
-    this.source = '' + source;
   }
 
   Minifier.prototype = {
     init: function() {
-      this.length = this.tokens.length;
       this.index = 0;
       this.lineLen = 0;
       this.current();
@@ -739,6 +737,7 @@
       return this.current();
     },
     current: function() {
+      this.length = this.tokens.length;
       this.prev = this.tokens[this.index - 1] || {};
       this.token = this.tokens[this.index] || TOKEN_END;
       this.value = this.token.value;
@@ -746,72 +745,47 @@
       this.lookahead = this.tokens[this.index + 1] || TOKEN_END;
       return this.token;
     },
-    remove: function(index, length) {
-      length = length || 1;
-
+    remove: function(index) {
       if (index == null) {
         index = this.index;
       }
-
-      do {
-        this.tokens[index--].value = '';
-      } while (--length > 0);
+      this.tokens.splice(index, 1);
+      this.current();
+    },
+    insert: function(token) {
+      this.tokens.splice(this.index + 1, 0, token);
+      this.next();
     },
     eat: function(type) {
       type = type || _LineTerminator;
 
       while (this.type === type) {
         this.remove();
-        this.next();
       }
     },
-    flatten: function(end) {
+    flatten: function() {
+      this.init();
       this.eat();
 
       while (this.index < this.length) {
         if (this.type === _LineTerminator) {
-          if (this.lookahead.type === _LineTerminator) {
+          if (this.prev.type === _Punctuator ||
+              this.prev.type === _LineTerminator ||
+              this.lookahead.type === _Punctuator) {
+            this.eat();
+            continue;
+          } else if (this.lookahead.type === _LineTerminator) {
             this.next();
             this.eat();
-          } else if (this.prev.type === _Punctuator ||
-                     this.prev.type === _LineTerminator ||
-                     this.lookahead.type === _Punctuator) {
-            this.eat();
+            continue;
           }
         }
         this.next();
       }
-
-      this.refresh();
-      if (!end) {
-        return this.flatten(true);
-      }
-    },
-    refresh: function() {
-      var newTokens = [];
-
-      this.init();
-      while (this.index < this.length) {
-        if (this.value) {
-          newTokens[newTokens.length] = this.token;
-        }
-        this.next();
-      }
-
-      this.tokens = newTokens;
-      this.init();
-    },
-    concatString: function() {
-      if (this.prev.type === _String &&
-          this.lookahead.type === _String &&
-          (this.prev.value.charAt(0) === this.lookahead.value.charAt(0) ||
-           this.prev.value.slice(-1) === this.lookahead.value.slice(-1))) {
-        this.prev.value = this.prev.value.slice(0, -1);
-        this.lookahead.value = this.lookahead.value.substring(1);
-        this.remove();
-      }
     },
     breakLine: function() {
+      this.init();
+
       while (this.index < this.length) {
         if (this.type === _LineTerminator) {
           this.lineLen = 0;
@@ -819,7 +793,10 @@
           this.lineLen += this.value.length;
           if (this.lineLen >= this.options.maxLineLen) {
             if (this.type === _Punctuator && !signRightRe.test(this.value)) {
-              this.token.value += '\n';
+              this.insert({
+                type: _LineTerminator,
+                value: '\n'
+              });
               this.lineLen = 0;
             }
           }
@@ -829,28 +806,12 @@
     },
     compress: function() {
       this.flatten();
-
-      while (this.index < this.length) {
-        switch (this.type) {
-          case _Punctuator:
-            if (this.value === ';' && this.lookahead.value === '}') {
-              this.remove();
-            } else if (this.value === '+') {
-              this.concatString();
-            }
-            break;
-        }
-        this.next();
-      }
-
-      this.refresh();
       this.breakLine();
     },
-    minify: function() {
-      this.tokens = tokenize(this.source, { lineTerminator: true });
+    minify: function(source) {
+      this.tokens = tokenize(source, { lineTerminator: true });
       this.init();
       this.compress();
-      this.source = null;
       return untokenize(this.tokens);
     }
   };
@@ -865,7 +826,7 @@
    * @return {string} Return a minified source.
    */
   var minify = Chiffon.minify = function(source, options) {
-    return new Minifier(source, options).minify();
+    return new Minifier(options).minify(source);
   };
 
   return Chiffon;
