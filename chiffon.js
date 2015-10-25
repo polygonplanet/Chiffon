@@ -92,6 +92,16 @@
     '(?:[gimuy]+\\b|)' +
   ')';
 
+  var templateLiteral = '`(?:' +
+          '\\\\[\\s\\S]' +
+    '|' + '[$][{]' + '(?:' + '\\\\[\\s\\S]' +
+                       '|' + '[^{}\\\\]' +
+                       '|' + '[{](?:[^{}]*(?:[{][^{}]*[}])?)*[}]' +
+                       ')*' +
+          '[}]' +
+    '|' + '[^`\\\\]' +
+    ')*`';
+
   var identToken = '[^\\s+/%*=&|^~<>!?:;,.()[\\]{}\'"`-]';
 
   // Valid keywords for Regular Expression Literal. e.g. `typeof /a/`
@@ -146,7 +156,7 @@
             '(' + '-->[^' + lineTerminator + ']*' +
             ')' +
             // (5) template literal
-      '|' + '(' + '`(?:\\\\[\\s\\S]|[^`\\\\])*`' +
+      '|' + '(' + templateLiteral +
             ')' + literalSuffix +
             // (6) string literal
       '|' + '(' + '"(?:' + '\\\\[\\s\\S]' +
