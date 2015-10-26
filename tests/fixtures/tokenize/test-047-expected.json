@@ -1,0 +1,74 @@
+[
+    {
+        "type": "Keyword",
+        "value": "var"
+    },
+    {
+        "type": "Identifier",
+        "value": "\\u0061"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Numeric",
+        "value": "1"
+    },
+    {
+        "type": "Punctuator",
+        "value": ","
+    },
+    {
+        "type": "Identifier",
+        "value": "a\\u{61}"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Numeric",
+        "value": "2"
+    },
+    {
+        "type": "Punctuator",
+        "value": ","
+    },
+    {
+        "type": "Identifier",
+        "value": "a\\u{0061}a"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Numeric",
+        "value": "3"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    },
+    {
+        "type": "Keyword",
+        "value": "var"
+    },
+    {
+        "type": "Identifier",
+        "value": "\\u3042\\u3044\\u{3046}"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Numeric",
+        "value": "4"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    }
+]
