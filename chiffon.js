@@ -46,7 +46,6 @@
       _Punctuator = 'Punctuator',
       _RegularExpression = 'RegularExpression',
       _Numeric = 'Numeric',
-      _UnicodeEscapeSequence = 'UnicodeEscapeSequence',
       _Identifier = 'Identifier',
       _Null = 'Null',
       _Boolean = 'Boolean',
@@ -102,7 +101,10 @@
     '|' + '[^`\\\\]' +
     ')*`';
 
-  var identToken = '[^\\s+/%*=&|^~<>!?:;,.()[\\]{}\'"`-]';
+  var identToken = '(?:' +
+        '\\\\u(?:[0-9a-fA-F]{4}|[{][0-9a-fA-F]+[}])' +
+  '|' + '[^\\s+/%*=&|^~<>!?:;,.()[\\]{}\'"`-]' +
+  ')+';
 
   // Valid keywords for Regular Expression Literal. e.g. `typeof /a/`
   var regexPreWords = 'typeof|in|void|case|instanceof|yield|throw|delete';
@@ -125,6 +127,7 @@
 
   var lineTerminatorSequenceRe = new RegExp(lineTerminatorSequence);
 
+  var identRe = new RegExp('^' + identToken + '$');
   var identLeftRe = new RegExp('^' + identToken);
   var identRightRe = new RegExp(identToken + '$');
   var signLeftRe = /^[+-]/;
@@ -195,17 +198,12 @@
             '|' + '0[0-7]+' +
             ')' +
             // (9) operators
-      '|' + '(' + punctuators +
-            ')' +
-            // (10) unicode character
-      '|' + '(' + '\\\\u[0-9a-fA-F]{4}' +
-            ')' +
+      '|' + '(' + punctuators + ')' +
       '|' + whiteSpace +
-            // (11) line terminators
+            // (10) line terminators
       '|' + '(' + lineTerminatorSequence + ')' +
-            // (12) identifier
-      '|' + '(' + identToken + '+' +
-            ')' +
+            // (11) identifier
+      '|' + '(' + identToken + ')' +
       ')',
       'g'
     );
@@ -371,11 +369,6 @@
             return _Punctuator;
           }
           return _Template;
-        case '\\':
-          if (len > 1) {
-            return _UnicodeEscapeSequence;
-          }
-          return;
         default:
           if (value === 'true' || value === 'false') {
             return _Boolean;
@@ -402,7 +395,9 @@
           if (keywordsRe.test(value)) {
             return _Keyword;
           }
-          return _Identifier;
+          if (identRe.test(value)) {
+            return _Identifier;
+          }
       }
     },
     addLoc: function(token, lineStart, columnStart, lineEnd, columnEnd) {
