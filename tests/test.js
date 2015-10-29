@@ -1,3 +1,5 @@
+/* global describe, it, expect, require */
+(function test_chiffon() {
 'use strict';
 
 var Chiffon = require('../chiffon');
@@ -41,9 +43,26 @@ if (min) {
   test('Chiffon (min)', ChiffonMin);
 }
 
-
 function test(desc, parser) {
   describe(desc, function() {
+    describe('WhiteSpace', function() {
+      var whiteSpaces = [
+        0x20, 0x09, 0x0B, 0x0C, 0xA0,
+        0x1680, 0x180E, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004,
+        0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F,
+        0x205F, 0x3000, 0xFEFF
+      ];
+      whiteSpaces.forEach(function(ws) {
+        it('0x' + ('0000' + ws.toString(16).toUpperCase()).slice(-4), function() {
+          var c = String.fromCharCode(ws);
+          var code = c + '1';
+          var chiffon_tokens = parser.tokenize(code);
+          var esprima_tokens = esprima.parse(code, { tokens: true }).tokens;
+          assert.deepEqual(chiffon_tokens, esprima_tokens);
+        });
+      });
+    });
+
     describe('tokenize', function() {
       Object.keys(libs).forEach(function(name) {
         it(name, function() {
@@ -173,12 +192,14 @@ function getFixturesNo(filename) {
 
 
 function testSyntax(code) {
-  Function('return;' + code)();
+  /*jslint evil: true */
+  new Function('return;' + code)();
 }
 
 
 function fakeRequire(code) {
-  return Function(
+  /*jslint evil: true */
+  return new Function(
     'var module = { exports: {} };' +
     code + ';' +
     'return module.exports;'
@@ -203,3 +224,5 @@ function getFiles(dir) {
 
   return results;
 }
+
+}());
