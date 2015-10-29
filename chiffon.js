@@ -248,7 +248,7 @@
   Tokenizer.prototype = {
     parseMatches: function(matches, tokens) {
       var token, value, len, index, lines, range, loc;
-      var lineStart, columnStart, columnEnd;
+      var lineStart, columnStart, columnEnd, hasLineTerminator;
       var type, regex, ch, c;
 
       for (var i = 0; i < matches.length; i++) {
@@ -293,6 +293,11 @@
 
         this.index += len;
 
+        if (this.options.parse && type === _LineTerminator) {
+          hasLineTerminator = true;
+          continue;
+        }
+
         if ((type === _Comment && !this.options.comment) ||
             (type === _LineTerminator && !this.options.lineTerminator)) {
           continue;
@@ -303,6 +308,11 @@
             type: type,
             value: value
           };
+
+          if (hasLineTerminator) {
+            token.hasLineTerminator = true;
+          }
+          hasLineTerminator = false;
 
           if (regex) {
             token.regex = regex;
