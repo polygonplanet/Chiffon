@@ -36,7 +36,6 @@
   var push = arrayProto.push;
   var slice = arrayProto.slice;
   var splice = arrayProto.splice;
-  var hasOwnProperty = objectProto.hasOwnProperty;
   var fromCharCode = String.fromCharCode;
 
   var _Comment = 'Comment',
@@ -226,15 +225,13 @@
 
 
   function mixin(target) {
-    var sources = slice.call(arguments, 1);
-    for (var i = 0, len = sources.length; i < len; i++) {
-      var source = sources[i];
-      for (var key in source) {
-        if (hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
+    slice.call(arguments, 1).forEach(function(source) {
+      var keys = Object.keys(source);
+      for (var i = 0, len = keys.length; i < len; i++) {
+        var key = keys[i];
+        target[key] = source[key];
       }
-    }
+    });
     return target;
   }
 
