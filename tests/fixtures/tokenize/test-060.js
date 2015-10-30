@@ -1,0 +1,1 @@
+if (0) void 0; else /42/

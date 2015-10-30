@@ -1,0 +1,30 @@
+[
+    {
+        "type": "Keyword",
+        "value": "var"
+    },
+    {
+        "type": "Identifier",
+        "value": "i"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    },
+    {
+        "type": "Identifier",
+        "value": "i"
+    },
+    {
+        "type": "Keyword",
+        "value": "in"
+    },
+    {
+        "type": "RegularExpression",
+        "value": "/42/",
+        "regex": {
+            "pattern": "42",
+            "flags": ""
+        }
+    }
+]

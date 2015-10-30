@@ -1,0 +1,14 @@
+[
+    {
+        "type": "Keyword",
+        "value": "delete"
+    },
+    {
+        "type": "RegularExpression",
+        "value": "/42/",
+        "regex": {
+            "pattern": "42",
+            "flags": ""
+        }
+    }
+]

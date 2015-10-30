@@ -1,0 +1,38 @@
+[
+    {
+        "type": "Keyword",
+        "value": "var"
+    },
+    {
+        "type": "Identifier",
+        "value": "t"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "Template",
+        "value": "`========${"
+    },
+    {
+        "type": "Template",
+        "value": "`========${"
+    },
+    {
+        "type": "Numeric",
+        "value": "1"
+    },
+    {
+        "type": "Template",
+        "value": "}=========`"
+    },
+    {
+        "type": "Template",
+        "value": "}======`"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    }
+]

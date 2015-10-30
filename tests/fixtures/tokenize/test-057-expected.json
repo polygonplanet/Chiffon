@@ -1,0 +1,50 @@
+[
+    {
+        "type": "Keyword",
+        "value": "switch"
+    },
+    {
+        "type": "Punctuator",
+        "value": "("
+    },
+    {
+        "type": "Null",
+        "value": "null"
+    },
+    {
+        "type": "Punctuator",
+        "value": ")"
+    },
+    {
+        "type": "Punctuator",
+        "value": "{"
+    },
+    {
+        "type": "Keyword",
+        "value": "case"
+    },
+    {
+        "type": "RegularExpression",
+        "value": "/42/",
+        "regex": {
+            "pattern": "42",
+            "flags": ""
+        }
+    },
+    {
+        "type": "Punctuator",
+        "value": ":"
+    },
+    {
+        "type": "Keyword",
+        "value": "break"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    },
+    {
+        "type": "Punctuator",
+        "value": "}"
+    }
+]

@@ -1,0 +1,90 @@
+[
+    {
+        "type": "Keyword",
+        "value": "var",
+        "range": [
+            0,
+            3
+        ]
+    },
+    {
+        "type": "Identifier",
+        "value": "t",
+        "range": [
+            4,
+            5
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": "=",
+        "range": [
+            6,
+            7
+        ]
+    },
+    {
+        "type": "Template",
+        "value": "`<html>${",
+        "range": [
+            8,
+            17
+        ]
+    },
+    {
+        "type": "Template",
+        "value": "`<body>${",
+        "range": [
+            20,
+            29
+        ]
+    },
+    {
+        "type": "Numeric",
+        "value": "1",
+        "range": [
+            38,
+            39
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": "+",
+        "range": [
+            40,
+            41
+        ]
+    },
+    {
+        "type": "Numeric",
+        "value": "1",
+        "range": [
+            42,
+            43
+        ]
+    },
+    {
+        "type": "Template",
+        "value": "}</body>`",
+        "range": [
+            46,
+            55
+        ]
+    },
+    {
+        "type": "Template",
+        "value": "}</html>`",
+        "range": [
+            56,
+            65
+        ]
+    },
+    {
+        "type": "Punctuator",
+        "value": ";",
+        "range": [
+            65,
+            66
+        ]
+    }
+]
