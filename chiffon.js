@@ -102,7 +102,7 @@
 
   var identToken = '(?:' +
         '\\\\u(?:[0-9a-fA-F]{4}|[{][0-9a-fA-F]+[}])' +
-  '|' + '[^\\s+/%*=&|^~<>!?:;,.()[\\]{}\'"`-]' +
+  '|' + '[^\\s\\\\+/%*=&|^~<>!?:;,.()[\\]{}\'"`@#-]' +
   ')+';
 
   // Valid keywords for Regular Expression Literal. e.g. `typeof /a/`
@@ -141,6 +141,7 @@
   ')');
   var regexParenWordsRe = new RegExp('^(?:' + regexParenWords + ')$');
 
+  var tokenizeNotTemplateRe = getPattern(_Template);
   var tokenizeNotRegExpRe = getPattern(_RegularExpression);
   var tokenizeRe = getPattern();
 
@@ -172,7 +173,7 @@
             '(' + '-->[^' + lineTerminator + ']*' +
             ')' +
             // (5) template literal
-      '|' + '(' + templateLiteral +
+      '|' + '(' + (ignore === _Template ? whiteSpace : templateLiteral) +
             ')' + literalSuffix +
             // (6) string literal
       '|' + '(' + '"(?:' + '\\\\\\r\\n' +
@@ -202,7 +203,8 @@
             // (10) line terminators
       '|' + '(' + lineTerminatorSequence + ')' +
             // (11) identifier
-      '|' + '(' + identToken + ')' +
+      '|' + '(' + (ignore === _Template ? '[\\s\\S]' : identToken) +
+            ')' +
       ')',
       'g'
     );
@@ -236,10 +238,11 @@
   }
 
 
-  var _retokenize;
-
   function Tokenizer(options) {
     this.options = mixin({}, options || {});
+    this.line = 1;
+    this.index = 0;
+    this.prevLineIndex = 0;
   }
 
   Tokenizer.prototype = {
@@ -430,9 +433,8 @@
       for (var i = 0, len = blocks.length; i < len; i++) {
         var block = blocks[i];
         if (block.type === 'tmp-source') {
-          _retokenize = mixin({}, block._loc, { type: _Template });
-          var tokens = tokenize(block.value, this.options);
-          _retokenize = null;
+          var props = mixin({}, block._loc, { type: _Template });
+          var tokens = this._retokenize(block.value, props);
           push.apply(results, tokens);
         } else {
           results[results.length] = block;
@@ -441,7 +443,9 @@
 
       return results;
     },
-    parseTemplateBlock: function(value, columnStart) {
+    parseTemplateBlock: function(template, columnStart) {
+      var values = template.match(tokenizeNotTemplateRe);
+
       var line = this.line;
       var lineStart = line;
       var rangeStart = this.index;
@@ -449,71 +453,61 @@
 
       var tokens = [];
       var escapeCount = 0;
-      var s = '';
+      var value = '';
       var type = _Template;
 
-      var bracketLevel = 0;
       var braceLevel = 0;
-      var parenLevel = 0;
+      var length = 0;
 
-      var lastIndex, prevLineIndex, columnEnd;
+      var lastIndex, prevLineIndex, columnEnd, newlineIndex;
       var prev, inExpr, tail, append, token;
 
-      for (var i = 0, len = value.length; i < len; prev = value.charCodeAt(i++)) {
-        var c = value.charCodeAt(i);
+      for (var i = 0, len = values.length; i < len; prev = values[i++]) {
+        var c = values[i];
+        var cLen = c.length;
 
-        if (isLineTerminator(c)) {
-          if (prev === 0x0D && c === 0x0A) {
-            line--;
-          }
+        if (isLineTerminator(c.charCodeAt(0))) {
           line++;
-          newlines[newlines.length] = rangeStart + i + 1;
+          newlineIndex = rangeStart + length + 1;
+          if (cLen === 2 &&
+              c.charCodeAt(0) === 0x0D && c.charCodeAt(1) === 0x0A) {
+            newlineIndex++;
+          }
+          newlines[newlines.length] = newlineIndex;
         }
 
         if (inExpr) {
           switch (c) {
-            case 0x7B: // '{'
+            case '{':
               braceLevel++;
               break;
-            case 0x7D: // '}'
+            case '}':
               braceLevel--;
               break;
-            case 0x28: // '('
-              parenLevel++;
-              break;
-            case 0x29: // ')'
-              parenLevel--;
-              break;
-            case 0x5B: // '['
-              bracketLevel++;
-              break;
-            case 0x5D: // ']'
-              bracketLevel--;
           }
 
-          if (bracketLevel === 0 && braceLevel === 0 && parenLevel === 0 &&
-              i + 1 < len && value.charCodeAt(i + 1) === 0x7D) { // '}'
+          if (braceLevel === 0 && i + 1 < len && values[i + 1] === '}') {
             append = true;
             type = 'tmp-source'; // Temporary token type
             inExpr = false;
           }
-        } else if (c === 0x5C) { // '\'
-          if (prev === 0x5C) {
+        } else if (c === '\\') {
+          if (prev === '\\') {
             escapeCount++;
           } else {
             escapeCount = 1;
           }
-        } else if (c === 0x24) { // '$'
-          tail = (prev !== 0x5C || escapeCount % 2 === 0);
-        } else if (c === 0x7B) { // '{'
-          if (tail && prev === 0x24) {
+        } else if (c === '$') {
+          tail = (prev !== '\\' || escapeCount % 2 === 0);
+        } else if (c === '{') {
+          if (tail && prev === '$') {
             append = true;
             type = _Template;
             inExpr = true;
           }
         }
 
-        s += fromCharCode(c);
+        value += c;
 
         if (i === len - 1) {
           append = true;
@@ -523,23 +517,23 @@
         if (append) {
           token = {
             type: type,
-            value: s
+            value: value
           };
 
-          lastIndex = rangeStart + i + 1;
+          lastIndex = rangeStart + length + cLen;
           prevLineIndex = this.findPrevLineIndex(newlines, lastIndex);
           columnEnd = lastIndex - prevLineIndex;
 
           if (type === _Template) {
             if (this.options.range) {
-              token.range = [lastIndex - s.length, lastIndex];
+              token.range = [lastIndex - value.length, lastIndex];
             }
             if (this.options.loc) {
               this.addLoc(token, lineStart, columnStart, line, columnEnd);
             }
-            columnStart = columnEnd + 1;
+            columnStart = columnEnd + cLen;
           } else {
-            lastIndex = rangeStart + i + 1 - s.length;
+            lastIndex = rangeStart + length + cLen - value.length;
             prevLineIndex = this.findPrevLineIndex(newlines, lastIndex);
 
             token._loc = {
@@ -551,10 +545,12 @@
           }
 
           tokens[tokens.length] = token;
-          s = '';
+          value = '';
           lineStart = line;
           append = false;
         }
+
+        length += cLen;
       }
 
       this.line = lineStart;
@@ -630,17 +626,16 @@
 
       return false;
     },
+    _retokenize: function(source, props) {
+      var tokenizer = new Tokenizer(this.options);
+      mixin(tokenizer, props);
+      return tokenizer.tokenize(source);
+    },
     tokenize: function(source) {
-      source = '' + source;
-
-      if (_retokenize) {
-        // Recursive internal call.
-        mixin(this, _retokenize);
-      } else {
-        this.line = 1;
-        this.index = 0;
-        this.prevLineIndex = 0;
+      if (source == null) {
+        return [];
       }
+      source = '' + source;
 
       var tokens = [];
       var matches = source.match(tokenizeRe);
@@ -651,6 +646,7 @@
       return tokens;
     }
   };
+
 
   /**
    * Tokenize a string source.
