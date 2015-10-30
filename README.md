@@ -47,7 +47,7 @@ Tokenize a string source.
 
 * {_Array_} Chiffon.**tokenize** ( source [, options ] )  
   @param {_string_} _source_ Target source.  
-  @param {_Object_} [_options_] Tokenize options.  
+  @param {_Object_} [_options_] [Tokenize options](#tokenize-options).  
   @return {_Array_}  Return an array of the parsed tokens.  
 
 
@@ -70,6 +70,7 @@ Chiffon work simply tokenizing.
 ### Defined token type
 
 * Comment
+* WhiteSpace
 * LineTerminator
 * Template
 * String
@@ -82,10 +83,13 @@ Chiffon work simply tokenizing.
 * Keyword
 
 
-### Options
+### Tokenize Options
 
 * **comment** : {boolean} default=false  
   Keep comment tokens.
+
+* **whiteSpace** : {boolean} default=false  
+  Keep white space tokens.
 
 * **lineTerminator** : {boolean} default=false  
   Keep line terminator tokens.
@@ -102,6 +106,7 @@ Full options are following.
 ```javascript
 var options = {
   comment: Boolean,
+  whiteSpace: Boolean,
   lineTerminator: Boolean,
   range: Boolean,
   loc: Boolean
@@ -114,7 +119,29 @@ Concatenate to string from the parsed tokens.
 
 * {_string_} Chiffon.**untokenize** ( tokens )  
   @param {_Array_} _tokens_ An array of the parsed tokens.  
+  @param {_Object_} [_options_] [Untokenize options](#untokenize-options).  
   @return {_string_}  Return a concatenated string.  
+
+
+### Untokenize Options
+
+* **unsafe** : {boolean} (default=false)  
+  Untokenizer does not add a space between the identifier and identifier.
+
+
+Tokens can return to the original string by using the untokenize with these options.
+
+```javascript
+var source = 'var a = 1, b = 2; // comment';
+var tokens = Chiffon.tokenize(source, {
+  comment: true,
+  whiteSpace: true,
+  lineTerminator: true
+});
+
+var result = Chiffon.untokenize(tokens, { unsafe: true });
+console.log(result === source); // true
+```
 
 
 ## Minify
@@ -123,6 +150,7 @@ Minify JavaScript source.
 
 * {_string_} Chiffon.**minify** ( source )  
   @param {_string_} _source_ Target source.  
+  @param {_Object_} [_options_] [minify options](#minify-options).  
   @return {_string_} Return a minified source.  
 
 
@@ -130,6 +158,12 @@ Minify JavaScript source.
 var min = Chiffon.minify('var a = 1 + 1; // comment');
 console.log(min); // 'var a=1+1;'
 ```
+
+### Minify Options
+
+* **maxLineLen** : {number} default=32000  
+  Limit the line length in symbols.
+
 
 ## Demo
 
