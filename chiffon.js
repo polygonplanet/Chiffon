@@ -39,6 +39,7 @@
   var fromCharCode = String.fromCharCode;
 
   var _Comment = 'Comment',
+      _WhiteSpace = 'WhiteSpace',
       _LineTerminator = 'LineTerminator',
       _Template = 'Template',
       _String = 'String',
@@ -199,10 +200,11 @@
             ')' +
             // (9) operators
       '|' + '(' + punctuators + ')' +
-      '|' + whiteSpace +
-            // (10) line terminators
+            // (10) whitespace
+      '|' + '(' + whiteSpace + ')' +
+            // (11) line terminators
       '|' + '(' + lineTerminatorSequence + ')' +
-            // (11) identifier
+            // (12) identifier
       '|' + '(' + (ignore === _Template ? '[\\s\\S]' : identToken) +
             ')' +
       ')',
@@ -293,41 +295,44 @@
 
         this.index += len;
 
+        if (!type) {
+          continue;
+        }
+
         if (this.options.parse && type === _LineTerminator) {
           hasLineTerminator = true;
           continue;
         }
 
         if ((type === _Comment && !this.options.comment) ||
+            (type === _WhiteSpace && !this.options.whiteSpace) ||
             (type === _LineTerminator && !this.options.lineTerminator)) {
           continue;
         }
 
-        if (type) {
-          token = {
-            type: type,
-            value: value
-          };
+        token = {
+          type: type,
+          value: value
+        };
 
-          if (hasLineTerminator) {
-            token.hasLineTerminator = true;
-          }
-          hasLineTerminator = false;
-
-          if (regex) {
-            token.regex = regex;
-          }
-
-          if (this.options.range) {
-            token.range = [this.index - len, this.index];
-          }
-          if (this.options.loc) {
-            columnEnd = this.index - this.prevLineIndex;
-            this.addLoc(token, lineStart, columnStart, this.line, columnEnd);
-          }
-
-          tokens[tokens.length] = token;
+        if (hasLineTerminator) {
+          token.hasLineTerminator = true;
         }
+        hasLineTerminator = false;
+
+        if (regex) {
+          token.regex = regex;
+        }
+
+        if (this.options.range) {
+          token.range = [this.index - len, this.index];
+        }
+        if (this.options.loc) {
+          columnEnd = this.index - this.prevLineIndex;
+          this.addLoc(token, lineStart, columnStart, this.line, columnEnd);
+        }
+
+        tokens[tokens.length] = token;
       }
     },
     getTokenType: function(value) {
@@ -389,7 +394,7 @@
 
           ch = c.charCodeAt(0);
           if (ch === 0x20 || ch === 0x09 || whiteSpaceRe.test(c)) {
-            return;
+            return _WhiteSpace;
           }
 
           if (isLineTerminator(ch)) {
@@ -570,7 +575,9 @@
         var token = tokens[i];
         var type = token.type;
 
-        if (type === _Comment || type === _LineTerminator) {
+        if (type === _Comment ||
+            type === _WhiteSpace ||
+            type === _LineTerminator) {
           continue;
         }
 
