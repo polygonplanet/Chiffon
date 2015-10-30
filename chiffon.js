@@ -459,7 +459,7 @@
       var braceLevel = 0;
       var length = 0;
 
-      var lastIndex, prevLineIndex, columnEnd, newlineIndex;
+      var lastIndex, prevLineIndex, columnEnd;
       var prev, inExpr, tail, append, token;
 
       for (var i = 0, len = values.length; i < len; prev = values[i++]) {
@@ -468,12 +468,7 @@
 
         if (isLineTerminator(c.charCodeAt(0))) {
           line++;
-          newlineIndex = rangeStart + length + 1;
-          if (cLen === 2 &&
-              c.charCodeAt(0) === 0x0D && c.charCodeAt(1) === 0x0A) {
-            newlineIndex++;
-          }
-          newlines[newlines.length] = newlineIndex;
+          newlines[newlines.length] = rangeStart + length + cLen;
         }
 
         if (inExpr) {
