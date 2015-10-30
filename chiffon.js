@@ -132,6 +132,8 @@
   var identRightRe = new RegExp(identToken + '$');
   var signLeftRe = /^[+-]/;
   var signRightRe = /[+-]$/;
+  var notPunctRe = /[^{}()[\]<>=!+*%\/&|^~?:;,.-]/;
+  var notDigitRe = /[^0-9]/;
 
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
@@ -214,12 +216,12 @@
 
 
   function isPunctuator(c) {
-    return !!~'{}()[]<>=!+-*%/&|^~?:;,.'.indexOf(c);
+    return !notPunctRe.test(c);
   }
 
 
   function isDigit(c) {
-    return !!~'0123456789'.indexOf(c);
+    return !notDigitRe.test(c);
   }
 
 
