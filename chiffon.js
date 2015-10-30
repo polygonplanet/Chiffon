@@ -106,7 +106,8 @@
   ')+';
 
   // Valid keywords for Regular Expression Literal. e.g. `typeof /a/`
-  var regexPreWords = 'typeof|in|void|case|instanceof|yield|throw|delete';
+  var regexPreWords = 'typeof|in|void|case|instanceof|yield|throw|delete|' +
+    'else|return|do';
   // Valid keywords when previous token of the regex literal is a paren.
   // e.g. `if (1) /a/`
   var regexParenWords = 'if|while|for|with';
@@ -114,9 +115,8 @@
   var keywordsRe = new RegExp('^(?:' +
     // ECMA-262 11.6.2.1 Keywords
     regexParenWords + '|' + regexPreWords + '|' +
-    'var|else|function|this|return|new|break|do|' +
-    'catch|finally|try|default|continue|switch|' +
-    'const|export|import|class|extends|debugger|super|' +
+    'var|function|this|new|break|catch|finally|try|default|continue|' +
+    'switch|const|export|import|class|extends|debugger|super|' +
     // Reserved keywords
     'let|static|' +
     // ECMA-262 11.6.2.2 Future Reserved Words
