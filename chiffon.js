@@ -142,8 +142,8 @@
   ')');
   var regexParenWordsRe = new RegExp('^(?:' + regexParenWords + ')$');
 
+  var tokenizeNotRegExpRe = getPattern(_RegularExpression);
   var tokenizeRe = getPattern();
-  var tokenizeAllRe = getPattern(true);
 
   lineTerminator =
   lineTerminatorSequence =
@@ -157,7 +157,7 @@
   regexParenWords = null;
 
 
-  function getPattern(all) {
+  function getPattern(ignore) {
     return new RegExp(
       '(?:' +
             // (1) multiline comment
@@ -186,7 +186,7 @@
                     ")*'" +
             ')' +
             // (7) regular expression literal
-      '|' + '(' + (all ? regexpLiteral : whiteSpace) +
+      '|' + '(' + (ignore === _RegularExpression ? whiteSpace : regexpLiteral) +
             ')' + literalSuffix +
             // (8) numeric literal
       '|' + '(' + '0(?:' + '[xX][0-9a-fA-F]+' +
@@ -600,7 +600,7 @@
           break;
         }
 
-        var parts = regexValue.match(tokenizeRe);
+        var parts = regexValue.match(tokenizeNotRegExpRe);
         splice.apply(matches, [index, 1].concat(parts));
         return true;
       }
@@ -646,7 +646,7 @@
       }
 
       var tokens = [];
-      var matches = source.match(tokenizeAllRe);
+      var matches = source.match(tokenizeRe);
       if (matches) {
         this.parseMatches(matches, tokens);
       }
