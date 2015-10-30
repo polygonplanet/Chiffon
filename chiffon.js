@@ -710,6 +710,9 @@
    * Concatenate to string from the parsed tokens.
    *
    * @param {Array} tokens An array of the parsed tokens.
+   * @param {Object} [options] Untokenize options.
+   *  - unsafe: {boolean} (default=false)
+   *    Untokenizer does not add a space between the identifier and identifier.
    * @return {string} Return a concatenated string.
    */
   var untokenize = Chiffon.untokenize = function(tokens, options) {
