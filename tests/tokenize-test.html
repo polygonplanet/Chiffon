@@ -398,7 +398,7 @@
       },
 
       generateFileName: function(type) {
-        var n = ('000' + this.$downloadNumber.val()).slice(-3);
+        var n = ('0000' + this.$downloadNumber.val()).slice(-4);
 
         if (type === 'source') {
           return this.filenameTemplate({
