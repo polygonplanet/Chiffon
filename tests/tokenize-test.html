@@ -146,7 +146,7 @@
       },
 
       filenameTemplate: _.template(
-        'test-<%- number %><% result ? "-expected" : "" %>.<%- ext %>'
+        'test-<%- number %><%= result ? "-expected" : "" %>.<%- ext %>'
       ),
       benchmarkTemplate: _.template(
         'Processed time: <%- time %>ms. by <%- library %>'
