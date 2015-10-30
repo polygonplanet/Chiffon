@@ -36,7 +36,7 @@
   height: 30px;
 }
 
-#download-link {
+#download-result-link, #download-source-link {
   font-weight: bold;
   margin-left: 1em;
 }
@@ -92,7 +92,8 @@
               <input type="number" class="download-number" id="download-number" value="0" max="999" min="0" step="1">
               -expected.json
             </span>
-            <span id="download-link"></span>
+            <span id="download-source-link"></span>
+            <span id="download-result-link"></span>
           </div>
           <div class="tests">
             <button id="lint" class="btn btn-info" title="Check Syntax">Lint</button>
@@ -130,6 +131,8 @@
     var AppView = Backbone.View.extend({
       el: 'body',
       events: {
+        'input #input': 'onInputChange',
+        'change #input': 'onInputChange',
         'change #load-libraries': 'onLoadLibrariesChange',
         'change input[name="library"]': 'onLibraryChange',
         'change #download-number': 'onDownloadNumberChange',
@@ -143,7 +146,7 @@
       },
 
       filenameTemplate: _.template(
-        'test-<%- number %>-expected.<%- ext %>'
+        'test-<%- number %><% result ? "-expected" : "" %>.<%- ext %>'
       ),
       benchmarkTemplate: _.template(
         'Processed time: <%- time %>ms. by <%- library %>'
@@ -167,10 +170,14 @@
         'underscore'
       ],
       _library: null,
-      _ext: 'json',
+      _method: 'tokenize',
       _timerId: null,
+      _downloadSourceTimerId: null,
       _options: {},
-      _objectURL: null,
+      _objectURL: {
+        source: null,
+        result: null
+      },
 
       initialize: function(attributes, options) {
         _.bindAll.apply(_, [this].concat(_.functions(this)));
@@ -178,12 +185,15 @@
         this.$input = this.$el.find('#input');
         this.$output = this.$el.find('#output');
         this.$minify = this.$el.find('#minify');
+        this.$range = this.$el.find('#range');
+        this.$loc = this.$el.find('#loc');
         this.$equals = this.$el.find('#equals');
         this.$library = this.$el.find('input[name="library"]');
         this.$loadLibraries = this.$el.find('#load-libraries');
         this.$benchmarkTime = this.$el.find('#benchmark-time');
         this.$downloadNumber = this.$el.find('#download-number');
-        this.$downloadLink = this.$el.find('#download-link');
+        this.$downloadSourceLink = this.$el.find('#download-source-link');
+        this.$downloadResultLink = this.$el.find('#download-result-link');
 
         EventBus.on('resize:window', this.onWindowResize);
 
@@ -192,11 +202,23 @@
         });
         this.onWindowResize();
         this.createLibraryOptions();
+        this.onRangeChange();
+        this.onLocChange();
         this.$input.focus();
       },
 
       render: function() {
         return this;
+      },
+
+      onInputChange: function() {
+        if (this._downloadSourceTimerId) {
+          clearTimeout(this._downloadSourceTimerId);
+        }
+        this._downloadSourceTimerId = setTimeout(this._onInputChange, 100);
+      },
+      _onInputChange: function() {
+        this.createDownloadLink(this.$input.val(), 'source');
       },
 
       onLoadLibrariesChange: function(event) {
@@ -227,30 +249,31 @@
       },
 
       onDownloadNumberChange: function(event) {
-        this.createDownloadLink(this.$output.val());
+        this.createDownloadLink(this.$input.val(), 'source');
+        this.createDownloadLink(this.$output.val(), 'result');
       },
 
       onTokenizeClick: function() {
-        this._ext = 'json';
+        this._method = 'tokenize';
         this.$downloadNumber.prop('disabled', false);
         this.$equals.prop('disabled', false);
         this.parse();
       },
       onMinifyClick: function() {
-        this._ext = 'js';
+        this._method = 'minify';
         this.$downloadNumber.prop('disabled', true);
         this.$equals.prop('disabled', true);
         var source = Chiffon.minify(this.$input.val());
         this.$output.val(source);
-        this.createDownloadLink(source);
+        this.createDownloadLink(source, 'result');
       },
 
       onRangeChange: function(event) {
-        this._options.range = $(event.currentTarget).prop('checked');
+        this._options.range = this.$range.prop('checked');
         this.parse();
       },
       onLocChange: function(event) {
-        this._options.loc = $(event.currentTarget).prop('checked');
+        this._options.loc = this.$loc.prop('checked');
         this.parse();
       },
 
@@ -327,7 +350,7 @@
         if (this._timerId) {
           clearTimeout(this._timerId);
         }
-        this._timerId = setTimeout(this._parse, 20);
+        this._timerId = setTimeout(this._parse, 50);
       },
       _parse: function() {
         var result;
@@ -346,39 +369,54 @@
           library: this._library
         }));
 
-        this.createDownloadLink(result);
+        this.createDownloadLink(this.$input.val(), 'source');
+        this.createDownloadLink(result, 'result');
         this._timerId = null;
       },
 
-      createDownloadLink: function(data, filename) {
+      createDownloadLink: function(data, type, filename) {
+        var isResult = type === 'result';
+
         var blob = new Blob([data], { type: 'text/plain' });
         var url = window.URL || window.webkitURL;
-        if (this._objectURL && url.revokeObjectURL) {
-          url.revokeObjectURL(this._objectURL);
+        if (this._objectURL[type] && url.revokeObjectURL) {
+          url.revokeObjectURL(this._objectURL[type]);
+          this._objectURL[type] = null;
         }
-        this._objectURL = url.createObjectURL(blob);
+        this._objectURL[type] = url.createObjectURL(blob);
 
         var $a = $(this.downloadTemplate({
-          href: this._objectURL,
-          download: filename || this.generateFileName(),
-          text: 'Download Result'
+          href: this._objectURL[type],
+          download: filename || this.generateFileName(type),
+          text: 'Download ' + type.charAt(0).toUpperCase() + type.substring(1)
         }));
 
+        var $target = isResult ? this.$downloadResultLink : this.$downloadSourceLink;
         $a.hide();
-        this.$downloadLink.empty().append($a);
+        $target.empty().append($a);
         return $a.fadeIn();
       },
 
-      generateFileName: function(ext) {
-        if (this._ext === 'js') {
-          return moment().format('YYYYMMDD-HHmmss') + '-min.' + this._ext;
-        }
+      generateFileName: function(type) {
+        var n = ('000' + this.$downloadNumber.val()).slice(-3);
 
-        var n = this.$downloadNumber.val();
-        return this.filenameTemplate({
-          number: ('000' + n).slice(-3),
-          ext: ext || this._ext || 'json'
-        });
+        if (type === 'source') {
+          return this.filenameTemplate({
+            number: n,
+            result: false,
+            ext: 'js'
+          });
+        } else {
+          if (this._method === 'minify') {
+            return moment().format('YYYYMMDD-HHmmss') + '-min.js';
+          }
+
+          return this.filenameTemplate({
+            number: n,
+            result: true,
+            ext: 'json'
+          });
+        }
       },
 
       createLibraryOptions: function() {
