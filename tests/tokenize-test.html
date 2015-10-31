@@ -50,7 +50,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-10">
-        <h1>Chiffon - Test</h1>
+        <h1>Chiffon - Tokenize Test</h1>
       </div>
     </div>
     <div class="row">
@@ -89,7 +89,7 @@
             <label for="download-number">filename:</label>
             <span class="download-filename">
               test-
-              <input type="number" class="download-number" id="download-number" value="0" max="999" min="0" step="1">
+              <input type="number" class="download-number" id="download-number" value="0" max="9999" min="0" step="1">
               -expected.json
             </span>
             <span id="download-source-link"></span>
@@ -197,9 +197,7 @@
 
         EventBus.on('resize:window', this.onWindowResize);
 
-        this.onLibraryChange({
-          currentTarget: this.$library.filter(':checked')
-        });
+        this.onLibraryChange();
         this.onWindowResize();
         this.createLibraryOptions();
         this.onRangeChange();
@@ -240,12 +238,13 @@
       },
 
       onLibraryChange: function(event) {
-        this._library = $(event.currentTarget).val();
+        this._library = this.$library.filter(':checked').val();
         if (this._library === 'esprima') {
           this.$minify.prop('disabled', true);
         } else {
           this.$minify.prop('disabled', false);
         }
+        this.parse();
       },
 
       onDownloadNumberChange: function(event) {
