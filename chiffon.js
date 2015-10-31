@@ -684,7 +684,7 @@
         var tokenType = token.type;
         var tokenValue = token.value;
 
-        if (!prev) {
+        if (!prev || this.options.unsafe) {
           results[results.length] = tokenValue;
           continue;
         }
