@@ -34,6 +34,8 @@ var fixtures = {
   minify: getFixtureFiles('minify')
 };
 
+fixtures.untokenize = fixtures.minify;
+
 var min = process.argv.slice().pop() === '--min';
 
 test('Chiffon', Chiffon);
@@ -118,6 +120,30 @@ function test(desc, parser) {
           var expected = require(expectedName);
           var tokens = parser.tokenize(code, { loc: true });
           assert.deepEqual(tokens, expected);
+        });
+      });
+    });
+
+    describe('untokenize', function() {
+      fixtures.untokenize.test.forEach(function(testName, i) {
+        var no = getFixturesNo(testName);
+        it('fixtures ' + no, function() {
+          var code = fs.readFileSync(testName).toString();
+          var func = require(testName);
+          assert(func() === true);
+          var tokens = parser.tokenize(code, {
+            comment: true,
+            whiteSpace: true,
+            lineTerminator: true
+          });
+          assert(Array.isArray(tokens));
+          var result = parser.untokenize(tokens, {
+            unsafe: true
+          });
+
+          assert(result === code);
+          var resFunc = fakeRequire(result);
+          assert(func() === resFunc());
         });
       });
     });
