@@ -213,6 +213,15 @@
   }
 
 
+  function fromCodePoint(c) {
+    if (c <= 0xFFFF) {
+      return fromCharCode(c);
+    }
+    c -= 0x10000;
+    return fromCharCode((c >> 10) + 0xD800, (c % 0x400) + 0xDC00);
+  }
+
+
   function isLineTerminator(c) {
     return c === 0x0A || c === 0x0D || c === 0x2028 || c === 0x2029;
   }
@@ -835,6 +844,1398 @@
    */
   var minify = Chiffon.minify = function(source, options) {
     return new Minifier(options).minify(source);
+  };
+
+
+  // Parser based Esprima. (http://esprima.org/)
+  // Abstract syntax tree specified by ESTree. (https://github.com/estree/estree)
+  var _AssignmentExpression = 'AssignmentExpression',
+      _ArrayExpression = 'ArrayExpression',
+      _BlockStatement = 'BlockStatement',
+      _BinaryExpression = 'BinaryExpression',
+      _BreakStatement = 'BreakStatement',
+      _CallExpression = 'CallExpression',
+      _CatchClause = 'CatchClause',
+      _ConditionalExpression = 'ConditionalExpression',
+      _ContinueStatement = 'ContinueStatement',
+      _DoWhileStatement = 'DoWhileStatement',
+      _DebuggerStatement = 'DebuggerStatement',
+      _EmptyStatement = 'EmptyStatement',
+      _ExpressionStatement = 'ExpressionStatement',
+      _ForStatement = 'ForStatement',
+      _ForOfStatement = 'ForOfStatement',
+      _ForInStatement = 'ForInStatement',
+      _FunctionDeclaration = 'FunctionDeclaration',
+      _FunctionExpression = 'FunctionExpression',
+      _IfStatement = 'IfStatement',
+      _Literal = 'Literal',
+      _LabeledStatement = 'LabeledStatement',
+      _LogicalExpression = 'LogicalExpression',
+      _MemberExpression = 'MemberExpression',
+      _NewExpression = 'NewExpression',
+      _ObjectExpression = 'ObjectExpression',
+      _ObjectPattern = 'ObjectPattern',
+      _Program = 'Program',
+      _Property = 'Property',
+      _ReturnStatement = 'ReturnStatement',
+      _SequenceExpression = 'SequenceExpression',
+      _SpreadElement = 'SpreadElement',
+      _SwitchCase = 'SwitchCase',
+      _SwitchStatement = 'SwitchStatement',
+      _TaggedTemplateExpression = 'TaggedTemplateExpression',
+      _TemplateElement = 'TemplateElement',
+      _TemplateLiteral = 'TemplateLiteral',
+      _ThisExpression = 'ThisExpression',
+      _ThrowStatement = 'ThrowStatement',
+      _TryStatement = 'TryStatement',
+      _UnaryExpression = 'UnaryExpression',
+      _UpdateExpression = 'UpdateExpression',
+      _VariableDeclaration = 'VariableDeclaration',
+      _VariableDeclarator = 'VariableDeclarator',
+      _WhileStatement = 'WhileStatement',
+      _WithStatement = 'WithStatement';
+
+
+  var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=)$/;
+  var unaryOpRe = /^(?:[-+!~]|\+\+|--|typeof|void|delete)$/;
+  var octalDigitRe = /^0[0-7]+$/;
+
+
+  function Node() {}
+
+
+  function Parser(options) {
+    this.options = mixin({}, options || {});
+  }
+
+  Parser.prototype = {
+    next: function() {
+      this.index++;
+      return this.current();
+    },
+    current: function() {
+      this.token = this.tokens[this.index] || TOKEN_END;
+      this.value = this.token.value;
+      this.type = this.token.type;
+      this.lookahead = this.tokens[this.index + 1] || TOKEN_END;
+      return this.token;
+    },
+    hasNext: function() {
+      return this.index < this.length;
+    },
+    assertValue: function(value) {
+      if (this.value !== value) {
+        this.unexpected();
+      }
+    },
+    assertType: function(type) {
+      if (this.type !== type) {
+        this.unexpected();
+      }
+    },
+    expect: function(value) {
+      this.assertValue(value);
+      this.next();
+    },
+    expectType: function(type) {
+      this.assertType(type);
+      this.next();
+    },
+    expectSemicolon: function() {
+      if (this.value === ';') {
+        this.next();
+        return true;
+      }
+
+      if (this.token.hasLineTerminator ||
+          this.value === '}' || !this.hasNext()) {
+        return true;
+      }
+
+      this.unexpected();
+    },
+    unexpected: function() {
+      var token = this.value || '';
+      if (token.length > 10) {
+        token = token.substr(0, 10) + '...';
+      }
+      this.throwError("Unexpected token '" + token + "'");
+    },
+    throwError: function(message) {
+      var loc = this.token.loc;
+      if (loc) {
+        message += ' at line ' + loc.start.line + ' column ' + loc.start.column;
+      }
+      throw new Error(message);
+    },
+    startNode: function(type) {
+      var node = new Node();
+      this.startNodeAt(node);
+      node.type = type;
+      return node;
+    },
+    finishNode: function(node) {
+      if (this.lastGroup && this.lastGroup.expr === node) {
+        // Restore the held position
+        var startNode = this.lastGroup.startNode;
+        var endToken = this.lastGroup.endToken;
+        this.lastGroup = null;
+        this.startNodeAt(node, startNode);
+        return this.finishNodeAt(node, endToken);
+      }
+
+      return this.finishNodeAt(node);
+    },
+    startNodeAt: function(node, startNode) {
+      startNode = startNode || this.token;
+
+      if (this.length === 0 && startNode === TOKEN_END) {
+        startNode = this.getInitialLocationNode();
+      }
+
+      if (this.options.range) {
+        node.range = [startNode.range[0]];
+      }
+
+      if (this.options.loc) {
+        var loc = startNode.loc;
+        node.loc = {
+          start: {
+            line: loc.start.line,
+            column: loc.start.column
+          }
+        };
+      }
+
+      return node;
+    },
+    finishNodeAt: function(node, finishNode) {
+      finishNode = finishNode || this.tokens[this.index - 1];
+
+      if (!finishNode && this.length === 0) {
+        finishNode = this.getInitialLocationNode();
+      }
+
+      if (this.options.range) {
+        node.range[1] = finishNode.range[1];
+      }
+
+      if (this.options.loc) {
+        node.loc.end = {
+          line: finishNode.loc.end.line,
+          column: finishNode.loc.end.column
+        };
+      }
+
+      return node;
+    },
+    getInitialLocationNode: function() {
+      return {
+        range: [0, 0],
+        loc: {
+          start: {
+            line: 0,
+            column: 0
+          },
+          end: {
+            line: 0,
+            column: 0
+          }
+        }
+      };
+    },
+    // ECMA-262 11.8.3 Numeric Literals
+    parseNumeric: function(value) {
+      var i = 0;
+      var c = value.charAt(i++);
+      var n;
+
+      if (c === '0') {
+        c = value.charAt(i++);
+        n = value.substring(i);
+
+        if (c !== '.') {
+          switch (c.toLowerCase()) {
+            case 'x':
+              return parseInt(n, 16);
+            case 'o':
+              return parseInt(n, 8);
+            case 'b':
+              return parseInt(n, 2);
+          }
+
+          if (octalDigitRe.test(value)) {
+            return parseInt(n, 8);
+          }
+        }
+      }
+
+      return parseFloat(value);
+    },
+    // ECMA-262 11.8.4 String Literals
+    parseString: function(value) {
+      var s = '';
+      var i = 1;
+      var len = value.length - 1;
+      var c, c2, ch, hex, n, index, length;
+
+      while (i < len) {
+        c = value.charAt(i++);
+
+        if (c === '\\') {
+          if (i < len) {
+            c2 = value.charCodeAt(i);
+            if (isLineTerminator(c2)) {
+              i++;
+              if (c2 === 0x0D && i < len && value.charCodeAt(i) === 0x0A) {
+                i++;
+              }
+              continue;
+            }
+          }
+
+          c = value.charAt(i++);
+          switch (c) {
+            case 'b':
+              c = '\b';
+              break;
+            case 't':
+              c = '\t';
+              break;
+            case 'r':
+              c = '\r';
+              break;
+            case 'n':
+              c = '\n';
+              break;
+            case 'v':
+              c = '\x0B';
+              break;
+            case 'f':
+              c = '\f';
+              break;
+            case 'u':
+            case 'x':
+              if (c === 'u' && i < len && value.charAt(i) === '{') {
+                i++;
+                index = value.indexOf('}', i);
+                if (!~index) {
+                  this.unexpected();
+                }
+                hex = value.substring(i, index);
+                i = index + 1;
+              } else {
+                length = c === 'u' ? 4 : 2;
+                hex = value.substr(i, length);
+                i += length;
+              }
+              c = fromCodePoint(parseInt(hex, 16));
+              break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+              n = c;
+              do {
+                c = value.charAt(i);
+                if (c < '0' || c > '7') {
+                  break;
+                }
+                n += c;
+              } while (i++ < len && n.length < 3);
+
+              if (n.length > 0 && n.charAt(0) === '0') {
+                n = n.substring(1);
+              }
+              c = fromCharCode(parseInt(n, 8));
+              break;
+          }
+        }
+        s += c;
+      }
+
+      return s;
+    },
+    parseLiteral: function() {
+      var node = this.startNode(_Literal);
+      var value, raw, regex;
+
+      switch (this.type) {
+        case _Numeric:
+          raw = this.value;
+          value = this.parseNumeric(this.value);
+          break;
+        case _String:
+          raw = this.value;
+          value = this.parseString(this.value);
+          break;
+        case _RegularExpression:
+          regex = this.token.regex;
+          try {
+            value = new RegExp(regex.pattern, regex.flags);
+          } catch (e) {
+            value = null;
+          }
+          raw = this.value;
+          regex = regex;
+          break;
+        case _Boolean:
+          raw = this.value;
+          value = this.value === 'true';
+          break;
+        case _Null:
+          raw = this.value;
+          value = null;
+          break;
+        default:
+          this.unexpected();
+      }
+
+      this.next();
+      node.value = value;
+
+      if (raw) {
+        node.raw = raw;
+      }
+      if (regex) {
+        node.regex = regex;
+      }
+
+      return this.finishNode(node);
+    },
+    parseIdentifier: function(allowKeyword) {
+      var node = this.startNode(_Identifier);
+      var name = this.value;
+
+      if (allowKeyword) {
+        this.next();
+      } else {
+        this.expectType(_Identifier);
+      }
+
+      node.name = name;
+      return this.finishNode(node);
+    },
+    // ECMA-262 12.2 Primary Expression
+    parsePrimaryExpression: function() {
+      switch (this.type) {
+        case _Numeric:
+        case _String:
+        case _RegularExpression:
+        case _Boolean:
+        case _Null:
+          return this.parseLiteral();
+        case _Identifier:
+          return this.parseIdentifier();
+        case _Keyword:
+          return this.parsePrimaryKeywordExpression();
+        case _Punctuator:
+          return this.parsePrimaryPunctuatorExpression();
+        case _Template:
+          return this.parseTemplateLiteral();
+        default:
+          this.unexpected();
+      }
+    },
+    parsePrimaryKeywordExpression: function() {
+      switch (this.value) {
+        case 'function':
+          return this.parseFunctionExpression();
+        case 'this':
+          return this.parseThisExpression();
+      }
+
+      this.unexpected();
+    },
+    parseThisExpression: function() {
+      var node = this.startNode(_ThisExpression);
+      this.expect('this');
+      return this.finishNode(node);
+    },
+    parsePrimaryPunctuatorExpression: function() {
+      switch (this.value) {
+        case '{':
+          return this.parseObjectInitializer();
+        case '[':
+          return this.parseArrayInitializer();
+        case '(':
+          return this.parseGroupExpression();
+        default:
+          this.unexpected();
+      }
+    },
+    parseGroupExpression: function() {
+      this.expect('(');
+      var node = this.startNode();
+      var expr = this.parseExpression(true);
+
+      // Hold the current position for expression
+      this.lastGroup = {
+        expr: expr,
+        startNode: node,
+        endToken: this.tokens[this.index - 1]
+      };
+
+      this.expect(')');
+      return expr;
+    },
+    // ECMA-262 12.2.6 Object Initializer
+    parseObjectInitializer: function() {
+      var node = this.startNode(_ObjectExpression);
+      var props = [];
+
+      this.expect('{');
+
+      while (this.value !== '}' && this.hasNext()) {
+        props[props.length] = this.parseObjectDefinition();
+      }
+
+      this.expect('}');
+
+      node.properties = props;
+      return this.finishNode(node);
+    },
+    parseObjectDefinition: function() {
+      var node;
+
+      if (this.value === 'get' || this.value === 'set') {
+        node = this.parseObjectGetterSetter();
+      } else {
+        node = this.parseObjectProperty();
+      }
+
+      if (this.value !== '}') {
+        this.expect(',');
+      }
+
+      return node;
+    },
+    parseObjectProperty: function() {
+      var node = this.startNode(_Property);
+      var key = this.parseObjectPropertyName();
+      var value;
+
+      if (this.value === ':') {
+        this.next();
+        value = this.parseAssignmentExpression(true);
+      } else if (this.value === '(') {
+        value = this.parseFunction();
+      } else {
+        this.unexpected();
+      }
+
+      node.key = key;
+      node.value = value;
+      node.kind = 'init';
+      return this.finishNode(node);
+    },
+    parseObjectGetterSetter: function() {
+      var node = this.startNode(_Property);
+      var kind = 'init';
+      var key, value;
+
+      if (this.lookahead.value === ':') {
+        key = this.parseObjectPropertyName();
+        this.next();
+        value = this.parseAssignmentExpression(true);
+      } else if (this.lookahead.value === '(') {
+        key = this.parseObjectPropertyName();
+        value = this.parseFunction();
+      } else {
+        var prev = this.value;
+
+        this.next();
+        if (this.type === _Identifier || this.type === _Keyword ||
+            this.type === _String || this.type === _Numeric) {
+          kind = prev;
+          key = this.parseObjectPropertyName();
+          value = this.parseFunction({
+            getter: kind === 'get',
+            setter: kind === 'set'
+          });
+        } else {
+          this.unexpected();
+        }
+      }
+
+      node.key = key;
+      node.value = value;
+      node.kind = kind;
+      return this.finishNode(node);
+    },
+    parseObjectPropertyName: function() {
+      var node;
+
+      switch (this.type) {
+        case _String:
+        case _Numeric:
+          return this.parseLiteral();
+        case _Punctuator:
+          if (this.value === '[') {
+            node = this.parseAssignmentExpression();
+            this.expect(']');
+            return node;
+          }
+          break;
+        case _Keyword:
+        case _Identifier:
+        case _Boolean:
+        case _Null:
+          return this.parseIdentifier(true);
+      }
+
+      this.unexpected();
+    },
+    // ECMA-262 12.2.5 Array Initializer
+    parseArrayInitializer: function() {
+      var node = this.startNode(_ArrayExpression);
+      var elems = [];
+
+      this.expect('[');
+
+      while (this.value !== ']' && this.hasNext()) {
+        if (this.value === ',') {
+          this.next();
+          elems[elems.length] = null;
+          continue;
+        }
+        elems[elems.length] = this.parseAssignmentExpression(true);
+
+        if (this.value !== ']') {
+          this.expect(',');
+        }
+      }
+
+      this.expect(']');
+
+      node.elements = elems;
+      return this.finishNode(node);
+    },
+    // ECMA-262 A.2 Expressions
+    parseExpression: function(allowIn) {
+      var node = this.startNode(_SequenceExpression);
+      var expr = this.parseAssignmentExpression(allowIn);
+      if (this.value !== ',') {
+        return expr;
+      }
+
+      var exprs = [expr];
+
+      do {
+        this.next();
+        exprs[exprs.length] = this.parseAssignmentExpression(allowIn);
+      } while (this.value === ',');
+
+      node.expressions = exprs;
+      return this.finishNode(node);
+    },
+    parseAssignmentExpression: function(allowIn) {
+      var node = this.startNode(_AssignmentExpression);
+      var left = this.parseConditionalExpression(allowIn);
+      if (!assignOpRe.test(this.value)) {
+        return left;
+      }
+
+      var operator = this.value;
+      this.next();
+      var right = this.parseAssignmentExpression(allowIn);
+
+      node.operator = operator;
+      node.left = left;
+      node.right = right;
+      return this.finishNode(node);
+    },
+    parseConditionalExpression: function(allowIn) {
+      var node = this.startNode(_ConditionalExpression);
+      var expr = this.parseBinaryExpression(allowIn);
+      if (this.value !== '?') {
+        return expr;
+      }
+
+      this.expect('?');
+      var consequent = this.parseAssignmentExpression(true);
+      this.expect(':');
+      var alternate = this.parseAssignmentExpression(allowIn);
+
+      node.test = expr;
+      node.consequent = consequent;
+      node.alternate = alternate;
+      return this.finishNode(node);
+    },
+    getBinaryPrecedence: function(allowIn) {
+      switch (this.value) {
+        case '*':
+        case '/':
+        case '%':
+          return 1;
+        case '+':
+        case '-':
+          return 2;
+        case '<<':
+        case '>>':
+        case '>>>':
+          return 3;
+        case '<':
+        case '>':
+        case '<=':
+        case '>=':
+        case 'instanceof':
+          return 4;
+        case 'in':
+          return allowIn ? 4 : 0;
+        case '==':
+        case '!=':
+        case '===':
+        case '!==':
+          return 5;
+        case '&':
+          return 6;
+        case '^':
+          return 7;
+        case '|':
+          return 8;
+        case '&&':
+          return 9;
+        case '||':
+          return 10;
+        default:
+          return 0;
+      }
+    },
+    parseBinaryExpression: function(allowIn, base) {
+      if (base == null) {
+        base = 10;
+      }
+
+      var startNode = this.startNode();
+      var left = this.parseUnaryExpression();
+      var prec = this.getBinaryPrecedence(allowIn);
+      if (!prec) {
+        return left;
+      }
+      var right, operator, node;
+
+      for (var i = 1; i <= 10; i++) {
+        while ((prec = this.getBinaryPrecedence(allowIn)) === i) {
+          operator = this.value;
+
+          node = this.startNode(i < 9 ? _BinaryExpression : _LogicalExpression);
+          this.startNodeAt(node, startNode);
+          node.operator = operator;
+          node.left = left;
+
+          this.next();
+
+          if (prec === 1) {
+            right = this.parseUnaryExpression();
+          } else {
+            right = this.parseBinaryExpression(allowIn, prec - 1);
+          }
+
+          node.right = right;
+          left = this.finishNode(node);
+        }
+
+        if (base < prec) {
+          break;
+        }
+      }
+
+      this.startNodeAt(left, startNode);
+      return this.finishNode(left);
+    },
+    parseUnaryExpression: function() {
+      var value = this.value;
+      if (!unaryOpRe.test(value)) {
+        return this.parsePostfixExpression();
+      }
+
+      var isUpdate = (value === '++' || value === '--');
+      var node = this.startNode(isUpdate ? _UpdateExpression : _UnaryExpression);
+
+      this.next();
+      var argument = this.parseUnaryExpression();
+
+      node.operator = value;
+      node.argument = argument;
+      node.prefix = true;
+      return this.finishNode(node);
+    },
+    parsePostfixExpression: function() {
+      var node = this.startNode(_UpdateExpression);
+      var expr = this.parseMemberExpression(true);
+      var value = this.value;
+
+      if (value === '++' || value === '--') {
+        this.next();
+        node.operator = value;
+        node.argument = expr;
+        node.prefix = false;
+        return this.finishNode(node);
+      }
+
+      return expr;
+    },
+    parseMemberExpression: function(allowCall) {
+      var node = this.startNode();
+      var expr;
+
+      if (this.value === 'new') {
+        expr = this.parseNewExpression();
+      } else {
+        expr = this.parsePrimaryExpression();
+      }
+
+      while (this.hasNext()) {
+        if (this.value === '.') {
+          expr = this.parseNonComputedMember(expr, node);
+        } else if (this.value === '[') {
+          expr = this.parseComputedMember(expr, node);
+        } else if (allowCall && this.value === '(') {
+          expr = this.parseCallExpression(expr, node);
+        } else if (this.type === _Template && this.value.charAt(0) === '`') {
+          expr = this.parseTaggedTemplateExpression(expr, node);
+        } else {
+          break;
+        }
+      }
+
+      return expr;
+    },
+    parseNewExpression: function() {
+      var node = this.startNode(_NewExpression);
+      this.next();
+
+      var callee = this.parseMemberExpression(false);
+      node.callee = callee;
+      node.arguments = [];
+
+      if (this.value === '(') {
+        this.parseArguments(node);
+      }
+
+      return this.finishNode(node);
+    },
+    parseCallExpression: function(expr, startNode) {
+      var node = this.startNode(_CallExpression);
+      this.startNodeAt(node, startNode);
+
+      node.callee = expr;
+      node.arguments = [];
+      this.parseArguments(node);
+      return this.finishNode(node);
+    },
+    parseComputedMember: function(expr, startNode) {
+      var node = this.startNode(_MemberExpression);
+      this.startNodeAt(node, startNode);
+      this.next();
+
+      node.computed = true;
+      node.object = expr;
+      node.property = this.parseExpression(true);
+
+      this.expect(']');
+      return this.finishNode(node);
+    },
+    parseNonComputedMember: function(expr, startNode) {
+      var node = this.startNode(_MemberExpression);
+      this.startNodeAt(node, startNode);
+      this.next();
+
+      node.computed = false;
+      node.object = expr;
+      node.property = this.parseIdentifier();
+      return this.finishNode(node);
+    },
+    parseArguments: function(node) {
+      var args = node.arguments;
+
+      this.next();
+      while (this.value !== ')' && this.hasNext()) {
+        args[args.length] = this.parseAssignmentExpression(true);
+        if (this.value !== ')') {
+          this.expect(',');
+        }
+      }
+
+      this.next();
+      return node;
+    },
+    parseTemplateLiteral: function() {
+      var node = this.startNode(_TemplateLiteral);
+      var quasi = this.parseTemplateElement();
+      var quasis = [quasi];
+      var exprs = [];
+
+      while (!quasi.tail && this.hasNext()) {
+        exprs[exprs.length] = this.parseExpression();
+        quasi = this.parseTemplateElement();
+        quasis[quasis.length] = quasi;
+      }
+
+      node.quasis = quasis;
+      node.expressions = exprs;
+      return this.finishNode(node);
+    },
+    parseTemplateElement: function() {
+      var node = this.startNode(_TemplateElement);
+      var tail = false;
+      var raw;
+
+      this.assertType(_Template);
+
+      if (this.value.slice(-1) === '`') {
+        tail = true;
+      }
+
+      var c = this.value.charAt(0);
+      var endPos = tail ? -1 : -2;
+      raw = this.value.slice(1, endPos);
+
+      var cooked = this.parseString('`' + raw + '`');
+      this.next();
+
+      node.tail = tail;
+      node.value = {
+        cooked: cooked,
+        raw: raw
+      };
+      return this.finishNode(node);
+    },
+    parseTaggedTemplateExpression: function(tag, startNode) {
+      var node = this.startNode(_TaggedTemplateExpression);
+      this.startNodeAt(node, startNode);
+      var quasi = this.parseTemplateLiteral();
+
+      node.tag = tag;
+      node.quasi = quasi;
+      return this.finishNode(node);
+    },
+    // ECMA-262 13 ECMAScript Language: Statements and Declarations
+    parseStatement: function() {
+      switch (this.value) {
+        case '{':
+          return this.parseBlockStatement();
+        case 'var':
+        case 'let':
+        case 'const':
+          return this.parseVariableStatement(this.value);
+        case ';':
+          return this.parseEmptyStatement();
+        case 'if':
+          return this.parseIfStatement();
+        case 'continue':
+          return this.parseContinueStatement();
+        case 'break':
+          return this.parseBreakStatement();
+        case 'return':
+          return this.parseReturnStatement();
+        case 'with':
+          return this.parseWithStatement();
+        case 'throw':
+          return this.parseThrowStatement();
+        case 'try':
+          return this.parseTryStatement();
+        case 'debugger':
+          return this.parseDebuggerStatement();
+        case 'function':
+          return this.parseFunctionDeclaration();
+        case 'switch':
+          return this.parseSwitchStatement();
+        case 'do':
+          return this.parseDoWhileStatement();
+        case 'while':
+          return this.parseWhileStatement();
+        case 'for':
+          return this.parseForStatement();
+        default:
+          return this.parseMaybeExpressionStatement();
+      }
+    },
+    parseScriptBody: function(body, end) {
+      while (this.value !== end && this.hasNext()) {
+        body[body.length] = this.parseStatement();
+      }
+    },
+    parseBlockStatement: function() {
+      var node = this.startNode(_BlockStatement);
+      this.expect('{');
+
+      var body = [];
+      this.parseScriptBody(body, '}');
+      this.expect('}');
+
+      node.body = body;
+      return this.finishNode(node);
+    },
+    // ECMA-262 13.3.2 Variable Statement
+    parseVariableStatement: function(kind, inFor) {
+      var node = this.startNode(_VariableDeclaration);
+      var allowIn = !inFor;
+      var declarations = this.parseVariableDeclarationList(allowIn);
+
+      if (!inFor) {
+        this.expectSemicolon();
+      }
+
+      node.declarations = declarations;
+      node.kind = kind;
+      return this.finishNode(node);
+    },
+    parseVariableDeclarationList: function(allowIn) {
+      var list = [];
+
+      do {
+        list[list.length] = this.parseVariableDeclaration(allowIn);
+      } while (this.value === ',');
+
+      return list;
+    },
+    parseVariableDeclaration: function(allowIn) {
+      this.next();
+
+      var node = this.startNode(_VariableDeclarator);
+      var id = this.parseIdentifier();
+      var init = null;
+
+      if (this.value === '=') {
+        this.next();
+        init = this.parseAssignmentExpression(allowIn);
+      }
+
+      node.id = id;
+      node.init = init;
+      return this.finishNode(node);
+    },
+    // ECMA-262 14.1 Function Definitions
+    parseFunctionDeclaration: function() {
+      var node = this.startNode();
+      this.expect('function');
+      return this.parseFunction({ node: node });
+    },
+    parseFunctionExpression: function() {
+      var node = this.startNode();
+      this.expect('function');
+      return this.parseFunction({ node: node, expression: true });
+    },
+    parseFunction: function(options) {
+      options = options || {};
+
+      var node = options.node || this.startNode();
+      node.type = options.expression ? _FunctionExpression : _FunctionDeclaration;
+      node.id = null;
+      node.params = [];
+      node.defaults = [];
+      node.body = null;
+      node.generator = !!options.generator;
+      node.expression = false;
+
+      if (options.getter) {
+        this.expect('(');
+        this.expect(')');
+      } else if (options.setter) {
+        this.parseParams(node);
+      } else {
+        if (this.type === _Identifier) {
+          node.id = this.parseIdentifier();
+        }
+        this.parseParams(node);
+      }
+
+      node.body = this.parseBlockStatement();
+      return this.finishNode(node);
+    },
+    parseParams: function(node) {
+      var params = node.params;
+
+      this.expect('(');
+      while (this.value !== ')' && this.hasNext()) {
+        params[params.length] = this.parseIdentifier();
+        if (this.value !== ')') {
+          this.expect(',');
+        }
+      }
+
+      this.expect(')');
+    },
+    // ECMA-262 13 Statements and Declarations
+    parseIfStatement: function() {
+      var node = this.startNode(_IfStatement);
+      this.expect('if');
+      this.expect('(');
+
+      var expr = this.parseExpression(true);
+      this.expect(')');
+      var consequent = this.parseStatement();
+      var alternate = null;
+
+      if (this.value === 'else') {
+        this.next();
+        alternate = this.parseStatement();
+      }
+
+      node.test = expr;
+      node.consequent = consequent;
+      node.alternate = alternate;
+      return this.finishNode(node);
+    },
+    parseEmptyStatement: function() {
+      var node = this.startNode(_EmptyStatement);
+      this.expect(';');
+      return this.finishNode(node);
+    },
+    parseContinueStatement: function() {
+      var node = this.startNode(_ContinueStatement);
+      this.expect('continue');
+
+      var label = null;
+
+      if (this.type === _Identifier && !this.token.hasLineTerminator) {
+        label = this.parseIdentifier();
+      }
+
+      this.expectSemicolon();
+      node.label = label;
+      return this.finishNode(node);
+    },
+    parseBreakStatement: function() {
+      var node = this.startNode(_BreakStatement);
+      this.expect('break');
+
+      var label = null;
+
+      if (this.type === _Identifier && !this.token.hasLineTerminator) {
+        label = this.parseIdentifier();
+      }
+
+      this.expectSemicolon();
+      node.label = label;
+      return this.finishNode(node);
+    },
+    parseReturnStatement: function() {
+      var node = this.startNode(_ReturnStatement);
+      this.expect('return');
+
+      var argument = null;
+
+      if (!this.token.hasLineTerminator &&
+          this.value !== ';' && this.value !== '}' && this.hasNext()) {
+        argument = this.parseExpression(true);
+      }
+
+      this.expectSemicolon();
+      node.argument = argument;
+      return this.finishNode(node);
+    },
+    parseWithStatement: function() {
+      var node = this.startNode(_WithStatement);
+      this.expect('with');
+      this.expect('(');
+
+      var expr = this.parseExpression(true);
+      this.expect(')');
+
+      node.object = expr;
+      node.body = this.parseStatement();
+      return this.finishNode(node);
+    },
+    parseThrowStatement: function() {
+      var node = this.startNode(_ThrowStatement);
+      this.expect('throw');
+
+      if (this.token.hasLineTerminator) {
+        this.unexpected();
+      }
+
+      var expr = this.parseExpression(true);
+      this.expectSemicolon();
+      node.argument = expr;
+      return this.finishNode(node);
+    },
+    parseTryStatement: function() {
+      var node = this.startNode(_TryStatement);
+      var handler = null;
+      var finalizer = null;
+      var hasCatch, hasFinally;
+
+      this.expect('try');
+      var block = this.parseBlockStatement();
+
+      if (this.value === 'catch') {
+        hasCatch = true;
+        handler = this.parseCatchClause();
+      }
+
+      if (this.value === 'finally') {
+        hasFinally = true;
+        this.next();
+        finalizer = this.parseBlockStatement();
+      }
+
+      if (!hasCatch && !hasFinally) {
+        this.unexpected();
+      }
+
+      node.block = block;
+      node.guardedHandlers = [];
+      node.handler = handler;
+      node.finalizer = finalizer;
+      return this.finishNode(node);
+    },
+    parseCatchClause: function() {
+      var node = this.startNode(_CatchClause);
+      this.expect('catch');
+      this.expect('(');
+
+      var param = this.parseIdentifier();
+      this.expect(')');
+
+      var body = this.parseBlockStatement();
+
+      node.param = param;
+      node.body = body;
+      return this.finishNode(node);
+    },
+    parseDebuggerStatement: function() {
+      var node = this.startNode(_DebuggerStatement);
+      this.expect('debugger');
+      this.expectSemicolon();
+      return this.finishNode(node);
+    },
+    parseSwitchStatement: function() {
+      var node = this.startNode(_SwitchStatement);
+      this.expect('switch');
+      this.expect('(');
+
+      var expr = this.parseExpression(true);
+      var cases = [];
+
+      this.expect(')');
+      this.expect('{');
+
+      while (this.value !== '}' && this.hasNext()) {
+        cases[cases.length] = this.parseSwitchCase();
+      }
+
+      this.expect('}');
+      node.discriminant = expr;
+      node.cases = cases;
+      return this.finishNode(node);
+    },
+    parseSwitchCase: function() {
+      var node = this.startNode(_SwitchCase);
+      var test = null;
+      var consequent = [];
+
+      if (this.value === 'case') {
+        this.next();
+        test = this.parseExpression(true);
+      } else {
+        this.expect('default');
+      }
+
+      this.expect(':');
+
+      while (this.value !== '}' && this.value !== 'case' &&
+             this.value !== 'default' && this.hasNext()) {
+        consequent[consequent.length] = this.parseStatement();
+      }
+
+      node.test = test;
+      node.consequent = consequent;
+      return this.finishNode(node);
+    },
+    parseWhileStatement: function() {
+      var node = this.startNode(_WhileStatement);
+      this.expect('while');
+      this.expect('(');
+
+      var expr = this.parseExpression(true);
+      this.expect(')');
+
+      node.test = expr;
+      node.body = this.parseStatement();
+      return this.finishNode(node);
+    },
+    parseDoWhileStatement: function() {
+      var node = this.startNode(_DoWhileStatement);
+      this.expect('do');
+
+      var body = this.parseStatement();
+      this.expect('while');
+      this.expect('(');
+
+      var expr = this.parseExpression(true);
+      this.expect(')');
+      this.expectSemicolon();
+
+      node.body = body;
+      node.test = expr;
+      return this.finishNode(node);
+    },
+    parseForStatement: function() {
+      var node = this.startNode(_ForStatement);
+      this.expect('for');
+      this.expect('(');
+
+      var init = null;
+
+      if (this.value !== ';') {
+        if (this.value === 'var' || this.value === 'let' || this.value === 'const') {
+          init = this.parseForVarStatement(node);
+        } else {
+          init = this.parseForExpressionStatement(node);
+        }
+
+        if (init.type === _ForInStatement || init.type === _ForOfStatement) {
+          return init;
+        }
+      }
+
+      this.expect(';');
+
+      var test = null;
+      if (this.value !== ';') {
+        test = this.parseExpression(true);
+      }
+      this.expect(';');
+
+      var update = null;
+      if (this.value !== ')') {
+        update = this.parseExpression(true);
+      }
+      this.expect(')');
+
+      var body = this.parseStatement();
+
+      node.init = init;
+      node.test = test;
+      node.update = update;
+      node.body = body;
+      return this.finishNode(node);
+    },
+    parseForExpressionStatement: function(node) {
+      var expr = this.parseExpression(false);
+
+      if (this.value === 'in') {
+        return this.parseForInStatement(expr, node);
+      }
+
+      if (this.value === 'of') {
+        return this.parseForOfStatement(expr, node);
+      }
+
+      return expr;
+    },
+    parseForVarStatement: function(node) {
+      var kind = this.value;
+      var decl = this.parseVariableStatement(kind, true);
+
+      if (this.value === 'in') {
+        return this.parseForInStatement(decl, node);
+      }
+
+      if (this.value === 'of') {
+        return this.parseForOfStatement(decl, node);
+      }
+
+      return decl;
+    },
+    parseForInStatement: function(left, node) {
+      node.type = _ForInStatement;
+      this.expect('in');
+
+      var right = this.parseExpression(true);
+      this.expect(')');
+
+      var body = this.parseStatement();
+
+      node.left = left;
+      node.right = right;
+      node.body = body;
+      node.each = false;
+      return this.finishNode(node);
+    },
+    parseForOfStatement: function(left, node) {
+      node.type = _ForOfStatement;
+      this.expect('of');
+
+      var right = this.parseExpression(true);
+      this.expect(')');
+
+      var body = this.parseStatement();
+
+      node.left = left;
+      node.right = right;
+      node.body = body;
+      return this.finishNode(node);
+    },
+    parseMaybeExpressionStatement: function() {
+      var label = this.parseMaybeLabelledStatement();
+      if (label) {
+        return label;
+      }
+
+      var node = this.startNode(_ExpressionStatement);
+      var expr = this.parseExpression(true);
+      this.expectSemicolon();
+
+      node.expression = expr;
+      return this.finishNode(node);
+    },
+    parseMaybeLabelledStatement: function() {
+      if (this.type === _Identifier && this.lookahead.value === ':') {
+        var node = this.startNode(_LabeledStatement);
+        var label = this.parseIdentifier();
+
+        this.next();
+        var body = this.parseStatement();
+
+        node.label = label;
+        node.body = body;
+        return this.finishNode(node);
+      }
+    },
+    parse: function(source) {
+      source = source == null ? '' : '' + source;
+
+      this.tokens = tokenize(source, {
+        range: this.options.range,
+        loc: this.options.loc,
+        parse: true
+      });
+      this.length = this.tokens.length;
+      this.index = 0;
+      this.current();
+
+      var program = this.startNode(_Program);
+      program.body = [];
+
+      this.parseScriptBody(program.body);
+      return this.finishNode(program);
+    }
+  };
+
+  Chiffon.Parser = Parser;
+
+  /**
+   * Parse a string source.
+   * The result will be an abstract syntax tree (AST) object.
+   *
+   * @param {string} source Target source.
+   * @param {Object} [options] Parse options.
+   *   - range: {boolean} (default=false)
+   *       Include an index-based location range (array)
+   *   - loc: {boolean} (default=false)
+   *       Include line number and column-based location info
+   * @return {Object} Return an abstract syntax tree object.
+   */
+  var parse = Chiffon.parse = function(source, options) {
+    return new Parser(options).parse(source);
   };
 
   return Chiffon;
