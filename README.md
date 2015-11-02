@@ -40,8 +40,8 @@ bower install chiffon
 
 ## Parse
 
-Parse a string source.
-The result will be an abstract syntax tree (JavaScript AST) object.
+Parse a string source.  
+The result will be an abstract syntax tree (JavaScript AST) object.  
 (JavaScript AST is specified by the [ESTree spec](https://github.com/estree/estree).)
 
 * {_Object_} Chiffon.**parse** ( source [, options ] )  
