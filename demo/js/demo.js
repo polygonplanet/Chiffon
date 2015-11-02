@@ -22,11 +22,13 @@
       'paste #input': 'onInputChange',
       'change #input': 'onInputChange',
       'change #range': 'onRangeChange',
-      'change #loc': 'onLocChange'
+      'change #loc': 'onLocChange',
+      'click .output-tabs a': 'onTabClick'
     },
 
     _options: {},
     _timerId: null,
+    _method: 'parse',
 
     initialize: function(attributes, options) {
       _.bindAll.apply(_, [this].concat(_.functions(this)));
@@ -36,6 +38,7 @@
       this.$range = this.$el.find('#range');
       this.$loc = this.$el.find('#loc');
       this.$url = this.$el.find('#url');
+      this.$outputTabs = this.$el.find('.output-tabs');
 
       EventBus.on('resize:window', this.onWindowResize);
       this.onWindowResize();
@@ -61,6 +64,22 @@
       this._options.loc = this.$loc.prop('checked');
       this.parse();
     },
+    onTabClick: function(event) {
+      var method = $(event.currentTarget).data('method');
+      this.changeTab(method);
+    },
+    changeTab: function(method) {
+      switch (method) {
+        case 'parse':
+        case 'tokenize':
+          this._method = method;
+          this.$outputTabs.find('li').removeClass('active');
+          var $a = this.$outputTabs.find('[data-method=' + method + ']');
+          $a.parent().addClass('active');
+          this.parse();
+          break;
+      }
+    },
 
     parse: function() {
       if (this._timerId) {
@@ -69,8 +88,15 @@
       this._timerId = setTimeout(this._parse, 150);
     },
     _parse: function() {
-      var tokens = Chiffon.tokenize(this.$input.val(), this._options);
-      this.$output.val(JSON.stringify(tokens, null, '    '));
+      var result;
+      try {
+        result = Chiffon[this._method](this.$input.val(), this._options);
+        result = JSON.stringify(result, null, '    ');
+      } catch (e) {
+        result = e.message || e;
+      }
+
+      this.$output.val(result);
       this.updateURL();
       this._timerId = null;
     },
@@ -78,6 +104,7 @@
     updateURL: function() {
       var params = {
         code: this.$input.val(),
+        method: this._method,
         range: this._options.range,
         loc: this._options.loc
       };
@@ -92,6 +119,9 @@
       }
       if (params.loc === 'true') {
         this.$loc.prop('checked', true);
+      }
+      if (params.method) {
+        this.changeTab(params.method);
       }
       if (params.code) {
         this.$input.val(params.code);

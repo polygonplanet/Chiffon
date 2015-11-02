@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chiffon - A very small ECMAScript parser, tokenizer and minifier in JavaScript - Demo</title>
+<title>Chiffon - A small ECMAScript parser, tokenizer and minifier in JavaScript - Demo</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 <style>
 h2 {
@@ -13,6 +13,11 @@ h2 {
 #input, #output {
   width: 99%;
   height: 300px;
+}
+
+.input-title {
+  border: 0 none;
+  margin-bottom: 12px;
 }
 
 .sub {
@@ -34,7 +39,7 @@ h2 {
     <div class="row">
       <div class="col-md-10">
         <h1>Chiffon - A Small JavaScript parser, tokenizer - Demo</h1>
-        <h2>Chiffon is a very small ECMAScript parser, tokenizer and minifier written in JavaScript</h2>
+        <h2>Chiffon is a small ECMAScript parser, tokenizer and minifier written in JavaScript</h2>
         <p>
           Write JavaScript code to Input.
         </p>
@@ -43,7 +48,7 @@ h2 {
     <div class="row">
       <div class="col-md-6">
         <fieldset>
-          <legend>Input</legend>
+          <legend class="input-title">Input</legend>
           <textarea id="input" class="form-control" placeholder="Write JavaScript code here.">var a = 1;</textarea>
           <div class="sub">
             <label><input type="checkbox" id="range"> Include an index-based location range</label>
@@ -55,7 +60,10 @@ h2 {
       </div>
       <div class="col-md-6">
         <fieldset>
-          <legend>Output</legend>
+          <ul class="nav nav-tabs output-tabs">
+            <li class="active"><a href="javascript:void(0)" data-method="parse">Parse</a></li>
+            <li><a href="javascript:void(0)" data-method="tokenize">Tokenize</a></li>
+          </ul>
           <textarea id="output" class="form-control" readonly></textarea>
           <div class="sub">
             <label for="url" class="control-label">URL:</label>
