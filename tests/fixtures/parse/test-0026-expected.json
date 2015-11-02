@@ -1,0 +1,185 @@
+{
+    "range": [
+        0,
+        33
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 3,
+            "column": 14
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                33
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 3,
+                    "column": 14
+                }
+            },
+            "type": "ExpressionStatement",
+            "expression": {
+                "range": [
+                    0,
+                    32
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 3,
+                        "column": 13
+                    }
+                },
+                "type": "CallExpression",
+                "callee": {
+                    "range": [
+                        0,
+                        26
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 0
+                        },
+                        "end": {
+                            "line": 3,
+                            "column": 7
+                        }
+                    },
+                    "type": "MemberExpression",
+                    "computed": false,
+                    "object": {
+                        "range": [
+                            1,
+                            20
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 1
+                            },
+                            "end": {
+                                "line": 3,
+                                "column": 1
+                            }
+                        },
+                        "type": "FunctionExpression",
+                        "id": null,
+                        "params": [],
+                        "defaults": [],
+                        "body": {
+                            "range": [
+                                12,
+                                20
+                            ],
+                            "loc": {
+                                "start": {
+                                    "line": 1,
+                                    "column": 12
+                                },
+                                "end": {
+                                    "line": 3,
+                                    "column": 1
+                                }
+                            },
+                            "type": "BlockStatement",
+                            "body": [
+                                {
+                                    "range": [
+                                        16,
+                                        18
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 2,
+                                            "column": 2
+                                        },
+                                        "end": {
+                                            "line": 2,
+                                            "column": 4
+                                        }
+                                    },
+                                    "type": "ExpressionStatement",
+                                    "expression": {
+                                        "range": [
+                                            16,
+                                            17
+                                        ],
+                                        "loc": {
+                                            "start": {
+                                                "line": 2,
+                                                "column": 2
+                                            },
+                                            "end": {
+                                                "line": 2,
+                                                "column": 3
+                                            }
+                                        },
+                                        "type": "Literal",
+                                        "value": 1,
+                                        "raw": "1"
+                                    }
+                                }
+                            ]
+                        },
+                        "generator": false,
+                        "expression": false
+                    },
+                    "property": {
+                        "range": [
+                            22,
+                            26
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 3,
+                                "column": 3
+                            },
+                            "end": {
+                                "line": 3,
+                                "column": 7
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "call"
+                    }
+                },
+                "arguments": [
+                    {
+                        "range": [
+                            27,
+                            31
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 3,
+                                "column": 8
+                            },
+                            "end": {
+                                "line": 3,
+                                "column": 12
+                            }
+                        },
+                        "type": "ThisExpression"
+                    }
+                ]
+            }
+        }
+    ]
+}
