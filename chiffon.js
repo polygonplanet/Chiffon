@@ -851,6 +851,8 @@
   // Abstract syntax tree specified by ESTree. (https://github.com/estree/estree)
   var _AssignmentExpression = 'AssignmentExpression',
       _ArrayExpression = 'ArrayExpression',
+      _ArrowFunctionExpression = 'ArrowFunctionExpression',
+      _ArrowParameters = 'ArrowParameters',
       _BlockStatement = 'BlockStatement',
       _BinaryExpression = 'BinaryExpression',
       _BreakStatement = 'BreakStatement',
@@ -1271,7 +1273,22 @@
       }
     },
     parseGroupExpression: function() {
+      var startNode = this.startNode();
       this.expect('(');
+
+      if (this.value === ')') {
+        this.next();
+        if (this.value !== '=>') {
+          this.unexpected();
+        }
+
+        return {
+          type: _ArrowParameters,
+          params: [],
+          startNode: startNode
+        };
+      }
+
       var node = this.startNode();
       var expr = this.parseExpression(true);
 
@@ -1283,6 +1300,25 @@
       };
 
       this.expect(')');
+
+      if (this.value === '=>') {
+        var params = [];
+
+        if (expr.type === _SequenceExpression) {
+          params = expr.expressions;
+        } else if (expr.type === _Identifier) {
+          params = [expr];
+        } else {
+          this.unexpected();
+        }
+
+        expr = {
+          type: _ArrowParameters,
+          params: params,
+          startNode: startNode
+        };
+      }
+
       return expr;
     },
     // ECMA-262 12.2.6 Object Initializer
@@ -1439,6 +1475,11 @@
     parseAssignmentExpression: function(allowIn) {
       var node = this.startNode(_AssignmentExpression);
       var left = this.parseConditionalExpression(allowIn);
+
+      if (this.value === '=>' && left.type === _ArrowParameters) {
+        return this.parseArrowFunctionExpression(left);
+      }
+
       if (!assignOpRe.test(this.value)) {
         return left;
       }
@@ -1467,6 +1508,27 @@
       node.test = expr;
       node.consequent = consequent;
       node.alternate = alternate;
+      return this.finishNode(node);
+    },
+    parseArrowFunctionExpression: function(expr) {
+      var node = this.startNode(_ArrowFunctionExpression);
+      this.startNodeAt(node, expr.startNode);
+      this.expect('=>');
+
+      var params = expr.params || [];
+      var expression = false;
+      var body;
+
+      if (this.value === '{') {
+        body = this.parseBlockStatement();
+      } else {
+        body = this.parseExpression(true);
+        expression = true;
+      }
+
+      node.params = params;
+      node.body = body;
+      node.expression = expression;
       return this.finishNode(node);
     },
     getBinaryPrecedence: function(allowIn) {
