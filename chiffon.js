@@ -1065,7 +1065,7 @@
           }
 
           if (octalDigitRe.test(value)) {
-            return parseInt(n, 8);
+            return parseInt(c + n, 8);
           }
         }
       }
