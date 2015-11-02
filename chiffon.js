@@ -1522,7 +1522,7 @@
       if (this.value === '{') {
         body = this.parseBlockStatement();
       } else {
-        body = this.parseExpression(true);
+        body = this.parseAssignmentExpression(true);
         expression = true;
       }
 
