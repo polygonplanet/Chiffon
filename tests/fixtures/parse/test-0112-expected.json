@@ -1,0 +1,93 @@
+{
+    "range": [
+        0,
+        24
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 3,
+            "column": 1
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                24
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 3,
+                    "column": 1
+                }
+            },
+            "type": "SwitchStatement",
+            "discriminant": {
+                "range": [
+                    8,
+                    9
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 8
+                    },
+                    "end": {
+                        "line": 1,
+                        "column": 9
+                    }
+                },
+                "type": "Identifier",
+                "name": "a"
+            },
+            "cases": [
+                {
+                    "range": [
+                        15,
+                        22
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 2,
+                            "column": 2
+                        },
+                        "end": {
+                            "line": 2,
+                            "column": 9
+                        }
+                    },
+                    "type": "SwitchCase",
+                    "test": {
+                        "range": [
+                            20,
+                            21
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 2,
+                                "column": 7
+                            },
+                            "end": {
+                                "line": 2,
+                                "column": 8
+                            }
+                        },
+                        "type": "Literal",
+                        "value": 1,
+                        "raw": "1"
+                    },
+                    "consequent": []
+                }
+            ]
+        }
+    ]
+}

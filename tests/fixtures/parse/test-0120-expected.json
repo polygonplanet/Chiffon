@@ -1,0 +1,127 @@
+{
+    "range": [
+        0,
+        24
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 3,
+            "column": 12
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                24
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 3,
+                    "column": 12
+                }
+            },
+            "type": "DoWhileStatement",
+            "body": {
+                "range": [
+                    3,
+                    13
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 3
+                    },
+                    "end": {
+                        "line": 3,
+                        "column": 1
+                    }
+                },
+                "type": "BlockStatement",
+                "body": [
+                    {
+                        "range": [
+                            7,
+                            11
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 2,
+                                "column": 2
+                            },
+                            "end": {
+                                "line": 2,
+                                "column": 6
+                            }
+                        },
+                        "type": "ExpressionStatement",
+                        "expression": {
+                            "range": [
+                                7,
+                                10
+                            ],
+                            "loc": {
+                                "start": {
+                                    "line": 2,
+                                    "column": 2
+                                },
+                                "end": {
+                                    "line": 2,
+                                    "column": 5
+                                }
+                            },
+                            "type": "CallExpression",
+                            "callee": {
+                                "range": [
+                                    7,
+                                    8
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 2,
+                                        "column": 2
+                                    },
+                                    "end": {
+                                        "line": 2,
+                                        "column": 3
+                                    }
+                                },
+                                "type": "Identifier",
+                                "name": "a"
+                            },
+                            "arguments": []
+                        }
+                    }
+                ]
+            },
+            "test": {
+                "range": [
+                    21,
+                    22
+                ],
+                "loc": {
+                    "start": {
+                        "line": 3,
+                        "column": 9
+                    },
+                    "end": {
+                        "line": 3,
+                        "column": 10
+                    }
+                },
+                "type": "Literal",
+                "value": 0,
+                "raw": "0"
+            }
+        }
+    ]
+}

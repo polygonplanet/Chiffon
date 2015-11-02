@@ -1,0 +1,78 @@
+{
+    "range": [
+        0,
+        33
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 1,
+            "column": 33
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                33
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 1,
+                    "column": 33
+                }
+            },
+            "type": "ExpressionStatement",
+            "expression": {
+                "range": [
+                    0,
+                    33
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 1,
+                        "column": 33
+                    }
+                },
+                "type": "TemplateLiteral",
+                "quasis": [
+                    {
+                        "range": [
+                            0,
+                            33
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 0
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 33
+                            }
+                        },
+                        "type": "TemplateElement",
+                        "value": {
+                            "raw": "a\\u0062\\u{63}\\u0064\\r\\n\\v\\b\\f\\t",
+                            "cooked": "abcd\r\n\u000b\b\f\t"
+                        },
+                        "tail": true
+                    }
+                ],
+                "expressions": []
+            }
+        }
+    ]
+}

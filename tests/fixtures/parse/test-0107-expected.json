@@ -1,0 +1,163 @@
+{
+    "range": [
+        0,
+        41
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 3,
+            "column": 14
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                41
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 3,
+                    "column": 14
+                }
+            },
+            "type": "TryStatement",
+            "block": {
+                "range": [
+                    4,
+                    28
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 4
+                    },
+                    "end": {
+                        "line": 3,
+                        "column": 1
+                    }
+                },
+                "type": "BlockStatement",
+                "body": [
+                    {
+                        "range": [
+                            8,
+                            26
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 2,
+                                "column": 2
+                            },
+                            "end": {
+                                "line": 2,
+                                "column": 20
+                            }
+                        },
+                        "type": "ThrowStatement",
+                        "argument": {
+                            "range": [
+                                14,
+                                25
+                            ],
+                            "loc": {
+                                "start": {
+                                    "line": 2,
+                                    "column": 8
+                                },
+                                "end": {
+                                    "line": 2,
+                                    "column": 19
+                                }
+                            },
+                            "type": "NewExpression",
+                            "callee": {
+                                "range": [
+                                    18,
+                                    23
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 2,
+                                        "column": 12
+                                    },
+                                    "end": {
+                                        "line": 2,
+                                        "column": 17
+                                    }
+                                },
+                                "type": "Identifier",
+                                "name": "Error"
+                            },
+                            "arguments": []
+                        }
+                    }
+                ]
+            },
+            "guardedHandlers": [],
+            "handler": {
+                "range": [
+                    29,
+                    41
+                ],
+                "loc": {
+                    "start": {
+                        "line": 3,
+                        "column": 2
+                    },
+                    "end": {
+                        "line": 3,
+                        "column": 14
+                    }
+                },
+                "type": "CatchClause",
+                "param": {
+                    "range": [
+                        36,
+                        37
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 3,
+                            "column": 9
+                        },
+                        "end": {
+                            "line": 3,
+                            "column": 10
+                        }
+                    },
+                    "type": "Identifier",
+                    "name": "e"
+                },
+                "body": {
+                    "range": [
+                        39,
+                        41
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 3,
+                            "column": 12
+                        },
+                        "end": {
+                            "line": 3,
+                            "column": 14
+                        }
+                    },
+                    "type": "BlockStatement",
+                    "body": []
+                }
+            },
+            "finalizer": null
+        }
+    ]
+}

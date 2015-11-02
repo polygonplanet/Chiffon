@@ -1,0 +1,495 @@
+{
+    "range": [
+        0,
+        74
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 1,
+            "column": 74
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                74
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 1,
+                    "column": 74
+                }
+            },
+            "type": "ExpressionStatement",
+            "expression": {
+                "range": [
+                    0,
+                    73
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 1,
+                        "column": 73
+                    }
+                },
+                "type": "ConditionalExpression",
+                "test": {
+                    "range": [
+                        0,
+                        1
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 0
+                        },
+                        "end": {
+                            "line": 1,
+                            "column": 1
+                        }
+                    },
+                    "type": "Literal",
+                    "value": 1,
+                    "raw": "1"
+                },
+                "consequent": {
+                    "range": [
+                        4,
+                        5
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 4
+                        },
+                        "end": {
+                            "line": 1,
+                            "column": 5
+                        }
+                    },
+                    "type": "Literal",
+                    "value": 2,
+                    "raw": "2"
+                },
+                "alternate": {
+                    "range": [
+                        8,
+                        73
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 8
+                        },
+                        "end": {
+                            "line": 1,
+                            "column": 73
+                        }
+                    },
+                    "type": "ConditionalExpression",
+                    "test": {
+                        "range": [
+                            8,
+                            9
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 8
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 9
+                            }
+                        },
+                        "type": "Literal",
+                        "value": 3,
+                        "raw": "3"
+                    },
+                    "consequent": {
+                        "range": [
+                            12,
+                            13
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 12
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 13
+                            }
+                        },
+                        "type": "Literal",
+                        "value": 4,
+                        "raw": "4"
+                    },
+                    "alternate": {
+                        "range": [
+                            16,
+                            73
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 16
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 73
+                            }
+                        },
+                        "type": "ConditionalExpression",
+                        "test": {
+                            "range": [
+                                16,
+                                17
+                            ],
+                            "loc": {
+                                "start": {
+                                    "line": 1,
+                                    "column": 16
+                                },
+                                "end": {
+                                    "line": 1,
+                                    "column": 17
+                                }
+                            },
+                            "type": "Literal",
+                            "value": 5,
+                            "raw": "5"
+                        },
+                        "consequent": {
+                            "range": [
+                                20,
+                                21
+                            ],
+                            "loc": {
+                                "start": {
+                                    "line": 1,
+                                    "column": 20
+                                },
+                                "end": {
+                                    "line": 1,
+                                    "column": 21
+                                }
+                            },
+                            "type": "Literal",
+                            "value": 6,
+                            "raw": "6"
+                        },
+                        "alternate": {
+                            "range": [
+                                24,
+                                73
+                            ],
+                            "loc": {
+                                "start": {
+                                    "line": 1,
+                                    "column": 24
+                                },
+                                "end": {
+                                    "line": 1,
+                                    "column": 73
+                                }
+                            },
+                            "type": "ConditionalExpression",
+                            "test": {
+                                "range": [
+                                    24,
+                                    25
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 24
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 25
+                                    }
+                                },
+                                "type": "Literal",
+                                "value": 7,
+                                "raw": "7"
+                            },
+                            "consequent": {
+                                "range": [
+                                    28,
+                                    29
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 28
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 29
+                                    }
+                                },
+                                "type": "Literal",
+                                "value": 8,
+                                "raw": "8"
+                            },
+                            "alternate": {
+                                "range": [
+                                    32,
+                                    73
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 32
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 73
+                                    }
+                                },
+                                "type": "ConditionalExpression",
+                                "test": {
+                                    "range": [
+                                        32,
+                                        33
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 1,
+                                            "column": 32
+                                        },
+                                        "end": {
+                                            "line": 1,
+                                            "column": 33
+                                        }
+                                    },
+                                    "type": "Literal",
+                                    "value": 9,
+                                    "raw": "9"
+                                },
+                                "consequent": {
+                                    "range": [
+                                        36,
+                                        38
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 1,
+                                            "column": 36
+                                        },
+                                        "end": {
+                                            "line": 1,
+                                            "column": 38
+                                        }
+                                    },
+                                    "type": "Literal",
+                                    "value": 10,
+                                    "raw": "10"
+                                },
+                                "alternate": {
+                                    "range": [
+                                        41,
+                                        73
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 1,
+                                            "column": 41
+                                        },
+                                        "end": {
+                                            "line": 1,
+                                            "column": 73
+                                        }
+                                    },
+                                    "type": "ConditionalExpression",
+                                    "test": {
+                                        "range": [
+                                            41,
+                                            43
+                                        ],
+                                        "loc": {
+                                            "start": {
+                                                "line": 1,
+                                                "column": 41
+                                            },
+                                            "end": {
+                                                "line": 1,
+                                                "column": 43
+                                            }
+                                        },
+                                        "type": "Literal",
+                                        "value": 11,
+                                        "raw": "11"
+                                    },
+                                    "consequent": {
+                                        "range": [
+                                            46,
+                                            48
+                                        ],
+                                        "loc": {
+                                            "start": {
+                                                "line": 1,
+                                                "column": 46
+                                            },
+                                            "end": {
+                                                "line": 1,
+                                                "column": 48
+                                            }
+                                        },
+                                        "type": "Literal",
+                                        "value": 12,
+                                        "raw": "12"
+                                    },
+                                    "alternate": {
+                                        "range": [
+                                            51,
+                                            73
+                                        ],
+                                        "loc": {
+                                            "start": {
+                                                "line": 1,
+                                                "column": 51
+                                            },
+                                            "end": {
+                                                "line": 1,
+                                                "column": 73
+                                            }
+                                        },
+                                        "type": "ConditionalExpression",
+                                        "test": {
+                                            "range": [
+                                                51,
+                                                53
+                                            ],
+                                            "loc": {
+                                                "start": {
+                                                    "line": 1,
+                                                    "column": 51
+                                                },
+                                                "end": {
+                                                    "line": 1,
+                                                    "column": 53
+                                                }
+                                            },
+                                            "type": "Literal",
+                                            "value": 13,
+                                            "raw": "13"
+                                        },
+                                        "consequent": {
+                                            "range": [
+                                                56,
+                                                58
+                                            ],
+                                            "loc": {
+                                                "start": {
+                                                    "line": 1,
+                                                    "column": 56
+                                                },
+                                                "end": {
+                                                    "line": 1,
+                                                    "column": 58
+                                                }
+                                            },
+                                            "type": "Literal",
+                                            "value": 14,
+                                            "raw": "14"
+                                        },
+                                        "alternate": {
+                                            "range": [
+                                                61,
+                                                73
+                                            ],
+                                            "loc": {
+                                                "start": {
+                                                    "line": 1,
+                                                    "column": 61
+                                                },
+                                                "end": {
+                                                    "line": 1,
+                                                    "column": 73
+                                                }
+                                            },
+                                            "type": "ConditionalExpression",
+                                            "test": {
+                                                "range": [
+                                                    61,
+                                                    63
+                                                ],
+                                                "loc": {
+                                                    "start": {
+                                                        "line": 1,
+                                                        "column": 61
+                                                    },
+                                                    "end": {
+                                                        "line": 1,
+                                                        "column": 63
+                                                    }
+                                                },
+                                                "type": "Literal",
+                                                "value": 15,
+                                                "raw": "15"
+                                            },
+                                            "consequent": {
+                                                "range": [
+                                                    66,
+                                                    68
+                                                ],
+                                                "loc": {
+                                                    "start": {
+                                                        "line": 1,
+                                                        "column": 66
+                                                    },
+                                                    "end": {
+                                                        "line": 1,
+                                                        "column": 68
+                                                    }
+                                                },
+                                                "type": "Literal",
+                                                "value": 16,
+                                                "raw": "16"
+                                            },
+                                            "alternate": {
+                                                "range": [
+                                                    71,
+                                                    73
+                                                ],
+                                                "loc": {
+                                                    "start": {
+                                                        "line": 1,
+                                                        "column": 71
+                                                    },
+                                                    "end": {
+                                                        "line": 1,
+                                                        "column": 73
+                                                    }
+                                                },
+                                                "type": "Literal",
+                                                "value": 17,
+                                                "raw": "17"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

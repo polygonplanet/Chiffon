@@ -1,0 +1,1 @@
+for (i = 0, len = a.length; i < len; i++);

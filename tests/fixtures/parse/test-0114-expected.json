@@ -1,0 +1,149 @@
+{
+    "range": [
+        0,
+        45
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 5,
+            "column": 1
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                45
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 5,
+                    "column": 1
+                }
+            },
+            "type": "SwitchStatement",
+            "discriminant": {
+                "range": [
+                    8,
+                    9
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 8
+                    },
+                    "end": {
+                        "line": 1,
+                        "column": 9
+                    }
+                },
+                "type": "Identifier",
+                "name": "a"
+            },
+            "cases": [
+                {
+                    "range": [
+                        15,
+                        22
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 2,
+                            "column": 2
+                        },
+                        "end": {
+                            "line": 2,
+                            "column": 9
+                        }
+                    },
+                    "type": "SwitchCase",
+                    "test": {
+                        "range": [
+                            20,
+                            21
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 2,
+                                "column": 7
+                            },
+                            "end": {
+                                "line": 2,
+                                "column": 8
+                            }
+                        },
+                        "type": "Literal",
+                        "value": 1,
+                        "raw": "1"
+                    },
+                    "consequent": []
+                },
+                {
+                    "range": [
+                        25,
+                        43
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 3,
+                            "column": 2
+                        },
+                        "end": {
+                            "line": 4,
+                            "column": 10
+                        }
+                    },
+                    "type": "SwitchCase",
+                    "test": {
+                        "range": [
+                            30,
+                            31
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 3,
+                                "column": 7
+                            },
+                            "end": {
+                                "line": 3,
+                                "column": 8
+                            }
+                        },
+                        "type": "Literal",
+                        "value": 2,
+                        "raw": "2"
+                    },
+                    "consequent": [
+                        {
+                            "range": [
+                                37,
+                                43
+                            ],
+                            "loc": {
+                                "start": {
+                                    "line": 4,
+                                    "column": 4
+                                },
+                                "end": {
+                                    "line": 4,
+                                    "column": 10
+                                }
+                            },
+                            "type": "BreakStatement",
+                            "label": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

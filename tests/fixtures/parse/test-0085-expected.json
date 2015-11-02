@@ -1,0 +1,306 @@
+{
+    "range": [
+        0,
+        57
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 3,
+            "column": 5
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                57
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 3,
+                    "column": 5
+                }
+            },
+            "type": "ExpressionStatement",
+            "expression": {
+                "range": [
+                    0,
+                    56
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 3,
+                        "column": 4
+                    }
+                },
+                "type": "CallExpression",
+                "callee": {
+                    "range": [
+                        1,
+                        53
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 1
+                        },
+                        "end": {
+                            "line": 3,
+                            "column": 1
+                        }
+                    },
+                    "type": "FunctionExpression",
+                    "id": null,
+                    "params": [],
+                    "defaults": [],
+                    "body": {
+                        "range": [
+                            12,
+                            53
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 12
+                            },
+                            "end": {
+                                "line": 3,
+                                "column": 1
+                            }
+                        },
+                        "type": "BlockStatement",
+                        "body": [
+                            {
+                                "range": [
+                                    16,
+                                    51
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 2,
+                                        "column": 2
+                                    },
+                                    "end": {
+                                        "line": 2,
+                                        "column": 37
+                                    }
+                                },
+                                "type": "VariableDeclaration",
+                                "declarations": [
+                                    {
+                                        "range": [
+                                            20,
+                                            50
+                                        ],
+                                        "loc": {
+                                            "start": {
+                                                "line": 2,
+                                                "column": 6
+                                            },
+                                            "end": {
+                                                "line": 2,
+                                                "column": 36
+                                            }
+                                        },
+                                        "type": "VariableDeclarator",
+                                        "id": {
+                                            "range": [
+                                                20,
+                                                21
+                                            ],
+                                            "loc": {
+                                                "start": {
+                                                    "line": 2,
+                                                    "column": 6
+                                                },
+                                                "end": {
+                                                    "line": 2,
+                                                    "column": 7
+                                                }
+                                            },
+                                            "type": "Identifier",
+                                            "name": "a"
+                                        },
+                                        "init": {
+                                            "range": [
+                                                24,
+                                                50
+                                            ],
+                                            "loc": {
+                                                "start": {
+                                                    "line": 2,
+                                                    "column": 10
+                                                },
+                                                "end": {
+                                                    "line": 2,
+                                                    "column": 36
+                                                }
+                                            },
+                                            "type": "TaggedTemplateExpression",
+                                            "tag": {
+                                                "range": [
+                                                    24,
+                                                    30
+                                                ],
+                                                "loc": {
+                                                    "start": {
+                                                        "line": 2,
+                                                        "column": 10
+                                                    },
+                                                    "end": {
+                                                        "line": 2,
+                                                        "column": 16
+                                                    }
+                                                },
+                                                "type": "Identifier",
+                                                "name": "tagged"
+                                            },
+                                            "quasi": {
+                                                "range": [
+                                                    30,
+                                                    50
+                                                ],
+                                                "loc": {
+                                                    "start": {
+                                                        "line": 2,
+                                                        "column": 16
+                                                    },
+                                                    "end": {
+                                                        "line": 2,
+                                                        "column": 36
+                                                    }
+                                                },
+                                                "type": "TemplateLiteral",
+                                                "quasis": [
+                                                    {
+                                                        "range": [
+                                                            30,
+                                                            41
+                                                        ],
+                                                        "loc": {
+                                                            "start": {
+                                                                "line": 2,
+                                                                "column": 16
+                                                            },
+                                                            "end": {
+                                                                "line": 2,
+                                                                "column": 27
+                                                            }
+                                                        },
+                                                        "type": "TemplateElement",
+                                                        "value": {
+                                                            "raw": "1 + 1 = ",
+                                                            "cooked": "1 + 1 = "
+                                                        },
+                                                        "tail": false
+                                                    },
+                                                    {
+                                                        "range": [
+                                                            48,
+                                                            50
+                                                        ],
+                                                        "loc": {
+                                                            "start": {
+                                                                "line": 2,
+                                                                "column": 34
+                                                            },
+                                                            "end": {
+                                                                "line": 2,
+                                                                "column": 36
+                                                            }
+                                                        },
+                                                        "type": "TemplateElement",
+                                                        "value": {
+                                                            "raw": "",
+                                                            "cooked": ""
+                                                        },
+                                                        "tail": true
+                                                    }
+                                                ],
+                                                "expressions": [
+                                                    {
+                                                        "range": [
+                                                            42,
+                                                            47
+                                                        ],
+                                                        "loc": {
+                                                            "start": {
+                                                                "line": 2,
+                                                                "column": 28
+                                                            },
+                                                            "end": {
+                                                                "line": 2,
+                                                                "column": 33
+                                                            }
+                                                        },
+                                                        "type": "BinaryExpression",
+                                                        "operator": "+",
+                                                        "left": {
+                                                            "range": [
+                                                                42,
+                                                                43
+                                                            ],
+                                                            "loc": {
+                                                                "start": {
+                                                                    "line": 2,
+                                                                    "column": 28
+                                                                },
+                                                                "end": {
+                                                                    "line": 2,
+                                                                    "column": 29
+                                                                }
+                                                            },
+                                                            "type": "Literal",
+                                                            "value": 1,
+                                                            "raw": "1"
+                                                        },
+                                                        "right": {
+                                                            "range": [
+                                                                46,
+                                                                47
+                                                            ],
+                                                            "loc": {
+                                                                "start": {
+                                                                    "line": 2,
+                                                                    "column": 32
+                                                                },
+                                                                "end": {
+                                                                    "line": 2,
+                                                                    "column": 33
+                                                                }
+                                                            },
+                                                            "type": "Literal",
+                                                            "value": 1,
+                                                            "raw": "1"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                "kind": "var"
+                            }
+                        ]
+                    },
+                    "generator": false,
+                    "expression": false
+                },
+                "arguments": []
+            }
+        }
+    ]
+}

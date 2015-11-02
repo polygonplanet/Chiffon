@@ -1,0 +1,12 @@
+var a = 1;
+a = -a;
+a = +a;
+a = !a;
+a = ~a;
+a = ++a;
+a = --a;
+a = a++;
+a = a--;
+a = typeof a;
+a = void a;
+a = delete a;

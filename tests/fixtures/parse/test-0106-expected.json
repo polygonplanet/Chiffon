@@ -1,0 +1,72 @@
+{
+    "range": [
+        0,
+        18
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 1,
+            "column": 18
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                18
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 1,
+                    "column": 18
+                }
+            },
+            "type": "ThrowStatement",
+            "argument": {
+                "range": [
+                    6,
+                    17
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 6
+                    },
+                    "end": {
+                        "line": 1,
+                        "column": 17
+                    }
+                },
+                "type": "NewExpression",
+                "callee": {
+                    "range": [
+                        10,
+                        15
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 10
+                        },
+                        "end": {
+                            "line": 1,
+                            "column": 15
+                        }
+                    },
+                    "type": "Identifier",
+                    "name": "Error"
+                },
+                "arguments": []
+            }
+        }
+    ]
+}
