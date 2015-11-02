@@ -300,6 +300,14 @@ function filterForEsprima(ast) {
       callback: function(node) {
         delete node.handlers;
       }
+    },
+    {
+      type: 'ArrowFunctionExpression',
+      callback: function(node) {
+        delete node.id;
+        delete node.defaults;
+        delete node.generator;
+      }
     }
   ]);
   return ast;
