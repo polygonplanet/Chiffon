@@ -1278,10 +1278,7 @@
 
       if (this.value === ')') {
         this.next();
-        if (this.value !== '=>') {
-          this.unexpected();
-        }
-
+        this.assertValue('=>');
         return {
           type: _ArrowParameters,
           params: [],
