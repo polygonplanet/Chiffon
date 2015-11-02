@@ -1,7 +1,7 @@
 {
   "name": "chiffon",
-  "version": "1.6.8",
-  "description": "A very small ECMAScript parser, tokenizer and minifier written in JavaScript.",
+  "version": "2.0.0",
+  "description": "A small ECMAScript parser, tokenizer and minifier written in JavaScript.",
   "main": "chiffon.js",
   "directories": {
     "test": "tests"
