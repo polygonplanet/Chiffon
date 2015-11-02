@@ -1323,7 +1323,7 @@
         this.next();
         value = this.parseAssignmentExpression(true);
       } else if (this.value === '(') {
-        value = this.parseFunction();
+        value = this.parseFunction({ expression: true });
       } else {
         this.unexpected();
       }
@@ -1344,7 +1344,7 @@
         value = this.parseAssignmentExpression(true);
       } else if (this.lookahead.value === '(') {
         key = this.parseObjectPropertyName();
-        value = this.parseFunction();
+        value = this.parseFunction({ expression: true });
       } else {
         var prev = this.value;
 
@@ -1355,7 +1355,8 @@
           key = this.parseObjectPropertyName();
           value = this.parseFunction({
             getter: kind === 'get',
-            setter: kind === 'set'
+            setter: kind === 'set',
+            expression: true
           });
         } else {
           this.unexpected();
