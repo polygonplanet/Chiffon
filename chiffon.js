@@ -1170,16 +1170,15 @@
     },
     parseLiteral: function() {
       var node = this.startNode(_Literal);
-      var value, raw, regex;
+      var raw = this.value;
+      var value, regex;
 
       switch (this.type) {
         case _Numeric:
-          raw = this.value;
-          value = this.parseNumeric(this.value);
+          value = this.parseNumeric(raw);
           break;
         case _String:
-          raw = this.value;
-          value = this.parseString(this.value);
+          value = this.parseString(raw);
           break;
         case _RegularExpression:
           regex = this.token.regex;
@@ -1188,15 +1187,12 @@
           } catch (e) {
             value = null;
           }
-          raw = this.value;
           regex = regex;
           break;
         case _Boolean:
-          raw = this.value;
-          value = this.value === 'true';
+          value = raw === 'true';
           break;
         case _Null:
-          raw = this.value;
           value = null;
           break;
         default:
@@ -1204,11 +1200,9 @@
       }
 
       this.next();
-      node.value = value;
 
-      if (raw) {
-        node.raw = raw;
-      }
+      node.value = value;
+      node.raw = raw;
       if (regex) {
         node.regex = regex;
       }
