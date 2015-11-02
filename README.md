@@ -120,10 +120,6 @@ console.log(tokens);
 */
 ```
 
-JavaScript AST is not currently supported.
-
-Chiffon work simply tokenizing.
-
 
 ### Defined token type
 
