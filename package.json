@@ -11,8 +11,8 @@
     "mocha": ""
   },
   "scripts": {
-    "test": "mocha --timeout 5000 tests/test",
-    "test-min": "mocha --timeout 5000 tests/test --min",
+    "test": "mocha --timeout 10000 tests/test",
+    "test-min": "mocha --timeout 10000 tests/test --min",
     "pretest-min": "grunt"
   },
   "repository": {
