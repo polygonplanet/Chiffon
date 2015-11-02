@@ -989,8 +989,12 @@
     startNodeAt: function(node, startNode) {
       startNode = startNode || this.token;
 
-      if (this.length === 0 && startNode === TOKEN_END) {
-        startNode = this.getInitialLocationNode();
+      if (startNode === TOKEN_END) {
+        if (this.length === 0) {
+          startNode = this.getInitialLocationNode();
+        } else {
+          this.unexpected();
+        }
       }
 
       if (this.options.range) {
@@ -1012,8 +1016,12 @@
     finishNodeAt: function(node, finishNode) {
       finishNode = finishNode || this.tokens[this.index - 1];
 
-      if (!finishNode && this.length === 0) {
-        finishNode = this.getInitialLocationNode();
+      if (!finishNode) {
+        if (this.length === 0) {
+          finishNode = this.getInitialLocationNode();
+        } else {
+          this.unexpected();
+        }
       }
 
       if (this.options.range) {
