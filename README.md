@@ -3,10 +3,7 @@ Chiffon
 
 [![Build Status](https://travis-ci.org/polygonplanet/Chiffon.svg?branch=master)](https://travis-ci.org/polygonplanet/Chiffon)
 
-A very small ECMAScript parser, tokenizer and minifier written in JavaScript.
-
-`chiffon.min.js` is **7KB** now.
-
+A small ECMAScript parser, tokenizer and minifier written in JavaScript.
 
 ## Installation
 
@@ -39,6 +36,67 @@ var Chiffon = require('chiffon');
 
 ```bash
 bower install chiffon
+```
+
+## Parse
+
+Parse a string source.
+The result will be an abstract syntax tree (JavaScript AST) object.
+(JavaScript AST is specified by the [ESTree spec](https://github.com/estree/estree).)
+
+* {_Object_} Chiffon.**parse** ( source [, options ] )  
+  @param {_string_} _source_ Target source.  
+  @param {_Object_} [_options_] [Parse options](#parse-options).  
+  @return {_Object_} Return an abstract syntax tree object.
+
+
+Example:
+
+```javascript
+var ast = Chiffon.parse('1 + 1');
+console.log(ast);
+/*
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "ExpressionStatement",
+      "expression": {
+        "type": "BinaryExpression",
+        "operator": "+",
+        "left": {
+          "type": "Literal",
+          "value": 1,
+          "raw": "1"
+        },
+        "right": {
+          "type": "Literal",
+          "value": 1,
+          "raw": "1"
+        }
+      }
+    }
+  ]
+}
+*/
+```
+
+
+### Parse Options
+
+* **range** : {boolean} default=false  
+  Include an index-based location range. (array)
+
+* **loc** : {boolean} default=false  
+  Include line number and column-based location info.
+
+Full options are following.
+
+```javascript
+var options = {
+  range: Boolean,
+  loc: Boolean
+};
 ```
 
 ## Tokenize
