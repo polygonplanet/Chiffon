@@ -310,7 +310,7 @@ function astFilter(node, filters) {
   if (Array.isArray(node)) {
     node.forEach(function(child) {
       astFilter(child, filters);
-    }, this);
+    });
   } else if (node && typeof node === 'object') {
     filters.forEach(function(filter) {
       if (node.type === filter.type) {
@@ -319,7 +319,7 @@ function astFilter(node, filters) {
     });
     Object.keys(node).forEach(function(key) {
       astFilter(node[key], filters);
-    }, this);
+    });
   }
 }
 
