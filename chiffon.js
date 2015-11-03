@@ -142,6 +142,7 @@
   ')');
   var regexParenWordsRe = new RegExp('^(?:' + regexParenWords + ')$');
 
+  var tokenizeNotWhiteSpaceRe = getPattern(_WhiteSpace);
   var tokenizeNotTemplateRe = getPattern(_Template);
   var tokenizeNotRegExpRe = getPattern(_RegularExpression);
   var tokenizeRe = getPattern();
@@ -201,7 +202,8 @@
             // (9) operators
       '|' + '(' + punctuators + ')' +
             // (10) whitespace
-      '|' + '(' + whiteSpace + ')' +
+      (ignore === _WhiteSpace ? '' :
+        '|' + '(' + whiteSpace + ')') +
             // (11) line terminators
       '|' + '(' + lineTerminatorSequence + ')' +
             // (12) identifier
@@ -648,8 +650,15 @@
       }
       source = '' + source;
 
+      var re;
+      if (this.options.whiteSpace || this.options.range || this.options.loc) {
+        re = tokenizeRe;
+      } else {
+        re = tokenizeNotWhiteSpaceRe;
+      }
+
       var tokens = [];
-      var matches = source.match(tokenizeRe);
+      var matches = source.match(re);
       if (matches) {
         this.parseMatches(matches, tokens);
       }
@@ -2450,6 +2459,7 @@
         loc: this.options.loc,
         parse: true
       });
+
       this.length = this.tokens.length;
       this.index = 0;
       this.current();

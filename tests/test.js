@@ -192,12 +192,37 @@ function test(desc, parser) {
       });
 
       Object.keys(libs).forEach(function(name) {
+        it(name + ' without location', function() {
+          var code = libs[name];
+          assert(code.length > 0);
+          var chiffon_ast = parser.parse(code);
+          var esprima_ast = esprima.parse(code);
+          esprima_ast = filterForEsprima(esprima_ast);
+          assert.deepEqual(chiffon_ast, esprima_ast);
+          chiffon_ast = esprima_ast = null;
+        });
+      });
+
+      Object.keys(libs).forEach(function(name) {
         it(name + ' (CRLF)', function() {
           var code = libs[name].replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
           var chiffon_ast = parser.parse(code, { range: true, loc: true });
           var esprima_ast = esprima.parse(code, { range: true, loc: true });
+          esprima_ast = filterForEsprima(esprima_ast);
+          assert.deepEqual(chiffon_ast, esprima_ast);
+          chiffon_ast = esprima_ast = null;
+        });
+      });
+
+      Object.keys(libs).forEach(function(name) {
+        it(name + ' without location (CRLF)', function() {
+          var code = libs[name].replace(/\r\n|\r|\n/g, '\r\n');
+          assert(code.length > 0);
+          assert(/\r\n/.test(code));
+          var chiffon_ast = parser.parse(code);
+          var esprima_ast = esprima.parse(code);
           esprima_ast = filterForEsprima(esprima_ast);
           assert.deepEqual(chiffon_ast, esprima_ast);
           chiffon_ast = esprima_ast = null;
