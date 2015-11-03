@@ -850,7 +850,9 @@
   // Parser based Esprima. (http://esprima.org/)
   // Abstract syntax tree specified by ESTree. (https://github.com/estree/estree)
   var _AssignmentExpression = 'AssignmentExpression',
+      _AssignmentPattern = 'AssignmentPattern',
       _ArrayExpression = 'ArrayExpression',
+      _ArrayPattern = 'ArrayPattern',
       _ArrowFunctionExpression = 'ArrowFunctionExpression',
       _ArrowParameters = 'ArrowParameters',
       _BlockStatement = 'BlockStatement',
@@ -879,6 +881,7 @@
       _ObjectPattern = 'ObjectPattern',
       _Program = 'Program',
       _Property = 'Property',
+      _RestElement = 'RestElement',
       _ReturnStatement = 'ReturnStatement',
       _SequenceExpression = 'SequenceExpression',
       _SpreadElement = 'SpreadElement',
@@ -1000,16 +1003,16 @@
       }
 
       if (this.options.range) {
-        node.range = [startNode.range[0]];
+        node.range = node.range || [];
+        node.range[0] = startNode.range[0];
       }
 
       if (this.options.loc) {
         var loc = startNode.loc;
-        node.loc = {
-          start: {
-            line: loc.start.line,
-            column: loc.start.column
-          }
+        node.loc = node.loc || {};
+        node.loc.start = {
+          line: loc.start.line,
+          column: loc.start.column
         };
       }
 
@@ -1912,17 +1915,162 @@
       return this.finishNode(node);
     },
     parseParams: function(node) {
-      var params = node.params;
-
       this.expect('(');
+
       while (this.value !== ')' && this.hasNext()) {
-        params[params.length] = this.parseIdentifier();
-        if (this.value !== ')') {
+        if (!this.parseParam(node)) {
+          break;
+        }
+      }
+
+      if (!node._hasDefaults) {
+        node.defaults.length = 0;
+      } else {
+        delete node._hasDefaults;
+      }
+
+      this.expect(')');
+    },
+    parseParam: function(node) {
+      var params = node.params;
+      var defaults = node.defaults;
+
+      if (this.value === '...') {
+        params[params.length] = this.parseRestElement();
+        defaults[defaults.length] = null;
+        return false;
+      }
+
+      var pattern = this.parseBindingElement();
+
+      if (pattern.type === _AssignmentPattern) {
+        params[params.length] = pattern.left;
+        defaults[defaults.length] = pattern.right;
+        node._hasDefaults = true;
+      } else {
+        params[params.length] = pattern;
+        defaults[defaults.length] = null;
+      }
+
+      if (this.value !== ')') {
+        this.expect(',');
+      }
+
+      return true;
+    },
+    parseRestElement: function() {
+      var node = this.startNode(_RestElement);
+
+      this.expect('...');
+      var argument = this.parseIdentifier();
+
+      node.argument = argument;
+      return this.finishNode(node);
+    },
+    // ECMA-262 13.3.3 Destructuring Binding Patterns
+    parseBindingPattern: function() {
+      if (this.type === _Identifier) {
+        return this.parseIdentifier();
+      }
+
+      if (this.value === '{') {
+        return this.parseObjectPattern();
+      }
+
+      if (this.value === '[') {
+        return this.parseArrayPattern();
+      }
+
+      this.unexpected();
+    },
+    parseBindingElement: function() {
+      var pattern = this.parseBindingPattern();
+      if (pattern.type === _Identifier && this.value === '=') {
+        return this.parseAssignmentPattern(pattern);
+      }
+      return pattern;
+    },
+    parseAssignmentPattern: function(left) {
+      this.expect('=');
+
+      var node = this.startNode(_AssignmentPattern);
+      this.startNodeAt(node, left);
+      var right = this.parseAssignmentExpression(true);
+
+      node.left = left;
+      node.right = right;
+      return this.finishNode(node);
+    },
+    parseArrayPattern: function() {
+      var node = this.startNode(_ArrayPattern);
+      var elems = [];
+
+      this.expect('[');
+
+      while (this.value !== ']' && this.hasNext()) {
+        if (this.value === ',') {
+          elems[elems.length] = null;
+        } else {
+          if (this.value === '...') {
+            elems[elems.length] = this.parseRestElement();
+            break;
+          }
+          elems[elems.length] = this.parseBindingElement();
+        }
+
+        if (this.value !== ']') {
           this.expect(',');
         }
       }
 
-      this.expect(')');
+      this.expect(']');
+
+      node.elements = elems;
+      return this.finishNode(node);
+    },
+    parseObjectPattern: function() {
+      var node = this.startNode(_ObjectPattern);
+      var props = [];
+
+      this.expect('{');
+
+      while (this.value !== '}' && this.hasNext()) {
+        props[props.length] = this.parseObjectPropertyPattern();
+        if (this.value !== '}') {
+          this.expect(',');
+        }
+      }
+
+      this.expect('}');
+
+      node.properties = props;
+      return this.finishNode(node);
+    },
+    parseObjectPropertyPattern: function() {
+      var node = this.startNode(_Property);
+      var key, value;
+
+      if (this.type === _Identifier) {
+        key = this.parseIdentifier();
+        if (this.value === '=') {
+          value = this.parseAssignmentPattern(key);
+          this.startNodeAt(value, node);
+        } else if (this.value !== ':') {
+          value = key;
+        }
+      } else {
+        key = this.parseObjectPropertyName();
+      }
+
+      if (!value) {
+        this.expect(':');
+        value = this.parseBindingElement();
+      }
+
+      node.key = key;
+      node.value = value;
+      node.kind = 'init';
+      return this.finishNode(node);
     },
     // ECMA-262 13 Statements and Declarations
     parseIfStatement: function() {
