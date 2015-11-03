@@ -1442,7 +1442,12 @@
           elems[elems.length] = null;
           continue;
         }
-        elems[elems.length] = this.parseAssignmentExpression(true);
+
+        if (this.value === '...') {
+          elems[elems.length] = this.parseSpreadElement();
+        } else {
+          elems[elems.length] = this.parseAssignmentExpression(true);
+        }
 
         if (this.value !== ']') {
           this.expect(',');
@@ -1452,6 +1457,15 @@
       this.expect(']');
 
       node.elements = elems;
+      return this.finishNode(node);
+    },
+    parseSpreadElement: function() {
+      var node = this.startNode(_SpreadElement);
+
+      this.expect('...');
+      var argument = this.parseIdentifier();
+
+      node.argument = argument;
       return this.finishNode(node);
     },
     // ECMA-262 A.2 Expressions
