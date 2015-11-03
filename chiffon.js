@@ -1460,13 +1460,9 @@
       return this.finishNode(node);
     },
     parseSpreadElement: function() {
-      var node = this.startNode(_SpreadElement);
-
-      this.expect('...');
-      var argument = this.parseIdentifier();
-
-      node.argument = argument;
-      return this.finishNode(node);
+      var node = this.parseRestElement();
+      node.type = _SpreadElement;
+      return node;
     },
     // ECMA-262 A.2 Expressions
     parseExpression: function(allowIn) {
