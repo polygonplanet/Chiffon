@@ -1354,6 +1354,12 @@
     },
     parseObjectProperty: function() {
       var node = this.startNode(_Property);
+      var generator;
+      if (this.value === '*') {
+        generator = true;
+        this.next();
+      }
+
       var key = this.parseObjectPropertyName();
       var value;
 
@@ -1361,7 +1367,10 @@
         this.next();
         value = this.parseAssignmentExpression(true);
       } else if (this.value === '(') {
-        value = this.parseFunction({ expression: true });
+        value = this.parseFunction({
+          expression: true,
+          generator: generator
+        });
       } else {
         this.unexpected();
       }
@@ -1415,6 +1424,7 @@
           return this.parseLiteral();
         case _Punctuator:
           if (this.value === '[') {
+            this.next();
             node = this.parseAssignmentExpression();
             this.expect(']');
             return node;
@@ -1888,14 +1898,26 @@
     },
     // ECMA-262 14.1 Function Definitions
     parseFunctionDeclaration: function() {
-      var node = this.startNode();
-      this.expect('function');
-      return this.parseFunction({ node: node });
+      return this.parseFunctionDefinition();
     },
     parseFunctionExpression: function() {
+      return this.parseFunctionDefinition(true);
+    },
+    parseFunctionDefinition: function(expression) {
       var node = this.startNode();
+      var generator = false;
+
       this.expect('function');
-      return this.parseFunction({ node: node, expression: true });
+      if (this.value === '*') {
+        generator = true;
+        this.next();
+      }
+
+      return this.parseFunction({
+        node: node,
+        generator: generator,
+        expression: expression
+      });
     },
     parseFunction: function(options) {
       options = options || {};
