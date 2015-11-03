@@ -191,6 +191,19 @@ function test(desc, parser) {
         });
       });
 
+      Object.keys(libs).forEach(function(name) {
+        it(name + ' (CRLF)', function() {
+          var code = libs[name].replace(/\r\n|\r|\n/g, '\r\n');
+          assert(code.length > 0);
+          assert(/\r\n/.test(code));
+          var chiffon_ast = parser.parse(code, { range: true, loc: true });
+          var esprima_ast = esprima.parse(code, { range: true, loc: true });
+          esprima_ast = filterForEsprima(esprima_ast);
+          assert.deepEqual(chiffon_ast, esprima_ast);
+          chiffon_ast = esprima_ast = null;
+        });
+      });
+
       fixtures.parse.test.forEach(function(testName, i) {
         var no = getFixturesNo(testName);
         it('fixtures ' + no, function() {
