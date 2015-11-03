@@ -1864,7 +1864,7 @@
       this.next();
 
       var node = this.startNode(_VariableDeclarator);
-      var id = this.parseIdentifier();
+      var id = this.parseBindingPattern();
       var init = null;
 
       if (this.value === '=') {
@@ -2201,7 +2201,7 @@
       this.expect('catch');
       this.expect('(');
 
-      var param = this.parseIdentifier();
+      var param = this.parseBindingPattern();
       this.expect(')');
 
       var body = this.parseBlockStatement();

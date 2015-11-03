@@ -1,0 +1,346 @@
+{
+    "range": [
+        0,
+        35
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 1,
+            "column": 35
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                35
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 1,
+                    "column": 35
+                }
+            },
+            "type": "VariableDeclaration",
+            "declarations": [
+                {
+                    "range": [
+                        4,
+                        34
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 4
+                        },
+                        "end": {
+                            "line": 1,
+                            "column": 34
+                        }
+                    },
+                    "type": "VariableDeclarator",
+                    "id": {
+                        "range": [
+                            4,
+                            30
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 4
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 30
+                            }
+                        },
+                        "type": "ObjectPattern",
+                        "properties": [
+                            {
+                                "range": [
+                                    5,
+                                    9
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 5
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 9
+                                    }
+                                },
+                                "type": "Property",
+                                "key": {
+                                    "range": [
+                                        5,
+                                        6
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 1,
+                                            "column": 5
+                                        },
+                                        "end": {
+                                            "line": 1,
+                                            "column": 6
+                                        }
+                                    },
+                                    "type": "Identifier",
+                                    "name": "a"
+                                },
+                                "value": {
+                                    "range": [
+                                        8,
+                                        9
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 1,
+                                            "column": 8
+                                        },
+                                        "end": {
+                                            "line": 1,
+                                            "column": 9
+                                        }
+                                    },
+                                    "type": "Identifier",
+                                    "name": "A"
+                                },
+                                "kind": "init"
+                            },
+                            {
+                                "range": [
+                                    11,
+                                    19
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 11
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 19
+                                    }
+                                },
+                                "type": "Property",
+                                "key": {
+                                    "range": [
+                                        11,
+                                        12
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 1,
+                                            "column": 11
+                                        },
+                                        "end": {
+                                            "line": 1,
+                                            "column": 12
+                                        }
+                                    },
+                                    "type": "Identifier",
+                                    "name": "b"
+                                },
+                                "value": {
+                                    "range": [
+                                        14,
+                                        19
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 1,
+                                            "column": 14
+                                        },
+                                        "end": {
+                                            "line": 1,
+                                            "column": 19
+                                        }
+                                    },
+                                    "type": "AssignmentPattern",
+                                    "left": {
+                                        "range": [
+                                            14,
+                                            15
+                                        ],
+                                        "loc": {
+                                            "start": {
+                                                "line": 1,
+                                                "column": 14
+                                            },
+                                            "end": {
+                                                "line": 1,
+                                                "column": 15
+                                            }
+                                        },
+                                        "type": "Identifier",
+                                        "name": "B"
+                                    },
+                                    "right": {
+                                        "range": [
+                                            18,
+                                            19
+                                        ],
+                                        "loc": {
+                                            "start": {
+                                                "line": 1,
+                                                "column": 18
+                                            },
+                                            "end": {
+                                                "line": 1,
+                                                "column": 19
+                                            }
+                                        },
+                                        "type": "Literal",
+                                        "value": 1,
+                                        "raw": "1"
+                                    }
+                                },
+                                "kind": "init"
+                            },
+                            {
+                                "range": [
+                                    21,
+                                    29
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 21
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 29
+                                    }
+                                },
+                                "type": "Property",
+                                "key": {
+                                    "range": [
+                                        21,
+                                        22
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 1,
+                                            "column": 21
+                                        },
+                                        "end": {
+                                            "line": 1,
+                                            "column": 22
+                                        }
+                                    },
+                                    "type": "Identifier",
+                                    "name": "c"
+                                },
+                                "value": {
+                                    "range": [
+                                        24,
+                                        29
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 1,
+                                            "column": 24
+                                        },
+                                        "end": {
+                                            "line": 1,
+                                            "column": 29
+                                        }
+                                    },
+                                    "type": "ObjectPattern",
+                                    "properties": [
+                                        {
+                                            "range": [
+                                                26,
+                                                27
+                                            ],
+                                            "loc": {
+                                                "start": {
+                                                    "line": 1,
+                                                    "column": 26
+                                                },
+                                                "end": {
+                                                    "line": 1,
+                                                    "column": 27
+                                                }
+                                            },
+                                            "type": "Property",
+                                            "key": {
+                                                "range": [
+                                                    26,
+                                                    27
+                                                ],
+                                                "loc": {
+                                                    "start": {
+                                                        "line": 1,
+                                                        "column": 26
+                                                    },
+                                                    "end": {
+                                                        "line": 1,
+                                                        "column": 27
+                                                    }
+                                                },
+                                                "type": "Identifier",
+                                                "name": "d"
+                                            },
+                                            "value": {
+                                                "range": [
+                                                    26,
+                                                    27
+                                                ],
+                                                "loc": {
+                                                    "start": {
+                                                        "line": 1,
+                                                        "column": 26
+                                                    },
+                                                    "end": {
+                                                        "line": 1,
+                                                        "column": 27
+                                                    }
+                                                },
+                                                "type": "Identifier",
+                                                "name": "d"
+                                            },
+                                            "kind": "init"
+                                        }
+                                    ]
+                                },
+                                "kind": "init"
+                            }
+                        ]
+                    },
+                    "init": {
+                        "range": [
+                            33,
+                            34
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 33
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 34
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "o"
+                    }
+                }
+            ],
+            "kind": "var"
+        }
+    ]
+}
