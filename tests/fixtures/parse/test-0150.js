@@ -1,0 +1,1 @@
+function a(a = function(b = 1, c = function(d = function(e) {}) {} ) {}) {}

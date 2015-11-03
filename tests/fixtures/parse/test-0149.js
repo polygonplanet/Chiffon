@@ -1,0 +1,1 @@
+function a(a = { b: function(c = 1, d = 2) {} }) {}
