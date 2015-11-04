@@ -934,18 +934,15 @@
 
   Parser.prototype = {
     next: function() {
-      this.index++;
-      return this.current();
-    },
-    current: function() {
-      this.token = this.tokens[this.index] || TOKEN_END;
+      if (this.token === TOKEN_END) {
+        this.throwError('Unexpected end of input');
+      }
+      this.token = this.tokens[++this.index] || TOKEN_END;
       this.value = this.token.value;
       this.type = this.token.type;
-      this.lookahead = this.tokens[this.index + 1] || TOKEN_END;
-      return this.token;
     },
-    hasNext: function() {
-      return this.index < this.length;
+    lookahead: function() {
+      return this.tokens[this.index + 1] || TOKEN_END;
     },
     assertValue: function(value) {
       if (this.value !== value) {
@@ -971,8 +968,8 @@
         return true;
       }
 
-      if (this.token.hasLineTerminator ||
-          this.value === '}' || !this.hasNext()) {
+      if (this.value === '}' ||
+          this.token.hasLineTerminator || this.token === TOKEN_END) {
         return true;
       }
 
@@ -1249,7 +1246,7 @@
     parseCommaSeparatedElements: function(start, end, elems, callback, args) {
       this.expect(start);
 
-      while (this.value !== end && this.hasNext()) {
+      while (this.value !== end) {
         elems[elems.length] = callback.apply(this, args);
         if (this.value !== end) {
           this.expect(',');
@@ -1402,14 +1399,15 @@
     },
     parseObjectGetterSetter: function() {
       var node = this.startNode(_Property);
+      var lookahead = this.lookahead();
       var kind = 'init';
       var key, value;
 
-      if (this.lookahead.value === ':') {
+      if (lookahead.value === ':') {
         key = this.parseObjectPropertyName();
         this.next();
         value = this.parseAssignmentExpression(true);
-      } else if (this.lookahead.value === '(') {
+      } else if (lookahead.value === '(') {
         key = this.parseObjectPropertyName();
         value = this.parseFunction({ expression: true });
       } else {
@@ -1466,7 +1464,7 @@
 
       this.expect('[');
 
-      while (this.value !== ']' && this.hasNext()) {
+      while (this.value !== ']') {
         if (this.value === ',') {
           this.next();
           elems[elems.length] = null;
@@ -1695,7 +1693,7 @@
         expr = this.parsePrimaryExpression();
       }
 
-      while (this.hasNext()) {
+      for (;;) {
         if (this.value === '.') {
           expr = this.parseNonComputedMember(expr, node);
         } else if (this.value === '[') {
@@ -1768,7 +1766,7 @@
       var quasis = [quasi];
       var exprs = [];
 
-      while (!quasi.tail && this.hasNext()) {
+      while (!quasi.tail) {
         exprs[exprs.length] = this.parseExpression();
         quasi = this.parseTemplateElement();
         quasis[quasis.length] = quasi;
@@ -1858,7 +1856,7 @@
       }
     },
     parseScriptBody: function(body, end) {
-      while (this.value !== end && this.hasNext()) {
+      while (this.value !== end) {
         body[body.length] = this.parseStatement();
       }
     },
@@ -1965,7 +1963,7 @@
     parseParams: function(node) {
       this.expect('(');
 
-      while (this.value !== ')' && this.hasNext()) {
+      while (this.value !== ')') {
         if (!this.parseParam(node)) {
           break;
         }
@@ -2055,7 +2053,7 @@
 
       this.expect('[');
 
-      while (this.value !== ']' && this.hasNext()) {
+      while (this.value !== ']') {
         if (this.value === ',') {
           elems[elems.length] = null;
         } else {
@@ -2169,8 +2167,8 @@
 
       var argument = null;
 
-      if (!this.token.hasLineTerminator &&
-          this.value !== ';' && this.value !== '}' && this.hasNext()) {
+      if (this.value !== ';' && this.value !== '}' &&
+          !this.token.hasLineTerminator && this.token !== TOKEN_END) {
         argument = this.parseExpression(true);
       }
 
@@ -2264,7 +2262,7 @@
       this.expect(')');
       this.expect('{');
 
-      while (this.value !== '}' && this.hasNext()) {
+      while (this.value !== '}') {
         cases[cases.length] = this.parseSwitchCase();
       }
 
@@ -2288,7 +2286,7 @@
       this.expect(':');
 
       while (this.value !== '}' && this.value !== 'case' &&
-             this.value !== 'default' && this.hasNext()) {
+             this.value !== 'default' && this.token !== TOKEN_END) {
         consequent[consequent.length] = this.parseStatement();
       }
 
@@ -2599,7 +2597,7 @@
       return this.finishNode(node);
     },
     parseMaybeLabelledStatement: function() {
-      if (this.type === _Identifier && this.lookahead.value === ':') {
+      if (this.type === _Identifier && this.lookahead().value === ':') {
         var node = this.startNode(_LabeledStatement);
         var label = this.parseIdentifier();
 
@@ -2621,8 +2619,8 @@
       });
 
       this.length = this.tokens.length;
-      this.index = 0;
-      this.current();
+      this.index = -1;
+      this.next();
 
       var program = this.startNode(_Program);
       program.body = [];
