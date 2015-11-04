@@ -277,19 +277,21 @@
         regex = null;
         type = this.getTokenType(value);
 
-        if (type === _String ||
-            (type === _Comment && value.charAt(1) === '*')) {
-          if (this.options.loc) {
+        if (this.options.loc) {
+          if (type === _String ||
+              (type === _Comment && value.charAt(1) === '*')) {
             lines = value.split(lineTerminatorSequenceRe);
             if (lines.length > 1) {
               this.line += lines.length - 1;
               this.prevLineIndex = this.index + len - lines.pop().length;
             }
+          } else if (type === _LineTerminator) {
+            this.line++;
+            this.prevLineIndex = this.index + len;
           }
-        } else if (type === _LineTerminator) {
-          this.line++;
-          this.prevLineIndex = this.index + len;
-        } else if (type === _RegularExpression) {
+        }
+
+        if (type === _RegularExpression) {
           if (this.fixRegExpTokens(matches, i, tokens, value)) {
             i--;
             continue;
