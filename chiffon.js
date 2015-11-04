@@ -876,6 +876,10 @@
       _DoWhileStatement = 'DoWhileStatement',
       _DebuggerStatement = 'DebuggerStatement',
       _EmptyStatement = 'EmptyStatement',
+      _ExportAllDeclaration = 'ExportAllDeclaration',
+      _ExportDefaultDeclaration = 'ExportDefaultDeclaration',
+      _ExportNamedDeclaration = 'ExportNamedDeclaration',
+      _ExportSpecifier = 'ExportSpecifier',
       _ExpressionStatement = 'ExpressionStatement',
       _ForStatement = 'ForStatement',
       _ForOfStatement = 'ForOfStatement',
@@ -883,6 +887,10 @@
       _FunctionDeclaration = 'FunctionDeclaration',
       _FunctionExpression = 'FunctionExpression',
       _IfStatement = 'IfStatement',
+      _ImportDeclaration = 'ImportDeclaration',
+      _ImportDefaultSpecifier = 'ImportDefaultSpecifier',
+      _ImportNamespaceSpecifier = 'ImportNamespaceSpecifier',
+      _ImportSpecifier = 'ImportSpecifier',
       _Literal = 'Literal',
       _LabeledStatement = 'LabeledStatement',
       _LogicalExpression = 'LogicalExpression',
@@ -1238,6 +1246,19 @@
       node.name = name;
       return this.finishNode(node);
     },
+    parseCommaSeparatedElements: function(start, end, elems, callback, args) {
+      this.expect(start);
+
+      while (this.value !== end && this.hasNext()) {
+        elems[elems.length] = callback.apply(this, args);
+        if (this.value !== end) {
+          this.expect(',');
+        }
+      }
+
+      this.expect(end);
+      return elems;
+    },
     // ECMA-262 12.2 Primary Expression
     parsePrimaryExpression: function() {
       switch (this.type) {
@@ -1335,17 +1356,9 @@
     // ECMA-262 12.2.6 Object Initializer
     parseObjectInitializer: function() {
       var node = this.startNode(_ObjectExpression);
-      var props = [];
+      node.properties = this.parseCommaSeparatedElements('{', '}', [],
+        this.parseObjectDefinition);
 
-      this.expect('{');
-
-      while (this.value !== '}' && this.hasNext()) {
-        props[props.length] = this.parseObjectDefinition();
-      }
-
-      this.expect('}');
-
-      node.properties = props;
       return this.finishNode(node);
     },
     parseObjectDefinition: function() {
@@ -1355,10 +1368,6 @@
         node = this.parseObjectGetterSetter();
       } else {
         node = this.parseObjectProperty();
-      }
-
-      if (this.value !== '}') {
-        this.expect(',');
       }
 
       return node;
@@ -1748,17 +1757,9 @@
       return this.finishNode(node);
     },
     parseArguments: function(node) {
-      var args = node.arguments;
+      this.parseCommaSeparatedElements('(', ')', node.arguments,
+        this.parseAssignmentExpression, [true]);
 
-      this.next();
-      while (this.value !== ')' && this.hasNext()) {
-        args[args.length] = this.parseAssignmentExpression(true);
-        if (this.value !== ')') {
-          this.expect(',');
-        }
-      }
-
-      this.next();
       return node;
     },
     parseTemplateLiteral: function() {
@@ -1848,6 +1849,10 @@
           return this.parseWhileStatement();
         case 'for':
           return this.parseForStatement();
+        case 'import':
+          return this.parseImportDeclaration();
+        case 'export':
+          return this.parseExportDeclaration();
         default:
           return this.parseMaybeExpressionStatement();
       }
@@ -2073,20 +2078,9 @@
     },
     parseObjectPattern: function() {
       var node = this.startNode(_ObjectPattern);
-      var props = [];
+      node.properties = this.parseCommaSeparatedElements('{', '}', [],
+        this.parseObjectPropertyPattern);
 
-      this.expect('{');
-
-      while (this.value !== '}' && this.hasNext()) {
-        props[props.length] = this.parseObjectPropertyPattern();
-        if (this.value !== '}') {
-          this.expect(',');
-        }
-      }
-
-      this.expect('}');
-
-      node.properties = props;
       return this.finishNode(node);
     },
     parseObjectPropertyPattern: function() {
@@ -2425,6 +2419,170 @@
       node.left = left;
       node.right = right;
       node.body = body;
+      return this.finishNode(node);
+    },
+    // ECMA-262 15.2.2 Imports
+    parseImportDeclaration: function() {
+      var node = this.startNode(_ImportDeclaration);
+
+      this.expect('import');
+      node.specifiers = this.parseImportClause();
+
+      if (this.value === 'from') {
+        this.next();
+      }
+
+      this.assertType(_String);
+      node.source = this.parseLiteral();
+      this.expectSemicolon();
+
+      return this.finishNode(node);
+    },
+    parseImportClause: function() {
+      var specs = [];
+
+      if (this.type === _String) {
+        return specs;
+      }
+
+      if (this.type === _Identifier) {
+        if (this.value === 'from') {
+          this.unexpected();
+        }
+
+        specs[specs.length] = this.parseImportDefaultSpecifier();
+        if (this.value !== ',') {
+          return specs;
+        }
+        this.next();
+      }
+
+      if (this.value === '*') {
+        specs[specs.length] = this.parseImportNamespaceSpecifier();
+        if (this.value !== ',') {
+          return specs;
+        }
+        this.next();
+      }
+
+      if (this.value === '{') {
+        this.parseCommaSeparatedElements('{', '}', specs,
+          this.parseImportSpecifier);
+      }
+
+      return specs;
+    },
+    parseImportSpecifier: function() {
+      var node = this.startNode(_ImportSpecifier);
+      var imported = this.parseIdentifier();
+      var local;
+
+      if (this.value === 'as') {
+        this.next();
+        local = this.parseIdentifier();
+      }
+
+      node.local = local || imported;
+      node.imported = imported;
+      return this.finishNode(node);
+    },
+    parseImportNamespaceSpecifier: function() {
+      var node = this.startNode(_ImportNamespaceSpecifier);
+      this.expect('*');
+      this.expect('as');
+      node.local = this.parseIdentifier();
+      return this.finishNode(node);
+    },
+    parseImportDefaultSpecifier: function() {
+      var node = this.startNode(_ImportDefaultSpecifier);
+      node.local = this.parseIdentifier();
+      return this.finishNode(node);
+    },
+    // ECMA-262 15.2.3 Exports
+    parseExportDeclaration: function() {
+      var node = this.startNode();
+      this.expect('export');
+
+      if (this.value === 'default') {
+        return this.parseExportDefaultDeclaration(node);
+      }
+
+      if (this.value === '*') {
+        return this.parseExportAllDeclaration(node);
+      }
+
+      return this.parseExportNamedDeclaration(node);
+    },
+    parseExportDefaultDeclaration: function(node) {
+      node.type = _ExportDefaultDeclaration;
+      this.expect('default');
+
+      var expr, skipSemicolon;
+      if (this.value === 'function') {
+        expr = this.parseFunctionDeclaration();
+        skipSemicolon = true;
+      } else {
+        expr = this.parseAssignmentExpression(true);
+      }
+
+      if (!skipSemicolon) {
+        this.expectSemicolon();
+      }
+
+      node.declaration = expr;
+      return this.finishNode(node);
+    },
+    parseExportAllDeclaration: function(node) {
+      node.type = _ExportAllDeclaration;
+
+      this.expect('*');
+      this.expect('from');
+
+      this.assertType(_String);
+      node.source = this.parseLiteral();
+      this.expectSemicolon();
+
+      return this.finishNode(node);
+    },
+    parseExportNamedDeclaration: function(node) {
+      node.type = _ExportNamedDeclaration;
+
+      var decl = null;
+      var specs = [];
+      var source = null;
+
+      if (this.type === _Keyword) {
+        // export var|let|const|function|...
+        decl = this.parseStatement();
+      } else {
+        this.parseCommaSeparatedElements('{', '}', specs,
+          this.parseExportSpecifier);
+
+        if (this.value === 'from') {
+          this.next();
+          this.assertType(_String);
+          source = this.parseLiteral();
+        }
+        this.expectSemicolon();
+      }
+
+      node.declaration = decl;
+      node.specifiers = specs;
+      node.source = source;
+      return this.finishNode(node);
+    },
+    parseExportSpecifier: function() {
+      var node = this.startNode(_ExportSpecifier);
+      var local = this.parseIdentifier();
+      var exported;
+
+      if (this.value === 'as') {
+        this.next();
+        exported = this.parseIdentifier();
+      }
+
+      node.exported = exported || local;
+      node.local = local;
       return this.finishNode(node);
     },
     parseMaybeExpressionStatement: function() {
