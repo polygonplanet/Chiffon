@@ -1,0 +1,92 @@
+{
+    "range": [
+        0,
+        26
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 1,
+            "column": 26
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                26
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 1,
+                    "column": 26
+                }
+            },
+            "type": "ImportDeclaration",
+            "specifiers": [
+                {
+                    "range": [
+                        7,
+                        14
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 7
+                        },
+                        "end": {
+                            "line": 1,
+                            "column": 14
+                        }
+                    },
+                    "type": "ImportNamespaceSpecifier",
+                    "local": {
+                        "range": [
+                            12,
+                            14
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 12
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 14
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "ns"
+                    }
+                }
+            ],
+            "source": {
+                "range": [
+                    20,
+                    25
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 20
+                    },
+                    "end": {
+                        "line": 1,
+                        "column": 25
+                    }
+                },
+                "type": "Literal",
+                "value": "mod",
+                "raw": "\"mod\""
+            }
+        }
+    ]
+}

@@ -1,0 +1,216 @@
+{
+    "range": [
+        0,
+        28
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 1,
+            "column": 28
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                28
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 1,
+                    "column": 28
+                }
+            },
+            "type": "ImportDeclaration",
+            "specifiers": [
+                {
+                    "range": [
+                        8,
+                        9
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 8
+                        },
+                        "end": {
+                            "line": 1,
+                            "column": 9
+                        }
+                    },
+                    "type": "ImportSpecifier",
+                    "local": {
+                        "range": [
+                            8,
+                            9
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 8
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 9
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "a"
+                    },
+                    "imported": {
+                        "range": [
+                            8,
+                            9
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 8
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 9
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "a"
+                    }
+                },
+                {
+                    "range": [
+                        11,
+                        12
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 11
+                        },
+                        "end": {
+                            "line": 1,
+                            "column": 12
+                        }
+                    },
+                    "type": "ImportSpecifier",
+                    "local": {
+                        "range": [
+                            11,
+                            12
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 11
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 12
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "b"
+                    },
+                    "imported": {
+                        "range": [
+                            11,
+                            12
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 11
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 12
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "b"
+                    }
+                },
+                {
+                    "range": [
+                        14,
+                        15
+                    ],
+                    "loc": {
+                        "start": {
+                            "line": 1,
+                            "column": 14
+                        },
+                        "end": {
+                            "line": 1,
+                            "column": 15
+                        }
+                    },
+                    "type": "ImportSpecifier",
+                    "local": {
+                        "range": [
+                            14,
+                            15
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 14
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 15
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "c"
+                    },
+                    "imported": {
+                        "range": [
+                            14,
+                            15
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 14
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 15
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "c"
+                    }
+                }
+            ],
+            "source": {
+                "range": [
+                    22,
+                    27
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 22
+                    },
+                    "end": {
+                        "line": 1,
+                        "column": 27
+                    }
+                },
+                "type": "Literal",
+                "value": "mod",
+                "raw": "'mod'"
+            }
+        }
+    ]
+}
