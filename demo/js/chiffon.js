@@ -3,8 +3,8 @@
  *
  * @description  A small ECMAScript parser, tokenizer and minifier written in JavaScript
  * @fileoverview JavaScript parser, tokenizer and minifier library
- * @version      2.2.1
- * @date         2015-11-04
+ * @version      2.3.0
+ * @date         2015-11-05
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
  * @license      Licensed under the MIT license.
@@ -277,19 +277,21 @@
         regex = null;
         type = this.getTokenType(value);
 
-        if (type === _String ||
-            (type === _Comment && value.charAt(1) === '*')) {
-          if (this.options.loc) {
+        if (this.options.loc) {
+          if (type === _String ||
+              (type === _Comment && value.charAt(1) === '*')) {
             lines = value.split(lineTerminatorSequenceRe);
             if (lines.length > 1) {
               this.line += lines.length - 1;
               this.prevLineIndex = this.index + len - lines.pop().length;
             }
+          } else if (type === _LineTerminator) {
+            this.line++;
+            this.prevLineIndex = this.index + len;
           }
-        } else if (type === _LineTerminator) {
-          this.line++;
-          this.prevLineIndex = this.index + len;
-        } else if (type === _RegularExpression) {
+        }
+
+        if (type === _RegularExpression) {
           if (this.fixRegExpTokens(matches, i, tokens, value)) {
             i--;
             continue;
@@ -874,6 +876,10 @@
       _DoWhileStatement = 'DoWhileStatement',
       _DebuggerStatement = 'DebuggerStatement',
       _EmptyStatement = 'EmptyStatement',
+      _ExportAllDeclaration = 'ExportAllDeclaration',
+      _ExportDefaultDeclaration = 'ExportDefaultDeclaration',
+      _ExportNamedDeclaration = 'ExportNamedDeclaration',
+      _ExportSpecifier = 'ExportSpecifier',
       _ExpressionStatement = 'ExpressionStatement',
       _ForStatement = 'ForStatement',
       _ForOfStatement = 'ForOfStatement',
@@ -881,6 +887,10 @@
       _FunctionDeclaration = 'FunctionDeclaration',
       _FunctionExpression = 'FunctionExpression',
       _IfStatement = 'IfStatement',
+      _ImportDeclaration = 'ImportDeclaration',
+      _ImportDefaultSpecifier = 'ImportDefaultSpecifier',
+      _ImportNamespaceSpecifier = 'ImportNamespaceSpecifier',
+      _ImportSpecifier = 'ImportSpecifier',
       _Literal = 'Literal',
       _LabeledStatement = 'LabeledStatement',
       _LogicalExpression = 'LogicalExpression',
@@ -924,18 +934,15 @@
 
   Parser.prototype = {
     next: function() {
-      this.index++;
-      return this.current();
-    },
-    current: function() {
-      this.token = this.tokens[this.index] || TOKEN_END;
+      if (this.token === TOKEN_END) {
+        this.throwError('Unexpected end of input');
+      }
+      this.token = this.tokens[++this.index] || TOKEN_END;
       this.value = this.token.value;
       this.type = this.token.type;
-      this.lookahead = this.tokens[this.index + 1] || TOKEN_END;
-      return this.token;
     },
-    hasNext: function() {
-      return this.index < this.length;
+    lookahead: function() {
+      return this.tokens[this.index + 1] || TOKEN_END;
     },
     assertValue: function(value) {
       if (this.value !== value) {
@@ -961,8 +968,8 @@
         return true;
       }
 
-      if (this.token.hasLineTerminator ||
-          this.value === '}' || !this.hasNext()) {
+      if (this.value === '}' ||
+          this.token.hasLineTerminator || this.token === TOKEN_END) {
         return true;
       }
 
@@ -1236,6 +1243,19 @@
       node.name = name;
       return this.finishNode(node);
     },
+    parseCommaSeparatedElements: function(start, end, elems, callback, args) {
+      this.expect(start);
+
+      while (this.value !== end) {
+        elems[elems.length] = callback.apply(this, args);
+        if (this.value !== end) {
+          this.expect(',');
+        }
+      }
+
+      this.expect(end);
+      return elems;
+    },
     // ECMA-262 12.2 Primary Expression
     parsePrimaryExpression: function() {
       switch (this.type) {
@@ -1333,17 +1353,9 @@
     // ECMA-262 12.2.6 Object Initializer
     parseObjectInitializer: function() {
       var node = this.startNode(_ObjectExpression);
-      var props = [];
+      node.properties = this.parseCommaSeparatedElements('{', '}', [],
+        this.parseObjectDefinition);
 
-      this.expect('{');
-
-      while (this.value !== '}' && this.hasNext()) {
-        props[props.length] = this.parseObjectDefinition();
-      }
-
-      this.expect('}');
-
-      node.properties = props;
       return this.finishNode(node);
     },
     parseObjectDefinition: function() {
@@ -1353,10 +1365,6 @@
         node = this.parseObjectGetterSetter();
       } else {
         node = this.parseObjectProperty();
-      }
-
-      if (this.value !== '}') {
-        this.expect(',');
       }
 
       return node;
@@ -1391,14 +1399,15 @@
     },
     parseObjectGetterSetter: function() {
       var node = this.startNode(_Property);
+      var lookahead = this.lookahead();
       var kind = 'init';
       var key, value;
 
-      if (this.lookahead.value === ':') {
+      if (lookahead.value === ':') {
         key = this.parseObjectPropertyName();
         this.next();
         value = this.parseAssignmentExpression(true);
-      } else if (this.lookahead.value === '(') {
+      } else if (lookahead.value === '(') {
         key = this.parseObjectPropertyName();
         value = this.parseFunction({ expression: true });
       } else {
@@ -1455,7 +1464,7 @@
 
       this.expect('[');
 
-      while (this.value !== ']' && this.hasNext()) {
+      while (this.value !== ']') {
         if (this.value === ',') {
           this.next();
           elems[elems.length] = null;
@@ -1684,7 +1693,7 @@
         expr = this.parsePrimaryExpression();
       }
 
-      while (this.hasNext()) {
+      for (;;) {
         if (this.value === '.') {
           expr = this.parseNonComputedMember(expr, node);
         } else if (this.value === '[') {
@@ -1746,17 +1755,9 @@
       return this.finishNode(node);
     },
     parseArguments: function(node) {
-      var args = node.arguments;
+      this.parseCommaSeparatedElements('(', ')', node.arguments,
+        this.parseAssignmentExpression, [true]);
 
-      this.next();
-      while (this.value !== ')' && this.hasNext()) {
-        args[args.length] = this.parseAssignmentExpression(true);
-        if (this.value !== ')') {
-          this.expect(',');
-        }
-      }
-
-      this.next();
       return node;
     },
     parseTemplateLiteral: function() {
@@ -1765,7 +1766,7 @@
       var quasis = [quasi];
       var exprs = [];
 
-      while (!quasi.tail && this.hasNext()) {
+      while (!quasi.tail) {
         exprs[exprs.length] = this.parseExpression();
         quasi = this.parseTemplateElement();
         quasis[quasis.length] = quasi;
@@ -1846,12 +1847,16 @@
           return this.parseWhileStatement();
         case 'for':
           return this.parseForStatement();
+        case 'import':
+          return this.parseImportDeclaration();
+        case 'export':
+          return this.parseExportDeclaration();
         default:
           return this.parseMaybeExpressionStatement();
       }
     },
     parseScriptBody: function(body, end) {
-      while (this.value !== end && this.hasNext()) {
+      while (this.value !== end) {
         body[body.length] = this.parseStatement();
       }
     },
@@ -1958,7 +1963,7 @@
     parseParams: function(node) {
       this.expect('(');
 
-      while (this.value !== ')' && this.hasNext()) {
+      while (this.value !== ')') {
         if (!this.parseParam(node)) {
           break;
         }
@@ -2048,7 +2053,7 @@
 
       this.expect('[');
 
-      while (this.value !== ']' && this.hasNext()) {
+      while (this.value !== ']') {
         if (this.value === ',') {
           elems[elems.length] = null;
         } else {
@@ -2071,20 +2076,9 @@
     },
     parseObjectPattern: function() {
       var node = this.startNode(_ObjectPattern);
-      var props = [];
+      node.properties = this.parseCommaSeparatedElements('{', '}', [],
+        this.parseObjectPropertyPattern);
 
-      this.expect('{');
-
-      while (this.value !== '}' && this.hasNext()) {
-        props[props.length] = this.parseObjectPropertyPattern();
-        if (this.value !== '}') {
-          this.expect(',');
-        }
-      }
-
-      this.expect('}');
-
-      node.properties = props;
       return this.finishNode(node);
     },
     parseObjectPropertyPattern: function() {
@@ -2173,8 +2167,8 @@
 
       var argument = null;
 
-      if (!this.token.hasLineTerminator &&
-          this.value !== ';' && this.value !== '}' && this.hasNext()) {
+      if (this.value !== ';' && this.value !== '}' &&
+          !this.token.hasLineTerminator && this.token !== TOKEN_END) {
         argument = this.parseExpression(true);
       }
 
@@ -2268,7 +2262,7 @@
       this.expect(')');
       this.expect('{');
 
-      while (this.value !== '}' && this.hasNext()) {
+      while (this.value !== '}') {
         cases[cases.length] = this.parseSwitchCase();
       }
 
@@ -2292,7 +2286,7 @@
       this.expect(':');
 
       while (this.value !== '}' && this.value !== 'case' &&
-             this.value !== 'default' && this.hasNext()) {
+             this.value !== 'default' && this.token !== TOKEN_END) {
         consequent[consequent.length] = this.parseStatement();
       }
 
@@ -2425,6 +2419,170 @@
       node.body = body;
       return this.finishNode(node);
     },
+    // ECMA-262 15.2.2 Imports
+    parseImportDeclaration: function() {
+      var node = this.startNode(_ImportDeclaration);
+
+      this.expect('import');
+      node.specifiers = this.parseImportClause();
+
+      if (this.value === 'from') {
+        this.next();
+      }
+
+      this.assertType(_String);
+      node.source = this.parseLiteral();
+      this.expectSemicolon();
+
+      return this.finishNode(node);
+    },
+    parseImportClause: function() {
+      var specs = [];
+
+      if (this.type === _String) {
+        return specs;
+      }
+
+      if (this.type === _Identifier) {
+        if (this.value === 'from') {
+          this.unexpected();
+        }
+
+        specs[specs.length] = this.parseImportDefaultSpecifier();
+        if (this.value !== ',') {
+          return specs;
+        }
+        this.next();
+      }
+
+      if (this.value === '*') {
+        specs[specs.length] = this.parseImportNamespaceSpecifier();
+        if (this.value !== ',') {
+          return specs;
+        }
+        this.next();
+      }
+
+      if (this.value === '{') {
+        this.parseCommaSeparatedElements('{', '}', specs,
+          this.parseImportSpecifier);
+      }
+
+      return specs;
+    },
+    parseImportSpecifier: function() {
+      var node = this.startNode(_ImportSpecifier);
+      var imported = this.parseIdentifier();
+      var local;
+
+      if (this.value === 'as') {
+        this.next();
+        local = this.parseIdentifier();
+      }
+
+      node.local = local || imported;
+      node.imported = imported;
+      return this.finishNode(node);
+    },
+    parseImportNamespaceSpecifier: function() {
+      var node = this.startNode(_ImportNamespaceSpecifier);
+      this.expect('*');
+      this.expect('as');
+      node.local = this.parseIdentifier();
+      return this.finishNode(node);
+    },
+    parseImportDefaultSpecifier: function() {
+      var node = this.startNode(_ImportDefaultSpecifier);
+      node.local = this.parseIdentifier();
+      return this.finishNode(node);
+    },
+    // ECMA-262 15.2.3 Exports
+    parseExportDeclaration: function() {
+      var node = this.startNode();
+      this.expect('export');
+
+      if (this.value === 'default') {
+        return this.parseExportDefaultDeclaration(node);
+      }
+
+      if (this.value === '*') {
+        return this.parseExportAllDeclaration(node);
+      }
+
+      return this.parseExportNamedDeclaration(node);
+    },
+    parseExportDefaultDeclaration: function(node) {
+      node.type = _ExportDefaultDeclaration;
+      this.expect('default');
+
+      var expr, skipSemicolon;
+      if (this.value === 'function') {
+        expr = this.parseFunctionDeclaration();
+        skipSemicolon = true;
+      } else {
+        expr = this.parseAssignmentExpression(true);
+      }
+
+      if (!skipSemicolon) {
+        this.expectSemicolon();
+      }
+
+      node.declaration = expr;
+      return this.finishNode(node);
+    },
+    parseExportAllDeclaration: function(node) {
+      node.type = _ExportAllDeclaration;
+
+      this.expect('*');
+      this.expect('from');
+
+      this.assertType(_String);
+      node.source = this.parseLiteral();
+      this.expectSemicolon();
+
+      return this.finishNode(node);
+    },
+    parseExportNamedDeclaration: function(node) {
+      node.type = _ExportNamedDeclaration;
+
+      var decl = null;
+      var specs = [];
+      var source = null;
+
+      if (this.type === _Keyword) {
+        // export var|let|const|function|...
+        decl = this.parseStatement();
+      } else {
+        this.parseCommaSeparatedElements('{', '}', specs,
+          this.parseExportSpecifier);
+
+        if (this.value === 'from') {
+          this.next();
+          this.assertType(_String);
+          source = this.parseLiteral();
+        }
+        this.expectSemicolon();
+      }
+
+      node.declaration = decl;
+      node.specifiers = specs;
+      node.source = source;
+      return this.finishNode(node);
+    },
+    parseExportSpecifier: function() {
+      var node = this.startNode(_ExportSpecifier);
+      var local = this.parseIdentifier();
+      var exported;
+
+      if (this.value === 'as') {
+        this.next();
+        exported = this.parseIdentifier();
+      }
+
+      node.exported = exported || local;
+      node.local = local;
+      return this.finishNode(node);
+    },
     parseMaybeExpressionStatement: function() {
       var label = this.parseMaybeLabelledStatement();
       if (label) {
@@ -2439,7 +2597,7 @@
       return this.finishNode(node);
     },
     parseMaybeLabelledStatement: function() {
-      if (this.type === _Identifier && this.lookahead.value === ':') {
+      if (this.type === _Identifier && this.lookahead().value === ':') {
         var node = this.startNode(_LabeledStatement);
         var label = this.parseIdentifier();
 
@@ -2461,8 +2619,8 @@
       });
 
       this.length = this.tokens.length;
-      this.index = 0;
-      this.current();
+      this.index = -1;
+      this.next();
 
       var program = this.startNode(_Program);
       program.body = [];
