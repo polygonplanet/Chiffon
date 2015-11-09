@@ -925,9 +925,6 @@
   var octalDigitRe = /^0[0-7]+$/;
 
 
-  function Node() {}
-
-
   function Parser(options) {
     this.options = mixin({}, options || {});
   }
@@ -990,7 +987,7 @@
       throw new Error(message);
     },
     startNode: function(type) {
-      var node = new Node();
+      var node = {};
       this.startNodeAt(node);
       node.type = type;
       return node;
