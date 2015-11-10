@@ -952,11 +952,15 @@
       }
     },
     expect: function(value) {
-      this.assertValue(value);
+      if (this.value !== value) {
+        this.unexpected();
+      }
       this.next();
     },
     expectType: function(type) {
-      this.assertType(type);
+      if (this.type !== type) {
+        this.unexpected();
+      }
       this.next();
     },
     expectSemicolon: function() {
