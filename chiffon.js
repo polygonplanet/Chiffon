@@ -669,8 +669,6 @@
     }
   };
 
-  Chiffon.Tokenizer = Tokenizer;
-
   /**
    * Tokenize a string source.
    *
@@ -726,8 +724,6 @@
       return results.join('');
     }
   };
-
-  Chiffon.Untokenizer = Untokenizer;
 
   /**
    * Concatenate to string from the parsed tokens.
@@ -841,8 +837,6 @@
       return untokenize(this.tokens);
     }
   };
-
-  Chiffon.Minifier = Minifier;
 
   /**
    * Minify JavaScript source.
@@ -2630,8 +2624,6 @@
       return this.finishNode(program);
     }
   };
-
-  Chiffon.Parser = Parser;
 
   /**
    * Parse a string source.
