@@ -133,7 +133,6 @@
   var signLeftRe = /^[+-]/;
   var signRightRe = /[+-]$/;
   var notPunctRe = /[^{}()[\]<>=!+*%\/&|^~?:;,.-]/;
-  var notDigitRe = /[^0-9]/;
 
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
@@ -235,7 +234,13 @@
 
 
   function isDigit(c) {
-    return !notDigitRe.test(c);
+    return c >= 0x30 && c <= 0x39;
+  }
+
+
+  function isOctalDigit(c) {
+    var ch = c.charCodeAt(0);
+    return ch >= 0x30 && ch <= 0x37;
   }
 
 
@@ -413,11 +418,11 @@
           if (isLineTerminator(ch)) {
             return _LineTerminator;
           }
+          if (isDigit(ch)) {
+            return _Numeric;
+          }
           if (isPunctuator(c)) {
             return _Punctuator;
-          }
-          if (isDigit(c)) {
-            return _Numeric;
           }
 
           if (keywordsRe.test(value)) {
@@ -1155,28 +1160,22 @@
               }
               c = fromCodePoint(parseInt(hex, 16));
               break;
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-              n = c;
-              do {
-                c = value.charAt(i);
-                if (c < '0' || c > '7') {
-                  break;
-                }
-                n += c;
-              } while (i++ < len && n.length < 3);
+            default:
+              if (isOctalDigit(c)) {
+                n = c;
+                do {
+                  c = value.charAt(i);
+                  if (!isOctalDigit(c)) {
+                    break;
+                  }
+                  n += c;
+                } while (i++ < len && n.length < 3);
 
-              if (n.length > 0 && n.charAt(0) === '0') {
-                n = n.substring(1);
+                if (n.length > 0 && n.charAt(0) === '0') {
+                  n = n.substring(1);
+                }
+                c = fromCharCode(parseInt(n, 8));
               }
-              c = fromCharCode(parseInt(n, 8));
-              break;
           }
         }
         s += c;
