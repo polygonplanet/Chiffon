@@ -1372,10 +1372,14 @@
     },
     parseObjectProperty: function() {
       var node = this.startNode(_Property);
+      var computed = false;
       var generator;
+
       if (this.value === '*') {
         generator = true;
         this.next();
+      } else if (this.value === '[') {
+        computed = true;
       }
 
       var key = this.parseObjectPropertyName();
@@ -1394,6 +1398,7 @@
       }
 
       node.key = key;
+      node.computed = computed;
       node.value = value;
       node.kind = 'init';
       return this.finishNode(node);
@@ -1401,6 +1406,7 @@
     parseObjectGetterSetter: function() {
       var node = this.startNode(_Property);
       var lookahead = this.lookahead();
+      var computed = false;
       var kind = 'init';
       var key, value;
 
@@ -1412,12 +1418,14 @@
         key = this.parseObjectPropertyName();
         value = this.parseFunction({ expression: true });
       } else {
-        var prev = this.value;
-
+        kind = this.value;
         this.next();
-        if (this.type === _Identifier || this.type === _Keyword ||
+        if (this.value === '[') {
+          computed = true;
+        }
+
+        if (computed || this.type === _Identifier || this.type === _Keyword ||
             this.type === _String || this.type === _Numeric) {
-          kind = prev;
           key = this.parseObjectPropertyName();
           value = this.parseFunction({
             getter: kind === 'get',
@@ -1430,6 +1438,7 @@
       }
 
       node.key = key;
+      node.computed = computed;
       node.value = value;
       node.kind = kind;
       return this.finishNode(node);

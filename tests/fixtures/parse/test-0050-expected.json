@@ -117,6 +117,7 @@
                                     "type": "Identifier",
                                     "name": "a"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         15,
@@ -193,6 +194,7 @@
                                     "type": "Identifier",
                                     "name": "b"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         35,
@@ -269,6 +271,7 @@
                                     "type": "Identifier",
                                     "name": "c"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         53,
@@ -345,6 +348,7 @@
                                     "type": "Identifier",
                                     "name": "d"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         63,
@@ -421,6 +425,7 @@
                                     "type": "Identifier",
                                     "name": "e"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         77,
@@ -497,6 +502,7 @@
                                     "type": "Identifier",
                                     "name": "e"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         91,

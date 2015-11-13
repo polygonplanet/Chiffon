@@ -121,6 +121,7 @@
                                 "type": "Identifier",
                                 "name": "b"
                             },
+                            "computed": false,
                             "value": {
                                 "range": [
                                     20,

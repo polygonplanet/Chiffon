@@ -118,6 +118,7 @@
                                     "value": 0,
                                     "raw": "0"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         15,
@@ -174,6 +175,7 @@
                                     "value": "a",
                                     "raw": "'a'"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         25,
@@ -230,6 +232,7 @@
                                     "value": 255,
                                     "raw": "0xFF"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         38,

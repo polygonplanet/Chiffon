@@ -82,6 +82,7 @@
                             "type": "Identifier",
                             "name": "a"
                         },
+                        "computed": false,
                         "value": {
                             "range": [
                                 20,

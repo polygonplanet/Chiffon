@@ -153,6 +153,7 @@
                                         "name": "b"
                                     }
                                 },
+                                "computed": true,
                                 "value": {
                                     "range": [
                                         19,

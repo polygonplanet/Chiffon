@@ -117,6 +117,7 @@
                                     "type": "Identifier",
                                     "name": "get"
                                 },
+                                "computed": false,
                                 "value": {
                                     "range": [
                                         19,

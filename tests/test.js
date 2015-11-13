@@ -328,7 +328,6 @@ function filterForEsprima(ast) {
     {
       type: 'Property',
       callback: function(node) {
-        delete node.computed;
         delete node.method;
         delete node.shorthand;
       }
