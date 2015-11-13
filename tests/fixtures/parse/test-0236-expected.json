@@ -1,0 +1,207 @@
+{
+    "range": [
+        0,
+        59
+    ],
+    "loc": {
+        "start": {
+            "line": 1,
+            "column": 0
+        },
+        "end": {
+            "line": 5,
+            "column": 1
+        }
+    },
+    "type": "Program",
+    "body": [
+        {
+            "range": [
+                0,
+                59
+            ],
+            "loc": {
+                "start": {
+                    "line": 1,
+                    "column": 0
+                },
+                "end": {
+                    "line": 5,
+                    "column": 1
+                }
+            },
+            "type": "FunctionDeclaration",
+            "id": {
+                "range": [
+                    10,
+                    11
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 10
+                    },
+                    "end": {
+                        "line": 1,
+                        "column": 11
+                    }
+                },
+                "type": "Identifier",
+                "name": "a"
+            },
+            "params": [],
+            "defaults": [],
+            "body": {
+                "range": [
+                    14,
+                    59
+                ],
+                "loc": {
+                    "start": {
+                        "line": 1,
+                        "column": 14
+                    },
+                    "end": {
+                        "line": 5,
+                        "column": 1
+                    }
+                },
+                "type": "BlockStatement",
+                "body": [
+                    {
+                        "range": [
+                            18,
+                            57
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 2,
+                                "column": 2
+                            },
+                            "end": {
+                                "line": 4,
+                                "column": 4
+                            }
+                        },
+                        "type": "ExpressionStatement",
+                        "expression": {
+                            "range": [
+                                18,
+                                56
+                            ],
+                            "loc": {
+                                "start": {
+                                    "line": 2,
+                                    "column": 2
+                                },
+                                "end": {
+                                    "line": 4,
+                                    "column": 3
+                                }
+                            },
+                            "type": "YieldExpression",
+                            "argument": {
+                                "range": [
+                                    25,
+                                    56
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 2,
+                                        "column": 9
+                                    },
+                                    "end": {
+                                        "line": 4,
+                                        "column": 3
+                                    }
+                                },
+                                "type": "FunctionExpression",
+                                "id": null,
+                                "params": [],
+                                "defaults": [],
+                                "body": {
+                                    "range": [
+                                        37,
+                                        56
+                                    ],
+                                    "loc": {
+                                        "start": {
+                                            "line": 2,
+                                            "column": 21
+                                        },
+                                        "end": {
+                                            "line": 4,
+                                            "column": 3
+                                        }
+                                    },
+                                    "type": "BlockStatement",
+                                    "body": [
+                                        {
+                                            "range": [
+                                                43,
+                                                52
+                                            ],
+                                            "loc": {
+                                                "start": {
+                                                    "line": 3,
+                                                    "column": 4
+                                                },
+                                                "end": {
+                                                    "line": 3,
+                                                    "column": 13
+                                                }
+                                            },
+                                            "type": "ExpressionStatement",
+                                            "expression": {
+                                                "range": [
+                                                    43,
+                                                    51
+                                                ],
+                                                "loc": {
+                                                    "start": {
+                                                        "line": 3,
+                                                        "column": 4
+                                                    },
+                                                    "end": {
+                                                        "line": 3,
+                                                        "column": 12
+                                                    }
+                                                },
+                                                "type": "YieldExpression",
+                                                "argument": {
+                                                    "range": [
+                                                        50,
+                                                        51
+                                                    ],
+                                                    "loc": {
+                                                        "start": {
+                                                            "line": 3,
+                                                            "column": 11
+                                                        },
+                                                        "end": {
+                                                            "line": 3,
+                                                            "column": 12
+                                                        }
+                                                    },
+                                                    "type": "Literal",
+                                                    "value": 1,
+                                                    "raw": "1"
+                                                },
+                                                "delegate": true
+                                            }
+                                        }
+                                    ]
+                                },
+                                "generator": true,
+                                "expression": false
+                            },
+                            "delegate": true
+                        }
+                    }
+                ]
+            },
+            "generator": true,
+            "expression": false
+        }
+    ]
+}

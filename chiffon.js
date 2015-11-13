@@ -916,7 +916,8 @@
       _VariableDeclaration = 'VariableDeclaration',
       _VariableDeclarator = 'VariableDeclarator',
       _WhileStatement = 'WhileStatement',
-      _WithStatement = 'WithStatement';
+      _WithStatement = 'WithStatement',
+      _YieldExpression = 'YieldExpression';
 
 
   var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=)$/;
@@ -1505,6 +1506,9 @@
       return this.finishNode(node);
     },
     parseAssignmentExpression: function(allowIn) {
+      if (this.inGenerator && this.value === 'yield') {
+        return this.parseYieldExpression();
+      }
       var node = this.startNode(_AssignmentExpression);
       var left = this.parseConditionalExpression(allowIn);
 
@@ -1561,6 +1565,27 @@
       node.params = params;
       node.body = body;
       node.expression = expression;
+      return this.finishNode(node);
+    },
+    parseYieldExpression: function() {
+      var node = this.startNode(_YieldExpression);
+      var argument = null;
+      var delegate = false;
+
+      this.expect('yield');
+      if (!this.token.hasLineTerminator) {
+        if (this.value === '*') {
+          delegate = true;
+          this.next();
+          argument = this.parseAssignmentExpression(true);
+        } else if (this.value !== ';' && this.value !== '}' &&
+                   this.token !== TOKEN_END) {
+          argument = this.parseAssignmentExpression(true);
+        }
+      }
+
+      node.argument = argument;
+      node.delegate = delegate;
       return this.finishNode(node);
     },
     getBinaryPrecedence: function(allowIn) {
@@ -1951,7 +1976,10 @@
         this.parseParams(node);
       }
 
+      var prevInGenerator = this.inGenerator;
+      this.inGenerator = node.generator;
       node.body = this.parseBlockStatement();
+      this.inGenerator = prevInGenerator;
       return this.finishNode(node);
     },
     parseParams: function(node) {
