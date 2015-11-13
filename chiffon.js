@@ -932,7 +932,7 @@
   Parser.prototype = {
     next: function() {
       if (this.token === TOKEN_END) {
-        this.throwError('Unexpected end of input');
+        this.unexpected();
       }
       this.token = this.tokens[++this.index] || TOKEN_END;
       this.value = this.token.value;
@@ -977,11 +977,17 @@
       this.unexpected();
     },
     unexpected: function() {
-      var token = this.value || '';
-      if (token.length > 10) {
-        token = token.substr(0, 10) + '...';
+      var message = 'Unexpected';
+      if (this.token === TOKEN_END) {
+        message += ' end of input';
+      } else {
+        var token = this.value || '';
+        if (token.length > 10) {
+          token = token.substr(0, 10) + '...';
+        }
+        message += " token '" + token + "'";
       }
-      this.throwError("Unexpected token '" + token + "'");
+      this.throwError(message);
     },
     throwError: function(message) {
       var loc = this.token.loc;
