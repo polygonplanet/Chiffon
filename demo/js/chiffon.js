@@ -3,8 +3,8 @@
  *
  * @description  A small ECMAScript parser, tokenizer and minifier written in JavaScript
  * @fileoverview JavaScript parser, tokenizer and minifier library
- * @version      2.3.0
- * @date         2015-11-05
+ * @version      2.4.0
+ * @date         2015-11-14
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
  * @license      Licensed under the MIT license.
@@ -133,7 +133,6 @@
   var signLeftRe = /^[+-]/;
   var signRightRe = /[+-]$/;
   var notPunctRe = /[^{}()[\]<>=!+*%\/&|^~?:;,.-]/;
-  var notDigitRe = /[^0-9]/;
 
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
@@ -235,7 +234,13 @@
 
 
   function isDigit(c) {
-    return !notDigitRe.test(c);
+    return c >= 0x30 && c <= 0x39;
+  }
+
+
+  function isOctalDigit(c) {
+    var ch = c.charCodeAt(0);
+    return ch >= 0x30 && ch <= 0x37;
   }
 
 
@@ -413,11 +418,11 @@
           if (isLineTerminator(ch)) {
             return _LineTerminator;
           }
+          if (isDigit(ch)) {
+            return _Numeric;
+          }
           if (isPunctuator(c)) {
             return _Punctuator;
-          }
-          if (isDigit(c)) {
-            return _Numeric;
           }
 
           if (keywordsRe.test(value)) {
@@ -669,8 +674,6 @@
     }
   };
 
-  Chiffon.Tokenizer = Tokenizer;
-
   /**
    * Tokenize a string source.
    *
@@ -726,8 +729,6 @@
       return results.join('');
     }
   };
-
-  Chiffon.Untokenizer = Untokenizer;
 
   /**
    * Concatenate to string from the parsed tokens.
@@ -842,8 +843,6 @@
     }
   };
 
-  Chiffon.Minifier = Minifier;
-
   /**
    * Minify JavaScript source.
    *
@@ -917,15 +916,13 @@
       _VariableDeclaration = 'VariableDeclaration',
       _VariableDeclarator = 'VariableDeclarator',
       _WhileStatement = 'WhileStatement',
-      _WithStatement = 'WithStatement';
+      _WithStatement = 'WithStatement',
+      _YieldExpression = 'YieldExpression';
 
 
   var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=)$/;
   var unaryOpRe = /^(?:[-+!~]|\+\+|--|typeof|void|delete)$/;
   var octalDigitRe = /^0[0-7]+$/;
-
-
-  function Node() {}
 
 
   function Parser(options) {
@@ -955,11 +952,15 @@
       }
     },
     expect: function(value) {
-      this.assertValue(value);
+      if (this.value !== value) {
+        this.unexpected();
+      }
       this.next();
     },
     expectType: function(type) {
-      this.assertType(type);
+      if (this.type !== type) {
+        this.unexpected();
+      }
       this.next();
     },
     expectSemicolon: function() {
@@ -990,7 +991,7 @@
       throw new Error(message);
     },
     startNode: function(type) {
-      var node = new Node();
+      var node = {};
       this.startNodeAt(node);
       node.type = type;
       return node;
@@ -1160,28 +1161,22 @@
               }
               c = fromCodePoint(parseInt(hex, 16));
               break;
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-              n = c;
-              do {
-                c = value.charAt(i);
-                if (c < '0' || c > '7') {
-                  break;
-                }
-                n += c;
-              } while (i++ < len && n.length < 3);
+            default:
+              if (isOctalDigit(c)) {
+                n = c;
+                do {
+                  c = value.charAt(i);
+                  if (!isOctalDigit(c)) {
+                    break;
+                  }
+                  n += c;
+                } while (i++ < len && n.length < 3);
 
-              if (n.length > 0 && n.charAt(0) === '0') {
-                n = n.substring(1);
+                if (n.length > 0 && n.charAt(0) === '0') {
+                  n = n.substring(1);
+                }
+                c = fromCharCode(parseInt(n, 8));
               }
-              c = fromCharCode(parseInt(n, 8));
-              break;
           }
         }
         s += c;
@@ -1511,6 +1506,9 @@
       return this.finishNode(node);
     },
     parseAssignmentExpression: function(allowIn) {
+      if (this.inGenerator && this.value === 'yield') {
+        return this.parseYieldExpression();
+      }
       var node = this.startNode(_AssignmentExpression);
       var left = this.parseConditionalExpression(allowIn);
 
@@ -1567,6 +1565,27 @@
       node.params = params;
       node.body = body;
       node.expression = expression;
+      return this.finishNode(node);
+    },
+    parseYieldExpression: function() {
+      var node = this.startNode(_YieldExpression);
+      var argument = null;
+      var delegate = false;
+
+      this.expect('yield');
+      if (!this.token.hasLineTerminator) {
+        if (this.value === '*') {
+          delegate = true;
+          this.next();
+          argument = this.parseAssignmentExpression(true);
+        } else if (this.value !== ';' && this.value !== '}' &&
+                   this.token !== TOKEN_END) {
+          argument = this.parseAssignmentExpression(true);
+        }
+      }
+
+      node.argument = argument;
+      node.delegate = delegate;
       return this.finishNode(node);
     },
     getBinaryPrecedence: function(allowIn) {
@@ -1957,7 +1976,10 @@
         this.parseParams(node);
       }
 
+      var prevInGenerator = this.inGenerator;
+      this.inGenerator = node.generator;
       node.body = this.parseBlockStatement();
+      this.inGenerator = prevInGenerator;
       return this.finishNode(node);
     },
     parseParams: function(node) {
@@ -2226,7 +2248,6 @@
       }
 
       node.block = block;
-      node.guardedHandlers = [];
       node.handler = handler;
       node.finalizer = finalizer;
       return this.finishNode(node);
@@ -2629,8 +2650,6 @@
       return this.finishNode(program);
     }
   };
-
-  Chiffon.Parser = Parser;
 
   /**
    * Parse a string source.
