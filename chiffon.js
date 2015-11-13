@@ -2248,7 +2248,6 @@
       }
 
       node.block = block;
-      node.guardedHandlers = [];
       node.handler = handler;
       node.finalizer = finalizer;
       return this.finishNode(node);

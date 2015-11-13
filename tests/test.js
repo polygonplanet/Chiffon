@@ -337,6 +337,7 @@ function filterForEsprima(ast) {
       type: 'TryStatement',
       callback: function(node) {
         delete node.handlers;
+        delete node.guardedHandlers;
       }
     },
     {
