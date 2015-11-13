@@ -870,6 +870,9 @@
       _BreakStatement = 'BreakStatement',
       _CallExpression = 'CallExpression',
       _CatchClause = 'CatchClause',
+      _ClassBody = 'ClassBody',
+      _ClassDeclaration = 'ClassDeclaration',
+      _ClassExpression = 'ClassExpression',
       _ConditionalExpression = 'ConditionalExpression',
       _ContinueStatement = 'ContinueStatement',
       _DoWhileStatement = 'DoWhileStatement',
@@ -894,6 +897,7 @@
       _LabeledStatement = 'LabeledStatement',
       _LogicalExpression = 'LogicalExpression',
       _MemberExpression = 'MemberExpression',
+      _MethodDefinition = 'MethodDefinition',
       _NewExpression = 'NewExpression',
       _ObjectExpression = 'ObjectExpression',
       _ObjectPattern = 'ObjectPattern',
@@ -903,6 +907,7 @@
       _ReturnStatement = 'ReturnStatement',
       _SequenceExpression = 'SequenceExpression',
       _SpreadElement = 'SpreadElement',
+      _Super = 'Super',
       _SwitchCase = 'SwitchCase',
       _SwitchStatement = 'SwitchStatement',
       _TaggedTemplateExpression = 'TaggedTemplateExpression',
@@ -1282,6 +1287,8 @@
       switch (this.value) {
         case 'function':
           return this.parseFunctionExpression();
+        case 'class':
+          return this.parseClassExpression();
         case 'this':
           return this.parseThisExpression();
       }
@@ -1721,7 +1728,9 @@
       var node = this.startNode();
       var expr;
 
-      if (this.value === 'new') {
+      if (this.value === 'super') {
+        expr = this.parseSuper();
+      } else if (this.value === 'new') {
         expr = this.parseNewExpression();
       } else {
         expr = this.parsePrimaryExpression();
@@ -1742,6 +1751,11 @@
       }
 
       return expr;
+    },
+    parseSuper: function() {
+      var node = this.startNode(_Super);
+      this.expect('super');
+      return this.finishNode(node);
     },
     parseNewExpression: function() {
       var node = this.startNode(_NewExpression);
@@ -1873,6 +1887,8 @@
           return this.parseDebuggerStatement();
         case 'function':
           return this.parseFunctionDeclaration();
+        case 'class':
+          return this.parseClassDeclaration();
         case 'switch':
           return this.parseSwitchStatement();
         case 'do':
@@ -2617,6 +2633,72 @@
 
       node.exported = exported || local;
       node.local = local;
+      return this.finishNode(node);
+    },
+    // ECMA-262 14.5 Class Definitions
+    parseClassDeclaration: function() {
+      return this.parseClass();
+    },
+    parseClassExpression: function() {
+      return this.parseClass(true);
+    },
+    parseClass: function(expression) {
+      var node = this.startNode(expression ? _ClassExpression : _ClassDeclaration);
+      this.expect('class');
+
+      var id = null;
+      if (this.type === _Identifier) {
+        id = this.parseIdentifier();
+      }
+
+      var superClass = null;
+      if (this.value === 'extends') {
+        this.next();
+        superClass = this.parseMemberExpression(true);
+      }
+
+      node.id = id;
+      node.superClass = superClass;
+      node.body = this.parseClassBody();
+      return this.finishNode(node);
+    },
+    parseClassBody: function() {
+      var node = this.startNode(_ClassBody);
+      var body = [];
+
+      this.expect('{');
+
+      while (this.value !== '}') {
+        if (this.value === ';') {
+          this.next();
+          continue;
+        }
+        body[body.length] = this.parseMethodDefinition();
+      }
+
+      this.expect('}');
+      node.body = body;
+      return this.finishNode(node);
+    },
+    parseMethodDefinition: function() {
+      var startNode = this.startNode(_MethodDefinition);
+      var isStatic = false;
+      if (this.value === 'static') {
+        isStatic = true;
+        this.next();
+      }
+
+      var node = this.parseObjectDefinition();
+      this.startNodeAt(node, startNode);
+      node.type = _MethodDefinition;
+      node['static'] = isStatic;
+
+      if (node.key.name === 'constructor') {
+        node.kind = 'constructor';
+      } else if (node.kind === 'init') {
+        node.kind = 'method';
+      }
+
       return this.finishNode(node);
     },
     parseMaybeExpressionStatement: function() {
