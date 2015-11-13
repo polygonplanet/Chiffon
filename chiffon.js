@@ -1004,7 +1004,7 @@
     },
     finishNode: function(node) {
       if (this.lastGroup && this.lastGroup.expr === node) {
-        // Restore the held position
+        // Restore the kept position
         var startNode = this.lastGroup.startNode;
         var endToken = this.lastGroup.endToken;
         this.lastGroup = null;
@@ -1322,7 +1322,7 @@
       var node = this.startNode();
       var expr = this.parseExpression(true);
 
-      // Hold the current position for expression
+      // Keep the current position for expression
       this.lastGroup = {
         expr: expr,
         startNode: node,
