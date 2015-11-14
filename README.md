@@ -5,6 +5,12 @@ Chiffon
 
 A small ECMAScript parser, tokenizer and minifier written in JavaScript.
 
+## Features
+
+* Supports for [ECMAScript 6](http://www.ecma-international.org/ecma-262/6.0/index.html)
+* Supports for [Abstract Syntax Tree (JavaScript AST)](https://github.com/estree/estree)
+
+
 ## Installation
 
 ### In Browser:
