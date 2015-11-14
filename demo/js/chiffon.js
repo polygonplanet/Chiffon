@@ -3,7 +3,7 @@
  *
  * @description  A small ECMAScript parser, tokenizer and minifier written in JavaScript
  * @fileoverview JavaScript parser, tokenizer and minifier library
- * @version      2.4.0
+ * @version      2.5.0
  * @date         2015-11-14
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
@@ -870,6 +870,9 @@
       _BreakStatement = 'BreakStatement',
       _CallExpression = 'CallExpression',
       _CatchClause = 'CatchClause',
+      _ClassBody = 'ClassBody',
+      _ClassDeclaration = 'ClassDeclaration',
+      _ClassExpression = 'ClassExpression',
       _ConditionalExpression = 'ConditionalExpression',
       _ContinueStatement = 'ContinueStatement',
       _DoWhileStatement = 'DoWhileStatement',
@@ -894,6 +897,7 @@
       _LabeledStatement = 'LabeledStatement',
       _LogicalExpression = 'LogicalExpression',
       _MemberExpression = 'MemberExpression',
+      _MethodDefinition = 'MethodDefinition',
       _NewExpression = 'NewExpression',
       _ObjectExpression = 'ObjectExpression',
       _ObjectPattern = 'ObjectPattern',
@@ -903,6 +907,7 @@
       _ReturnStatement = 'ReturnStatement',
       _SequenceExpression = 'SequenceExpression',
       _SpreadElement = 'SpreadElement',
+      _Super = 'Super',
       _SwitchCase = 'SwitchCase',
       _SwitchStatement = 'SwitchStatement',
       _TaggedTemplateExpression = 'TaggedTemplateExpression',
@@ -932,7 +937,7 @@
   Parser.prototype = {
     next: function() {
       if (this.token === TOKEN_END) {
-        this.throwError('Unexpected end of input');
+        this.unexpected();
       }
       this.token = this.tokens[++this.index] || TOKEN_END;
       this.value = this.token.value;
@@ -977,11 +982,17 @@
       this.unexpected();
     },
     unexpected: function() {
-      var token = this.value || '';
-      if (token.length > 10) {
-        token = token.substr(0, 10) + '...';
+      var message = 'Unexpected';
+      if (this.token === TOKEN_END) {
+        message += ' end of input';
+      } else {
+        var token = this.value || '';
+        if (token.length > 10) {
+          token = token.substr(0, 10) + '...';
+        }
+        message += " token '" + token + "'";
       }
-      this.throwError("Unexpected token '" + token + "'");
+      this.throwError(message);
     },
     throwError: function(message) {
       var loc = this.token.loc;
@@ -998,7 +1009,7 @@
     },
     finishNode: function(node) {
       if (this.lastGroup && this.lastGroup.expr === node) {
-        // Restore the held position
+        // Restore the kept position
         var startNode = this.lastGroup.startNode;
         var endToken = this.lastGroup.endToken;
         this.lastGroup = null;
@@ -1276,6 +1287,8 @@
       switch (this.value) {
         case 'function':
           return this.parseFunctionExpression();
+        case 'class':
+          return this.parseClassExpression();
         case 'this':
           return this.parseThisExpression();
       }
@@ -1316,7 +1329,7 @@
       var node = this.startNode();
       var expr = this.parseExpression(true);
 
-      // Hold the current position for expression
+      // Keep the current position for expression
       this.lastGroup = {
         expr: expr,
         startNode: node,
@@ -1366,10 +1379,14 @@
     },
     parseObjectProperty: function() {
       var node = this.startNode(_Property);
+      var computed = false;
       var generator;
+
       if (this.value === '*') {
         generator = true;
         this.next();
+      } else if (this.value === '[') {
+        computed = true;
       }
 
       var key = this.parseObjectPropertyName();
@@ -1388,6 +1405,7 @@
       }
 
       node.key = key;
+      node.computed = computed;
       node.value = value;
       node.kind = 'init';
       return this.finishNode(node);
@@ -1395,6 +1413,7 @@
     parseObjectGetterSetter: function() {
       var node = this.startNode(_Property);
       var lookahead = this.lookahead();
+      var computed = false;
       var kind = 'init';
       var key, value;
 
@@ -1406,12 +1425,14 @@
         key = this.parseObjectPropertyName();
         value = this.parseFunction({ expression: true });
       } else {
-        var prev = this.value;
-
+        kind = this.value;
         this.next();
-        if (this.type === _Identifier || this.type === _Keyword ||
+        if (this.value === '[') {
+          computed = true;
+        }
+
+        if (computed || this.type === _Identifier || this.type === _Keyword ||
             this.type === _String || this.type === _Numeric) {
-          kind = prev;
           key = this.parseObjectPropertyName();
           value = this.parseFunction({
             getter: kind === 'get',
@@ -1424,6 +1445,7 @@
       }
 
       node.key = key;
+      node.computed = computed;
       node.value = value;
       node.kind = kind;
       return this.finishNode(node);
@@ -1706,7 +1728,9 @@
       var node = this.startNode();
       var expr;
 
-      if (this.value === 'new') {
+      if (this.value === 'super') {
+        expr = this.parseSuper();
+      } else if (this.value === 'new') {
         expr = this.parseNewExpression();
       } else {
         expr = this.parsePrimaryExpression();
@@ -1727,6 +1751,11 @@
       }
 
       return expr;
+    },
+    parseSuper: function() {
+      var node = this.startNode(_Super);
+      this.expect('super');
+      return this.finishNode(node);
     },
     parseNewExpression: function() {
       var node = this.startNode(_NewExpression);
@@ -1858,6 +1887,8 @@
           return this.parseDebuggerStatement();
         case 'function':
           return this.parseFunctionDeclaration();
+        case 'class':
+          return this.parseClassDeclaration();
         case 'switch':
           return this.parseSwitchStatement();
         case 'do':
@@ -2602,6 +2633,72 @@
 
       node.exported = exported || local;
       node.local = local;
+      return this.finishNode(node);
+    },
+    // ECMA-262 14.5 Class Definitions
+    parseClassDeclaration: function() {
+      return this.parseClass();
+    },
+    parseClassExpression: function() {
+      return this.parseClass(true);
+    },
+    parseClass: function(expression) {
+      var node = this.startNode(expression ? _ClassExpression : _ClassDeclaration);
+      this.expect('class');
+
+      var id = null;
+      if (this.type === _Identifier) {
+        id = this.parseIdentifier();
+      }
+
+      var superClass = null;
+      if (this.value === 'extends') {
+        this.next();
+        superClass = this.parseMemberExpression(true);
+      }
+
+      node.id = id;
+      node.superClass = superClass;
+      node.body = this.parseClassBody();
+      return this.finishNode(node);
+    },
+    parseClassBody: function() {
+      var node = this.startNode(_ClassBody);
+      var body = [];
+
+      this.expect('{');
+
+      while (this.value !== '}') {
+        if (this.value === ';') {
+          this.next();
+          continue;
+        }
+        body[body.length] = this.parseMethodDefinition();
+      }
+
+      this.expect('}');
+      node.body = body;
+      return this.finishNode(node);
+    },
+    parseMethodDefinition: function() {
+      var startNode = this.startNode(_MethodDefinition);
+      var isStatic = false;
+      if (this.value === 'static') {
+        isStatic = true;
+        this.next();
+      }
+
+      var node = this.parseObjectDefinition();
+      this.startNodeAt(node, startNode);
+      node.type = _MethodDefinition;
+      node['static'] = isStatic;
+
+      if (node.key.name === 'constructor') {
+        node.kind = 'constructor';
+      } else if (node.kind === 'init') {
+        node.kind = 'method';
+      }
+
       return this.finishNode(node);
     },
     parseMaybeExpressionStatement: function() {
