@@ -987,8 +987,8 @@
         message += ' end of input';
       } else {
         var token = this.value || '';
-        if (token.length > 10) {
-          token = token.substr(0, 10) + '...';
+        if (token.length > 16) {
+          token = token.substr(0, 16) + '...';
         }
         message += " token '" + token + "'";
       }
