@@ -160,54 +160,59 @@
 
   function getPattern(ignore) {
     return new RegExp(
-      '(?:' +
-            // (1) multiline comment
-            '(' + '/[*][\\s\\S]*?[*]/' + ')' +
-            // (2) single line comment
-      '|' + '(' + '//[^' + lineTerminator + ']*' +
-            '|' + '<!--[^' + lineTerminator + ']*' +
-            ')' +
-            // (3) line terminators
-      '|' + '(?:^|(' + lineTerminatorSequence + '))' +
-            '(?:' + whiteSpace + '|)' +
-            // (4) single line comment
-            '(' + '-->[^' + lineTerminator + ']*' +
-            ')' +
-            // (5) template literal
-      '|' + '(' + (ignore === _Template ? whiteSpace : templateLiteral) +
-            ')' + literalSuffix +
-            // (6) string literal
-      '|' + '(' + '"(?:' + '\\\\\\r\\n' +
-                     '|' + '\\\\[\\s\\S]' +
-                     '|' + '[^"' + lineTerminator + '\\\\]' +
-                   ')*"' +
-            '|' + "'(?:" + '\\\\\\r\\n' +
-                     '|' + '\\\\[\\s\\S]' +
-                     '|' + "[^'" + lineTerminator + "\\\\]" +
-                    ")*'" +
-            ')' +
-            // (7) regular expression literal
-      '|' + '(' + (ignore === _RegularExpression ? whiteSpace : regexpLiteral) +
-            ')' + literalSuffix +
-            // (8) numeric literal
-      '|' + '(' + '0(?:' + '[xX][0-9a-fA-F]+' +
-                     '|' + '[oO][0-7]+' +
-                     '|' + '[bB][01]+' +
-                     ')' +
-            '|' + '(?:\\d+(?:[.]\\d*)?|[.]\\d+)(?:[eE][+-]?\\d+)?' +
-            '|' + '[1-9]\\d*' +
-            '|' + '0[0-7]+' +
-            ')' +
-            // (9) operators
-      '|' + '(' + punctuators + ')' +
-            // (10) whitespace
+      '(' +
+            // MultiLine Comment
+            '/[*][\\s\\S]*?[*]/' +
+
+            // SingleLine Comment
+      '|' + '//[^' + lineTerminator + ']*' +
+      '|' + '<!--[^' + lineTerminator + ']*' +
+
+            // Line Terminators
+      '|' + '(?:^|' + lineTerminatorSequence + ')' +
+            '(?:' + whiteSpace + ')?' +
+            // SingleLine Comment
+            '-->[^' + lineTerminator + ']*' +
+
+            // Template Literal
+      (ignore === _Template ? '' :
+        '|' + templateLiteral + literalSuffix) +
+
+            // String Literal
+      '|' + '"(?:' + '\\\\\\r\\n' +
+               '|' + '\\\\[\\s\\S]' +
+               '|' + '[^"' + lineTerminator + '\\\\]' +
+               ')*"' +
+      '|' + "'(?:" + '\\\\\\r\\n' +
+               '|' + '\\\\[\\s\\S]' +
+               '|' + "[^'" + lineTerminator + "\\\\]" +
+               ")*'" +
+
+            // Regular Expression Literal
+      (ignore === _RegularExpression ? '' :
+        '|' + regexpLiteral + literalSuffix) +
+
+            // Numeric Literal
+      '|' + '0(?:' + '[xX][0-9a-fA-F]+' +
+               '|' + '[oO][0-7]+' +
+               '|' + '[bB][01]+' +
+               ')' +
+      '|' + '(?:\\d+(?:[.]\\d*)?|[.]\\d+)(?:[eE][+-]?\\d+)?' +
+      '|' + '[1-9]\\d*' +
+      '|' + '0[0-7]+' +
+
+            // Operators
+      '|' + punctuators +
+
+            // WhiteSpace
       (ignore === _WhiteSpace ? '' :
-        '|' + '(' + whiteSpace + ')') +
-            // (11) line terminators
-      '|' + '(' + lineTerminatorSequence + ')' +
-            // (12) identifier
-      '|' + '(' + (ignore === _Template ? '[\\s\\S]' : identToken) +
-            ')' +
+        '|' + whiteSpace) +
+
+            // Line Terminators
+      '|' + lineTerminatorSequence +
+
+            // Identifier
+      '|' + (ignore === _Template ? '[\\s\\S]' : identToken) +
       ')',
       'g'
     );
@@ -409,20 +414,19 @@
           if (value === 'null') {
             return _Null;
           }
-
-          ch = c.charCodeAt(0);
-          if (ch === 0x20 || ch === 0x09 || whiteSpaceRe.test(c)) {
+          if (whiteSpaceRe.test(c)) {
             return _WhiteSpace;
           }
+          if (isPunctuator(c)) {
+            return _Punctuator;
+          }
 
+          ch = c.charCodeAt(0);
           if (isLineTerminator(ch)) {
             return _LineTerminator;
           }
           if (isDigit(ch)) {
             return _Numeric;
-          }
-          if (isPunctuator(c)) {
-            return _Punctuator;
           }
 
           if (keywordsRe.test(value)) {
