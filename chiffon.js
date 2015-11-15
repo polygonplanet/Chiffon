@@ -3,8 +3,8 @@
  *
  * @description  A small ECMAScript parser, tokenizer and minifier written in JavaScript
  * @fileoverview JavaScript parser, tokenizer and minifier library
- * @version      2.5.0
- * @date         2015-11-14
+ * @version      2.5.1
+ * @date         2015-11-15
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
  * @license      Licensed under the MIT license.

@@ -1,7 +1,7 @@
 {
   "name": "chiffon",
   "main": "chiffon.js",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "homepage": "https://github.com/polygonplanet/Chiffon",
   "authors": [
     "polygonplanet <polygon.planet.aqua@gmail.com>"
