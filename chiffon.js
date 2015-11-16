@@ -1839,7 +1839,6 @@
         tail = true;
       }
 
-      var c = this.value.charAt(0);
       var endPos = tail ? -1 : -2;
       raw = this.value.slice(1, endPos);
 
