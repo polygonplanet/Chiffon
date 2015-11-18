@@ -32,7 +32,6 @@
   var Chiffon = {};
 
   var arrayProto = Array.prototype;
-  var objectProto = Object.prototype;
   var push = arrayProto.push;
   var slice = arrayProto.slice;
   var splice = arrayProto.splice;
