@@ -1,0 +1,1 @@
+var a = '\ud842\udfb7\u91ce\u5bb6\u3067\ud867\ude3d';
