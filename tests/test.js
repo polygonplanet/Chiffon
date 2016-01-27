@@ -346,6 +346,14 @@ function filterForEsprima(ast) {
         delete node.defaults;
         delete node.generator;
       }
+    },
+    {
+      type: 'ObjectPattern',
+      callback: function(node) {
+        node.properties.forEach(function(property) {
+          delete property.computed;
+        });
+      }
     }
   ]);
   return ast;

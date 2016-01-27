@@ -2086,7 +2086,7 @@
     },
     parseBindingElement: function() {
       var pattern = this.parseBindingPattern();
-      if (pattern.type === _Identifier && this.value === '=') {
+      if (this.value === '=') {
         return this.parseAssignmentPattern(pattern);
       }
       return pattern;
