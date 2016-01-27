@@ -1545,6 +1545,10 @@
         return left;
       }
 
+      if (left.type === _ArrayExpression) {
+        left.type = _ArrayPattern;
+      }
+
       var operator = this.value;
       this.next();
       var right = this.parseAssignmentExpression(allowIn);
