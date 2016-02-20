@@ -1403,6 +1403,12 @@
           expression: true,
           generator: generator
         });
+      } else if (key.type === _Identifier) {
+        if (this.value === '=') {
+          value = this.parseAssignmentPattern(key);
+        } else {
+          value = key;
+        }
       } else {
         this.unexpected();
       }
@@ -1530,6 +1536,29 @@
       node.expressions = exprs;
       return this.finishNode(node);
     },
+    reinterpretExpression: function(expr) {
+      var i, len;
+
+      switch (expr.type) {
+        case _AssignmentExpression:
+          expr.type = _AssignmentPattern;
+          this.reinterpretExpression(expr.left);
+          break;
+        case _ArrayExpression:
+          expr.type = _ArrayPattern;
+          for (i = 0, len = expr.elements.length; i < len; i++) {
+            if (expr.elements[i] !== null) {
+              this.reinterpretExpression(expr.elements[i]);
+            }
+          }
+          break;
+        case _ObjectExpression:
+          expr.type = _ObjectPattern;
+          for (i = 0, len = expr.properties.length; i < len; i++) {
+            this.reinterpretExpression(expr.properties[i].value);
+          }
+      }
+    },
     parseAssignmentExpression: function(allowIn) {
       if (this.inGenerator && this.value === 'yield') {
         return this.parseYieldExpression();
@@ -1544,10 +1573,7 @@
       if (!assignOpRe.test(this.value)) {
         return left;
       }
-
-      if (left.type === _ArrayExpression) {
-        left.type = _ArrayPattern;
-      }
+      this.reinterpretExpression(left);
 
       var operator = this.value;
       this.next();
