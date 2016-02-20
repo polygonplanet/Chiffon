@@ -3,10 +3,10 @@
  *
  * @description  A small ECMAScript parser, tokenizer and minifier written in JavaScript
  * @fileoverview JavaScript parser, tokenizer and minifier library
- * @version      2.5.1
- * @date         2015-11-15
+ * @version      2.5.3
+ * @date         2016-02-21
  * @link         https://github.com/polygonplanet/Chiffon
- * @copyright    Copyright (c) 2015 polygon planet <polygon.planet.aqua@gmail.com>
+ * @copyright    Copyright (c) 2015-2016 polygon planet <polygon.planet.aqua@gmail.com>
  * @license      Licensed under the MIT license.
  */
 
@@ -32,7 +32,6 @@
   var Chiffon = {};
 
   var arrayProto = Array.prototype;
-  var objectProto = Object.prototype;
   var push = arrayProto.push;
   var slice = arrayProto.slice;
   var splice = arrayProto.splice;
@@ -1404,6 +1403,12 @@
           expression: true,
           generator: generator
         });
+      } else if (key.type === _Identifier) {
+        if (this.value === '=') {
+          value = this.parseAssignmentPattern(key);
+        } else {
+          value = key;
+        }
       } else {
         this.unexpected();
       }
@@ -1531,6 +1536,29 @@
       node.expressions = exprs;
       return this.finishNode(node);
     },
+    reinterpretExpression: function(expr) {
+      var i, len;
+
+      switch (expr.type) {
+        case _AssignmentExpression:
+          expr.type = _AssignmentPattern;
+          this.reinterpretExpression(expr.left);
+          break;
+        case _ArrayExpression:
+          expr.type = _ArrayPattern;
+          for (i = 0, len = expr.elements.length; i < len; i++) {
+            if (expr.elements[i] !== null) {
+              this.reinterpretExpression(expr.elements[i]);
+            }
+          }
+          break;
+        case _ObjectExpression:
+          expr.type = _ObjectPattern;
+          for (i = 0, len = expr.properties.length; i < len; i++) {
+            this.reinterpretExpression(expr.properties[i].value);
+          }
+      }
+    },
     parseAssignmentExpression: function(allowIn) {
       if (this.inGenerator && this.value === 'yield') {
         return this.parseYieldExpression();
@@ -1545,6 +1573,7 @@
       if (!assignOpRe.test(this.value)) {
         return left;
       }
+      this.reinterpretExpression(left);
 
       var operator = this.value;
       this.next();
@@ -1839,7 +1868,6 @@
         tail = true;
       }
 
-      var c = this.value.charAt(0);
       var endPos = tail ? -1 : -2;
       raw = this.value.slice(1, endPos);
 
@@ -2088,7 +2116,7 @@
     },
     parseBindingElement: function() {
       var pattern = this.parseBindingPattern();
-      if (pattern.type === _Identifier && this.value === '=') {
+      if (this.value === '=') {
         return this.parseAssignmentPattern(pattern);
       }
       return pattern;
