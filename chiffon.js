@@ -269,9 +269,9 @@
 
   Tokenizer.prototype = {
     parseMatches: function(matches, tokens) {
-      var token, value, len, index, lines, range, loc;
+      var token, value, len, index, lines;
       var lineStart, columnStart, columnEnd, hasLineTerminator;
-      var type, regex, ch, c;
+      var type, regex;
 
       for (var i = 0; i < matches.length; i++) {
         value = matches[i];
@@ -717,7 +717,6 @@
         }
 
         var ws;
-        var prevType = prev.type;
         var prevValue = prev.value;
 
         if (tokenType === _Punctuator) {
@@ -1121,7 +1120,7 @@
       var s = '';
       var i = 1;
       var len = value.length - 1;
-      var c, c2, ch, hex, n, index, length;
+      var c, c2, hex, n, index, length;
 
       while (i < len) {
         c = value.charAt(i++);
@@ -1217,7 +1216,6 @@
           } catch (e) {
             value = null;
           }
-          regex = regex;
           break;
         case _Boolean:
           value = raw === 'true';
