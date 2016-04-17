@@ -1564,7 +1564,11 @@
       var node = this.startNode(_AssignmentExpression);
       var left = this.parseConditionalExpression(allowIn);
 
-      if (this.value === '=>' && left.type === _ArrowParameters) {
+      if (this.value === '=>' || left.type === _ArrowParameters) {
+        if (left.type === _Identifier) {
+          left.params = [mixin({}, left)];
+          left.startNode = node;
+        }
         return this.parseArrowFunctionExpression(left);
       }
 
