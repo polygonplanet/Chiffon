@@ -3,8 +3,8 @@
  *
  * @description  A small ECMAScript parser, tokenizer and minifier written in JavaScript
  * @fileoverview JavaScript parser, tokenizer and minifier library
- * @version      2.5.3
- * @date         2016-02-21
+ * @version      2.5.4
+ * @date         2016-04-17
  * @link         https://github.com/polygonplanet/Chiffon
  * @copyright    Copyright (c) 2015-2016 polygon planet <polygon.planet.aqua@gmail.com>
  * @license      Licensed under the MIT license.
@@ -269,9 +269,9 @@
 
   Tokenizer.prototype = {
     parseMatches: function(matches, tokens) {
-      var token, value, len, index, lines, range, loc;
+      var token, value, len, index, lines;
       var lineStart, columnStart, columnEnd, hasLineTerminator;
-      var type, regex, ch, c;
+      var type, regex;
 
       for (var i = 0; i < matches.length; i++) {
         value = matches[i];
@@ -717,7 +717,6 @@
         }
 
         var ws;
-        var prevType = prev.type;
         var prevValue = prev.value;
 
         if (tokenType === _Punctuator) {
@@ -1121,7 +1120,7 @@
       var s = '';
       var i = 1;
       var len = value.length - 1;
-      var c, c2, ch, hex, n, index, length;
+      var c, c2, hex, n, index, length;
 
       while (i < len) {
         c = value.charAt(i++);
@@ -1217,7 +1216,6 @@
           } catch (e) {
             value = null;
           }
-          regex = regex;
           break;
         case _Boolean:
           value = raw === 'true';
@@ -1566,7 +1564,11 @@
       var node = this.startNode(_AssignmentExpression);
       var left = this.parseConditionalExpression(allowIn);
 
-      if (this.value === '=>' && left.type === _ArrowParameters) {
+      if (this.value === '=>' || left.type === _ArrowParameters) {
+        if (left.type === _Identifier) {
+          left.params = [mixin({}, left)];
+          left.startNode = node;
+        }
         return this.parseArrowFunctionExpression(left);
       }
 
