@@ -1327,35 +1327,59 @@
         };
       }
 
-      var node = this.startNode();
-      var expr = this.parseExpression(true);
+      var innerStart = this.startNode();
+      var items = [];
+      var restElement = null;
 
-      // Keep the current position for expression
-      this.lastGroup = {
-        expr: expr,
-        startNode: node,
-        endToken: this.tokens[this.index - 1]
-      };
+      while (true) {
+        if (this.value === '...') {
+          restElement = this.parseRestElement();
+          break;
+        }
+        items[items.length] = this.parseAssignmentExpression(true);
+        if (this.value !== ',') {
+          break;
+        }
+        this.next();
+      }
 
+      var endToken = this.tokens[this.index - 1];
       this.expect(')');
 
-      if (this.value === '=>') {
+      // Arrow function: rest forces it; otherwise `=>` lookahead.
+      if (restElement || this.value === '=>') {
         var params = [];
-
-        if (expr.type === _SequenceExpression) {
-          params = expr.expressions;
-        } else if (expr.type === _Identifier) {
-          params = [expr];
-        } else {
-          this.unexpected();
+        for (var i = 0, len = items.length; i < len; i++) {
+          this.reinterpretExpression(items[i]);
+          params[params.length] = items[i];
         }
-
-        expr = {
+        if (restElement) {
+          params[params.length] = restElement;
+        }
+        return {
           type: _ArrowParameters,
           params: params,
           startNode: startNode
         };
       }
+
+      var expr;
+      if (items.length === 1) {
+        expr = items[0];
+      } else {
+        expr = this.startNode(_SequenceExpression);
+        this.startNodeAt(expr, innerStart);
+        expr.expressions = items;
+        expr = this.finishNodeAt(expr, endToken);
+      }
+
+      // Keep the inner expression's position so a parent's startNodeAt
+      // does not extend the range to include the outer parens.
+      this.lastGroup = {
+        expr: expr,
+        startNode: innerStart,
+        endToken: endToken
+      };
 
       return expr;
     },
@@ -1511,11 +1535,6 @@
       node.elements = elems;
       return this.finishNode(node);
     },
-    parseSpreadElement: function() {
-      var node = this.parseRestElement();
-      node.type = _SpreadElement;
-      return node;
-    },
     // ECMA-262 A.2 Expressions
     parseExpression: function(allowIn) {
       var node = this.startNode(_SequenceExpression);
@@ -1555,6 +1574,11 @@
           for (i = 0, len = expr.properties.length; i < len; i++) {
             this.reinterpretExpression(expr.properties[i].value);
           }
+          break;
+        case _SpreadElement:
+          expr.type = _RestElement;
+          this.reinterpretExpression(expr.argument);
+          break;
       }
     },
     parseAssignmentExpression: function(allowIn) {
@@ -1839,9 +1863,15 @@
     },
     parseArguments: function(node) {
       this.parseCommaSeparatedElements('(', ')', node.arguments,
-        this.parseAssignmentExpression, [true]);
+        this._parseArgumentsCallback);
 
       return node;
+    },
+    _parseArgumentsCallback: function() {
+      if (this.value === '...') {
+        return this.parseSpreadElement();
+      }
+      return this.parseAssignmentExpression(true);
     },
     parseTemplateLiteral: function() {
       var node = this.startNode(_TemplateLiteral);
@@ -2035,8 +2065,8 @@
       } else if (options.setter) {
         this.parseParams(node);
       } else {
-        if (this.type === _Identifier) {
-          node.id = this.parseIdentifier();
+        if (this.type === _Identifier || this.value === 'yield') {
+          node.id = this.parseIdentifier(true);
         }
         this.parseParams(node);
       }
@@ -2095,9 +2125,14 @@
       var node = this.startNode(_RestElement);
 
       this.expect('...');
-      var argument = this.parseIdentifier();
+      node.argument = this.parseBindingPattern();
+      return this.finishNode(node);
+    },
+    parseSpreadElement: function() {
+      var node = this.startNode(_SpreadElement);
 
-      node.argument = argument;
+      this.expect('...');
+      node.argument = this.parseAssignmentExpression(true);
       return this.finishNode(node);
     },
     // ECMA-262 13.3.3 Destructuring Binding Patterns
@@ -2717,7 +2752,9 @@
     parseMethodDefinition: function() {
       var startNode = this.startNode(_MethodDefinition);
       var isStatic = false;
-      if (this.value === 'static') {
+      // `static` is the static modifier unless it is itself the method name,
+      // e.g. `class A { static() {} }`.
+      if (this.value === 'static' && this.lookahead().value !== '(') {
         isStatic = true;
         this.next();
       }

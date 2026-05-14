@@ -1,7 +1,7 @@
-{
+module.exports = {
     "range": [
         0,
-        4
+        5
     ],
     "loc": {
         "start": {
@@ -10,7 +10,7 @@
         },
         "end": {
             "line": 1,
-            "column": 4
+            "column": 5
         }
     },
     "type": "Program",
@@ -18,7 +18,7 @@
         {
             "range": [
                 0,
-                4
+                5
             ],
             "loc": {
                 "start": {
@@ -27,14 +27,14 @@
                 },
                 "end": {
                     "line": 1,
-                    "column": 4
+                    "column": 5
                 }
             },
             "type": "ExpressionStatement",
             "expression": {
                 "range": [
                     0,
-                    4
+                    5
                 ],
                 "loc": {
                     "start": {
@@ -43,17 +43,17 @@
                     },
                     "end": {
                         "line": 1,
-                        "column": 4
+                        "column": 5
                     }
                 },
                 "type": "Literal",
-                "value": {},
-                "raw": "/42/",
+                "value": /42/g,
+                "raw": "/42/g",
                 "regex": {
                     "pattern": "42",
-                    "flags": ""
+                    "flags": "g"
                 }
             }
         }
     ]
-}
+};
