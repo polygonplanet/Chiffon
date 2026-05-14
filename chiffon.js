@@ -112,15 +112,17 @@
   // e.g. `if (1) /a/`
   var regexParenWords = 'if|while|for|with';
 
+  // Reserved Words
   var keywordsRe = new RegExp('^(?:' +
-    // ECMA-262 11.6.2.1 Keywords
     regexParenWords + '|' + regexPreWords + '|' +
     'var|function|this|new|break|catch|finally|try|default|continue|' +
-    'switch|const|export|import|class|extends|debugger|super|' +
-    // Reserved keywords
-    'let|static|' +
+    'switch|const|export|import|class|extends|debugger|super|enum' +
+
     // ECMA-262 11.6.2.2 Future Reserved Words
-    'enum|await|' +
+    // Contextually disallowed as identifiers, in strict mode code:
+    // `await` is not defined in this pattern because it acts as a keyword only
+    // inside async contexts; otherwise, it is treated as a valid identifier.
+    'let|static|' +
     'implements|package|protected|interface|private|public' +
   ')$');
 
@@ -216,7 +218,6 @@
       'g'
     );
   }
-
 
   function fromCodePoint(c) {
     if (c <= 0xFFFF) {
