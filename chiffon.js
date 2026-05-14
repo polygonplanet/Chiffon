@@ -1342,6 +1342,10 @@
           break;
         }
         this.next();
+        // ES2017: trailing comma in arrow parameters
+        if (this.value === ')') {
+          break;
+        }
       }
 
       var endToken = this.tokens[this.index - 1];
