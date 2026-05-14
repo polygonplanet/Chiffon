@@ -1,0 +1,14 @@
+module.exports = [
+    {
+        "type": "Numeric",
+        "value": "2"
+    },
+    {
+        "type": "Punctuator",
+        "value": "**"
+    },
+    {
+        "type": "Numeric",
+        "value": "3"
+    }
+];
