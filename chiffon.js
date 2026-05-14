@@ -70,7 +70,7 @@
 
   // ECMA-262 11.7 Punctuators
   var punctuators = '(?:' +
-          '>>>=?|[.]{3}|<<=|===|!==|>>=' +
+          '>>>=?|[.]{3}|<<=|===|!==|>>=|[*][*]=?' +
     '|' + '[+][+](?=[+])|--(?=-)' +
     '|' + '[=!<>*%+/&|^-]=' +
     '|' + '&&|[|][|]|[+][+]|--|<<|>>|=>' +
@@ -927,7 +927,7 @@
       _YieldExpression = 'YieldExpression';
 
 
-  var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=)$/;
+  var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=|[*][*]=)$/;
   var unaryOpRe = /^(?:[-+!~]|\+\+|--|typeof|void|delete)$/;
   var octalDigitRe = /^0[0-7]+$/;
 
@@ -1715,7 +1715,7 @@
       }
 
       var startNode = this.startNode();
-      var left = this.parseUnaryExpression();
+      var left = this.parseExponentiationExpression();
       var prec = this.getBinaryPrecedence(allowIn);
       if (!prec) {
         return left;
@@ -1734,7 +1734,7 @@
           this.next();
 
           if (prec === 1) {
-            right = this.parseUnaryExpression();
+            right = this.parseExponentiationExpression();
           } else {
             right = this.parseBinaryExpression(allowIn, prec - 1);
           }
@@ -1750,6 +1750,24 @@
 
       this.startNodeAt(left, startNode);
       return this.finishNode(left);
+    },
+    // ECMA-262 12.6 Exponentiation Operator (ES2016).
+    // Right-associative; binds tighter than multiplicative.
+    parseExponentiationExpression: function() {
+      var startNode = this.startNode();
+      var left = this.parseUnaryExpression();
+      if (this.value !== '**') {
+        return left;
+      }
+
+      var node = this.startNode(_BinaryExpression);
+      this.startNodeAt(node, startNode);
+      this.next();
+
+      node.operator = '**';
+      node.left = left;
+      node.right = this.parseExponentiationExpression();
+      return this.finishNode(node);
     },
     parseUnaryExpression: function() {
       var value = this.value;
