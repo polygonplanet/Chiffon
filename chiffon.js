@@ -116,7 +116,7 @@
   var keywordsRe = new RegExp('^(?:' +
     regexParenWords + '|' + regexPreWords + '|' +
     'var|function|this|new|break|catch|finally|try|default|continue|' +
-    'switch|const|export|import|class|extends|debugger|super|enum' +
+    'switch|const|export|import|class|extends|debugger|super|enum|' +
 
     // ECMA-262 11.6.2.2 Future Reserved Words
     // Contextually disallowed as identifiers, in strict mode code:
@@ -868,6 +868,7 @@
       _ArrayPattern = 'ArrayPattern',
       _ArrowFunctionExpression = 'ArrowFunctionExpression',
       _ArrowParameters = 'ArrowParameters',
+      _AwaitExpression = 'AwaitExpression',
       _BlockStatement = 'BlockStatement',
       _BinaryExpression = 'BinaryExpression',
       _BreakStatement = 'BreakStatement',
@@ -1266,6 +1267,15 @@
     },
     // ECMA-262 12.2 Primary Expression
     parsePrimaryExpression: function() {
+      // Detect async function before treating it as a plain Identifier
+      // because `async` is a contextual keyword.
+      if (this.isAsyncFunctionAhead()) {
+        this.next(); // consume 'async'
+        return this.parseFunctionExpression({ async: true });
+      }
+      if (this.isAsyncArrowAhead()) {
+        return this.parseAsyncArrowHead();
+      }
       switch (this.type) {
         case _Numeric:
         case _String:
@@ -1284,6 +1294,25 @@
         default:
           this.unexpected();
       }
+    },
+    parseAsyncArrowHead: function() {
+      var startNode = this.startNode();
+      this.next(); // consume 'async'
+
+      var head;
+      if (this.value === '(') {
+        head = this.parseGroupExpression();
+      } else {
+        // single-identifier param: `async ident =>`
+        var id = this.parseIdentifier(true);
+        head = {
+          type: _ArrowParameters,
+          params: [id]
+        };
+      }
+      head.async = true;
+      head.startNode = startNode;
+      return head;
     },
     parsePrimaryKeywordExpression: function() {
       switch (this.value) {
@@ -1410,7 +1439,20 @@
     parseObjectProperty: function() {
       var node = this.startNode(_Property);
       var computed = false;
-      var generator;
+      var generator = false;
+      var isAsync = false;
+
+      // `async method() {}`
+      // `async` is the modifier only when followed by a property name
+      // (not by `(`, `:`, `,`, `}`, or `=`) on the same line.
+      if (this.value === 'async' && !this.lookahead().hasLineTerminator) {
+        var afterAsync = this.lookahead().value;
+        if (afterAsync !== '(' && afterAsync !== ':' &&
+          afterAsync !== ',' && afterAsync !== '}' && afterAsync !== '=') {
+          isAsync = true;
+          this.next();
+        }
+      }
 
       if (this.value === '*') {
         generator = true;
@@ -1428,7 +1470,8 @@
       } else if (this.value === '(') {
         value = this.parseFunction({
           expression: true,
-          generator: generator
+          generator: generator,
+          async: isAsync
         });
       } else if (key.type === _Identifier) {
         if (this.value === '=') {
@@ -1638,8 +1681,12 @@
       this.expect('=>');
 
       var params = expr.params || [];
+      var isAsync = !!expr.async;
       var expression = false;
       var body;
+
+      var prevInAsync = this.inAsync;
+      this.inAsync = isAsync;
 
       if (this.value === '{') {
         body = this.parseBlockStatement();
@@ -1648,9 +1695,20 @@
         expression = true;
       }
 
+      this.inAsync = prevInAsync;
+
       node.params = params;
       node.body = body;
+      if (isAsync) {
+        node.async = true;
+      }
       node.expression = expression;
+      return this.finishNode(node);
+    },
+    parseAwaitExpression: function() {
+      var node = this.startNode(_AwaitExpression);
+      this.expect('await');
+      node.argument = this.parseUnaryExpression();
       return this.finishNode(node);
     },
     parseYieldExpression: function() {
@@ -1776,6 +1834,9 @@
     },
     parseUnaryExpression: function() {
       var value = this.value;
+      if (this.inAsync && value === 'await') {
+        return this.parseAwaitExpression();
+      }
       if (!unaryOpRe.test(value)) {
         return this.parsePostfixExpression();
       }
@@ -1945,8 +2006,54 @@
       node.quasi = quasi;
       return this.finishNode(node);
     },
+    isAsyncFunctionAhead: function() {
+      if (this.value !== 'async') {
+        return false;
+      }
+      var next = this.lookahead();
+      return next.value === 'function' && !next.hasLineTerminator;
+    },
+    isAsyncArrowAhead: function() {
+      if (this.value !== 'async') {
+        return false;
+      }
+
+      var next = this.lookahead();
+      if (!next || next.hasLineTerminator) {
+        return false;
+      }
+
+      // `async ident =>`
+      if (next.type === _Identifier) {
+        var afterIdent = this.tokens[this.index + 2];
+        return !!(afterIdent && afterIdent.value === '=>' &&
+          !afterIdent.hasLineTerminator);
+      }
+
+      // `async (...) =>`
+      if (next.value === '(') {
+        var depth = 0;
+        for (var i = this.index + 1, len = this.tokens.length; i < len; i++) {
+          var token = this.tokens[i];
+          if (token.value === '(') {
+            depth++;
+          } else if (token.value === ')') {
+            if (--depth === 0) {
+              var after = this.tokens[i + 1];
+              return !!(after && after.value === '=>' &&
+                !after.hasLineTerminator);
+            }
+          }
+        }
+      }
+      return false;
+    },
     // ECMA-262 13 ECMAScript Language: Statements and Declarations
     parseStatement: function() {
+      if (this.isAsyncFunctionAhead()) {
+        this.next(); // consume 'async'
+        return this.parseFunctionDeclaration({ async: true });
+      }
       switch (this.value) {
         case '{':
           return this.parseBlockStatement();
@@ -2048,14 +2155,17 @@
       return this.finishNode(node);
     },
     // ECMA-262 14.1 Function Definitions
-    parseFunctionDeclaration: function() {
-      return this.parseFunctionDefinition();
+    parseFunctionDeclaration: function(options) {
+      return this.parseFunctionDefinition(options || {});
     },
-    parseFunctionExpression: function() {
-      return this.parseFunctionDefinition(true);
+    parseFunctionExpression: function(options) {
+      options = options || {};
+      options.expression = true;
+      return this.parseFunctionDefinition(options);
     },
-    parseFunctionDefinition: function(expression) {
-      var node = this.startNode();
+    parseFunctionDefinition: function(options) {
+      options = options || {};
+      var node = options.node || this.startNode();
       var generator = false;
 
       this.expect('function');
@@ -2067,7 +2177,8 @@
       return this.parseFunction({
         node: node,
         generator: generator,
-        expression: expression
+        expression: options.expression,
+        async: options.async
       });
     },
     parseFunction: function(options) {
@@ -2080,6 +2191,9 @@
       node.defaults = [];
       node.body = null;
       node.generator = !!options.generator;
+      if (options.async) {
+        node.async = true;
+      }
       node.expression = false;
 
       if (options.getter) {
@@ -2088,16 +2202,20 @@
       } else if (options.setter) {
         this.parseParams(node);
       } else {
-        if (this.type === _Identifier || this.value === 'yield') {
+        if (this.type === _Identifier || this.value === 'yield' ||
+          (this.value === 'await' && !this.inAsync)) {
           node.id = this.parseIdentifier(true);
         }
         this.parseParams(node);
       }
 
       var prevInGenerator = this.inGenerator;
+      var prevInAsync = this.inAsync;
       this.inGenerator = node.generator;
+      this.inAsync = node.async;
       node.body = this.parseBlockStatement();
       this.inGenerator = prevInGenerator;
+      this.inAsync = prevInAsync;
       return this.finishNode(node);
     },
     parseParams: function(node) {
@@ -2663,6 +2781,10 @@
       if (this.value === 'function') {
         expr = this.parseFunctionDeclaration();
         skipSemicolon = true;
+      } else if (this.isAsyncFunctionAhead()) {
+        this.next(); // consume 'async'
+        expr = this.parseFunctionDeclaration({ async: true });
+        skipSemicolon = true;
       } else {
         expr = this.parseAssignmentExpression(true);
       }
@@ -2693,8 +2815,8 @@
       var specs = [];
       var source = null;
 
-      if (this.type === _Keyword) {
-        // export var|let|const|function|...
+      if (this.type === _Keyword || this.isAsyncFunctionAhead()) {
+        // export var|let|const|function|async function|...
         decl = this.parseStatement();
       } else {
         this.parseCommaSeparatedElements('{', '}', specs,
