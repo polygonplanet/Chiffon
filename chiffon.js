@@ -2188,7 +2188,6 @@
       node.type = options.expression ? _FunctionExpression : _FunctionDeclaration;
       node.id = null;
       node.params = [];
-      node.defaults = [];
       node.body = null;
       node.generator = !!options.generator;
       if (options.async) {
@@ -2226,35 +2225,17 @@
           break;
         }
       }
-
-      if (!node._hasDefaults) {
-        node.defaults.length = 0;
-      } else {
-        delete node._hasDefaults;
-      }
-
       this.expect(')');
     },
     parseParam: function(node) {
       var params = node.params;
-      var defaults = node.defaults;
-
       if (this.value === '...') {
         params[params.length] = this.parseRestElement();
-        defaults[defaults.length] = null;
         return false;
       }
 
       var pattern = this.parseBindingElement();
-
-      if (pattern.type === _AssignmentPattern) {
-        params[params.length] = pattern.left;
-        defaults[defaults.length] = pattern.right;
-        node._hasDefaults = true;
-      } else {
-        params[params.length] = pattern;
-        defaults[defaults.length] = null;
-      }
+      params[params.length] = pattern;
 
       if (this.value !== ')') {
         this.expect(',');
