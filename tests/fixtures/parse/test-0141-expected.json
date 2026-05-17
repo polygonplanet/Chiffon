@@ -616,7 +616,6 @@
                     ]
                 }
             ],
-            "defaults": [],
             "body": {
                 "range": [
                     75,

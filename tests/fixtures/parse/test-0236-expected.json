@@ -50,7 +50,6 @@
                 "name": "a"
             },
             "params": [],
-            "defaults": [],
             "body": {
                 "range": [
                     14,
@@ -118,7 +117,6 @@
                                 "type": "FunctionExpression",
                                 "id": null,
                                 "params": [],
-                                "defaults": [],
                                 "body": {
                                     "range": [
                                         37,

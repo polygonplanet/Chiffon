@@ -64,11 +64,11 @@
                             }
                         },
                         "type": "TemplateElement",
+                        "tail": false,
                         "value": {
-                            "raw": "1 + 1 = ",
-                            "cooked": "1 + 1 = "
-                        },
-                        "tail": false
+                            "cooked": "1 + 1 = ",
+                            "raw": "1 + 1 = "
+                        }
                     },
                     {
                         "range": [
@@ -86,11 +86,11 @@
                             }
                         },
                         "type": "TemplateElement",
+                        "tail": true,
                         "value": {
-                            "raw": "",
-                            "cooked": ""
-                        },
-                        "tail": true
+                            "cooked": "",
+                            "raw": ""
+                        }
                     }
                 ],
                 "expressions": [

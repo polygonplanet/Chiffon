@@ -49,7 +49,6 @@
                 "type": "FunctionDeclaration",
                 "id": null,
                 "params": [],
-                "defaults": [],
                 "body": {
                     "range": [
                         25,

@@ -153,7 +153,6 @@
                                         "name": "a"
                                     },
                                     "params": [],
-                                    "defaults": [],
                                     "body": {
                                         "range": [
                                             29,

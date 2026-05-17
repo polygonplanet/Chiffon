@@ -53,7 +53,7 @@
                 {
                     "range": [
                         11,
-                        20
+                        25
                     ],
                     "loc": {
                         "start": {
@@ -62,71 +62,106 @@
                         },
                         "end": {
                             "line": 1,
-                            "column": 20
+                            "column": 25
                         }
                     },
-                    "type": "ArrayPattern",
-                    "elements": [
-                        {
-                            "range": [
-                                12,
-                                13
-                            ],
-                            "loc": {
-                                "start": {
-                                    "line": 1,
-                                    "column": 12
-                                },
-                                "end": {
-                                    "line": 1,
-                                    "column": 13
-                                }
+                    "type": "AssignmentPattern",
+                    "left": {
+                        "range": [
+                            11,
+                            20
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 11
                             },
-                            "type": "Identifier",
-                            "name": "a"
+                            "end": {
+                                "line": 1,
+                                "column": 20
+                            }
                         },
-                        {
-                            "range": [
-                                15,
-                                16
-                            ],
-                            "loc": {
-                                "start": {
-                                    "line": 1,
-                                    "column": 15
+                        "type": "ArrayPattern",
+                        "elements": [
+                            {
+                                "range": [
+                                    12,
+                                    13
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 12
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 13
+                                    }
                                 },
-                                "end": {
-                                    "line": 1,
-                                    "column": 16
-                                }
+                                "type": "Identifier",
+                                "name": "a"
                             },
-                            "type": "Identifier",
-                            "name": "b"
+                            {
+                                "range": [
+                                    15,
+                                    16
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 15
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 16
+                                    }
+                                },
+                                "type": "Identifier",
+                                "name": "b"
+                            },
+                            {
+                                "range": [
+                                    18,
+                                    19
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 18
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 19
+                                    }
+                                },
+                                "type": "Identifier",
+                                "name": "c"
+                            }
+                        ]
+                    },
+                    "right": {
+                        "range": [
+                            23,
+                            25
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 23
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 25
+                            }
                         },
-                        {
-                            "range": [
-                                18,
-                                19
-                            ],
-                            "loc": {
-                                "start": {
-                                    "line": 1,
-                                    "column": 18
-                                },
-                                "end": {
-                                    "line": 1,
-                                    "column": 19
-                                }
-                            },
-                            "type": "Identifier",
-                            "name": "c"
-                        }
-                    ]
+                        "type": "ArrayExpression",
+                        "elements": []
+                    }
                 },
                 {
                     "range": [
                         27,
-                        30
+                        35
                     ],
                     "loc": {
                         "start": {
@@ -135,68 +170,65 @@
                         },
                         "end": {
                             "line": 1,
-                            "column": 30
-                        }
-                    },
-                    "type": "ArrayPattern",
-                    "elements": [
-                        {
-                            "range": [
-                                28,
-                                29
-                            ],
-                            "loc": {
-                                "start": {
-                                    "line": 1,
-                                    "column": 28
-                                },
-                                "end": {
-                                    "line": 1,
-                                    "column": 29
-                                }
-                            },
-                            "type": "Identifier",
-                            "name": "d"
-                        }
-                    ]
-                }
-            ],
-            "defaults": [
-                {
-                    "range": [
-                        23,
-                        25
-                    ],
-                    "loc": {
-                        "start": {
-                            "line": 1,
-                            "column": 23
-                        },
-                        "end": {
-                            "line": 1,
-                            "column": 25
-                        }
-                    },
-                    "type": "ArrayExpression",
-                    "elements": []
-                },
-                {
-                    "range": [
-                        33,
-                        35
-                    ],
-                    "loc": {
-                        "start": {
-                            "line": 1,
-                            "column": 33
-                        },
-                        "end": {
-                            "line": 1,
                             "column": 35
                         }
                     },
-                    "type": "ArrayExpression",
-                    "elements": []
+                    "type": "AssignmentPattern",
+                    "left": {
+                        "range": [
+                            27,
+                            30
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 27
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 30
+                            }
+                        },
+                        "type": "ArrayPattern",
+                        "elements": [
+                            {
+                                "range": [
+                                    28,
+                                    29
+                                ],
+                                "loc": {
+                                    "start": {
+                                        "line": 1,
+                                        "column": 28
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "column": 29
+                                    }
+                                },
+                                "type": "Identifier",
+                                "name": "d"
+                            }
+                        ]
+                    },
+                    "right": {
+                        "range": [
+                            33,
+                            35
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 33
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 35
+                            }
+                        },
+                        "type": "ArrayExpression",
+                        "elements": []
+                    }
                 }
             ],
             "body": {

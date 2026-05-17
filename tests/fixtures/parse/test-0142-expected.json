@@ -53,7 +53,7 @@
                 {
                     "range": [
                         11,
-                        12
+                        16
                     ],
                     "loc": {
                         "start": {
@@ -62,32 +62,47 @@
                         },
                         "end": {
                             "line": 1,
-                            "column": 12
-                        }
-                    },
-                    "type": "Identifier",
-                    "name": "a"
-                }
-            ],
-            "defaults": [
-                {
-                    "range": [
-                        15,
-                        16
-                    ],
-                    "loc": {
-                        "start": {
-                            "line": 1,
-                            "column": 15
-                        },
-                        "end": {
-                            "line": 1,
                             "column": 16
                         }
                     },
-                    "type": "Literal",
-                    "value": 1,
-                    "raw": "1"
+                    "type": "AssignmentPattern",
+                    "left": {
+                        "range": [
+                            11,
+                            12
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 11
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 12
+                            }
+                        },
+                        "type": "Identifier",
+                        "name": "a"
+                    },
+                    "right": {
+                        "range": [
+                            15,
+                            16
+                        ],
+                        "loc": {
+                            "start": {
+                                "line": 1,
+                                "column": 15
+                            },
+                            "end": {
+                                "line": 1,
+                                "column": 16
+                            }
+                        },
+                        "type": "Literal",
+                        "value": 1,
+                        "raw": "1"
+                    }
                 }
             ],
             "body": {

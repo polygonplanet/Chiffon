@@ -64,11 +64,11 @@
                             }
                         },
                         "type": "TemplateElement",
+                        "tail": true,
                         "value": {
-                            "raw": "\na\n",
-                            "cooked": "\na\n"
-                        },
-                        "tail": true
+                            "cooked": "\na\n",
+                            "raw": "\na\n"
+                        }
                     }
                 ],
                 "expressions": []

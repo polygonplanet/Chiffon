@@ -99,11 +99,11 @@
                                     }
                                 },
                                 "type": "TemplateElement",
+                                "tail": true,
                                 "value": {
-                                    "raw": "\\u{20Bb7}",
-                                    "cooked": "𠮷"
-                                },
-                                "tail": true
+                                    "cooked": "𠮷",
+                                    "raw": "\\u{20Bb7}"
+                                }
                             }
                         ],
                         "expressions": []

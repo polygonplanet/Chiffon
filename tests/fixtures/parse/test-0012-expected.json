@@ -50,7 +50,6 @@
                 "name": "a"
             },
             "params": [],
-            "defaults": [],
             "body": {
                 "range": [
                     13,

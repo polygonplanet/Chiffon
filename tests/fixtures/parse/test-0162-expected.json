@@ -251,7 +251,6 @@
                     ]
                 }
             ],
-            "defaults": [],
             "body": {
                 "range": [
                     40,

@@ -82,7 +82,6 @@
                         "type": "FunctionExpression",
                         "id": null,
                         "params": [],
-                        "defaults": [],
                         "body": {
                             "range": [
                                 12,

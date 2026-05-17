@@ -120,7 +120,6 @@
                             "type": "FunctionExpression",
                             "id": null,
                             "params": [],
-                            "defaults": [],
                             "body": {
                                 "range": [
                                     26,
@@ -198,7 +197,6 @@
                             "type": "FunctionExpression",
                             "id": null,
                             "params": [],
-                            "defaults": [],
                             "body": {
                                 "range": [
                                     35,

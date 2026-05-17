@@ -81,11 +81,11 @@
                                 }
                             },
                             "type": "TemplateElement",
+                            "tail": true,
                             "value": {
-                                "raw": "a",
-                                "cooked": "a"
-                            },
-                            "tail": true
+                                "cooked": "a",
+                                "raw": "a"
+                            }
                         }
                     ],
                     "expressions": []
@@ -123,11 +123,11 @@
                                 }
                             },
                             "type": "TemplateElement",
+                            "tail": true,
                             "value": {
-                                "raw": "b",
-                                "cooked": "b"
-                            },
-                            "tail": true
+                                "cooked": "b",
+                                "raw": "b"
+                            }
                         }
                     ],
                     "expressions": []

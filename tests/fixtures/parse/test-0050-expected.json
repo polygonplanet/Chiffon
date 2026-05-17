@@ -136,7 +136,6 @@
                                     "type": "FunctionExpression",
                                     "id": null,
                                     "params": [],
-                                    "defaults": [],
                                     "body": {
                                         "range": [
                                             26,
@@ -213,7 +212,6 @@
                                     "type": "FunctionExpression",
                                     "id": null,
                                     "params": [],
-                                    "defaults": [],
                                     "body": {
                                         "range": [
                                             46,
@@ -290,7 +288,6 @@
                                     "type": "FunctionExpression",
                                     "id": null,
                                     "params": [],
-                                    "defaults": [],
                                     "body": {
                                         "range": [
                                             56,
@@ -367,7 +364,6 @@
                                     "type": "FunctionExpression",
                                     "id": null,
                                     "params": [],
-                                    "defaults": [],
                                     "body": {
                                         "range": [
                                             66,
@@ -444,7 +440,6 @@
                                     "type": "FunctionExpression",
                                     "id": null,
                                     "params": [],
-                                    "defaults": [],
                                     "body": {
                                         "range": [
                                             80,
@@ -540,7 +535,6 @@
                                             "name": "e"
                                         }
                                     ],
-                                    "defaults": [],
                                     "body": {
                                         "range": [
                                             95,
