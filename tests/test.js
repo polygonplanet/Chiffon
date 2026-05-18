@@ -240,13 +240,13 @@ function test(desc, parser) {
           assert.equal(getFixturesNo(expectedName), no);
           var expected = require(expectedName);
           var ast = parser.parse(code, { range: true, loc: true });
+          normalizeRegExpValue(ast);
           assert.deepEqual(ast, expected);
         });
       });
     });
   });
 }
-
 
 function getFixtureFiles(type) {
   var files = getFiles(__dirname + '/fixtures/' + type);
@@ -277,19 +277,16 @@ function getFixtureFiles(type) {
   };
 }
 
-
 function getFixturesNo(filename) {
   var re = /^\w+-(\d+)/;
   var basename = path.basename(filename);
   return basename.match(re)[1];
 }
 
-
 function testSyntax(code) {
   /*jslint evil: true */
   new Function('return;' + code)();
 }
-
 
 function fakeRequire(code) {
   /*jslint evil: true */
@@ -299,7 +296,6 @@ function fakeRequire(code) {
     'return module.exports;'
   )();
 }
-
 
 function getFiles(dir) {
   var results = [];
@@ -318,7 +314,6 @@ function getFiles(dir) {
 
   return results;
 }
-
 
 function filterForEsprima(ast) {
   astFilter(ast, [
@@ -354,6 +349,22 @@ function filterForEsprima(ast) {
   return ast;
 }
 
+// Normalizes a RegExp literal's `value` field to `{}` so the parsed AST can be
+// compared against the JSON expected fixtures. JSON cannot represent a regular
+// expression. The `regex` property still holds the pattern and flags.
+function normalizeRegExpValue(ast) {
+  astFilter(ast, [
+    {
+      type: 'Literal',
+      callback: function(node) {
+        if (node.regex && node.value instanceof RegExp) {
+          node.value = {};
+        }
+      }
+    }
+  ]);
+  return ast;
+}
 
 function astFilter(node, filters) {
   if (Array.isArray(node)) {

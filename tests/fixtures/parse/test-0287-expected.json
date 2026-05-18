@@ -1,4 +1,4 @@
-module.exports = {
+{
     "range": [
         0,
         6
@@ -89,4 +89,4 @@ module.exports = {
             }
         }
     ]
-};
+}
