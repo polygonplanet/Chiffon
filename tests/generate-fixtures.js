@@ -111,7 +111,7 @@ function generate(group) {
       return;
     }
 
-    var newContent = JSON.stringify(result, null, 4) + '\n';
+    var newContent = JSON.stringify(result, null, 2) + '\n';
 
     var exists = fs.existsSync(expectedPath);
     if (exists && fs.readFileSync(expectedPath).toString() === newContent) {
