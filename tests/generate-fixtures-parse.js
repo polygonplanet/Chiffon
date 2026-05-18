@@ -56,7 +56,7 @@ testFiles.forEach(function (testFile) {
     return;
   }
 
-  var newContent = JSON.stringify(ast, null, 4) + '\n';
+  var newContent = JSON.stringify(ast, null, 2) + '\n';
 
   var exists = fs.existsSync(expectedPath);
   if (exists && fs.readFileSync(expectedPath).toString() === newContent) {

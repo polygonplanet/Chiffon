@@ -1,132 +1,132 @@
 {
-    "range": [
+  "range": [
+    0,
+    29
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 29
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
         0,
         29
-    ],
-    "loc": {
+      ],
+      "loc": {
         "start": {
-            "line": 1,
-            "column": 0
+          "line": 1,
+          "column": 0
         },
         "end": {
+          "line": 1,
+          "column": 29
+        }
+      },
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "range": [
+          7,
+          29
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 7
+          },
+          "end": {
             "line": 1,
             "column": 29
-        }
-    },
-    "type": "Program",
-    "body": [
-        {
+          }
+        },
+        "type": "VariableDeclaration",
+        "declarations": [
+          {
             "range": [
-                0,
-                29
+              11,
+              28
             ],
             "loc": {
+              "start": {
+                "line": 1,
+                "column": 11
+              },
+              "end": {
+                "line": 1,
+                "column": 28
+              }
+            },
+            "type": "VariableDeclarator",
+            "id": {
+              "range": [
+                11,
+                12
+              ],
+              "loc": {
                 "start": {
-                    "line": 1,
-                    "column": 0
+                  "line": 1,
+                  "column": 11
                 },
                 "end": {
-                    "line": 1,
-                    "column": 29
+                  "line": 1,
+                  "column": 12
                 }
+              },
+              "type": "Identifier",
+              "name": "a"
             },
-            "type": "ExportNamedDeclaration",
-            "declaration": {
+            "init": {
+              "range": [
+                15,
+                28
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 15
+                },
+                "end": {
+                  "line": 1,
+                  "column": 28
+                }
+              },
+              "type": "FunctionExpression",
+              "id": null,
+              "params": [],
+              "body": {
                 "range": [
-                    7,
-                    29
+                  26,
+                  28
                 ],
                 "loc": {
-                    "start": {
-                        "line": 1,
-                        "column": 7
-                    },
-                    "end": {
-                        "line": 1,
-                        "column": 29
-                    }
+                  "start": {
+                    "line": 1,
+                    "column": 26
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 28
+                  }
                 },
-                "type": "VariableDeclaration",
-                "declarations": [
-                    {
-                        "range": [
-                            11,
-                            28
-                        ],
-                        "loc": {
-                            "start": {
-                                "line": 1,
-                                "column": 11
-                            },
-                            "end": {
-                                "line": 1,
-                                "column": 28
-                            }
-                        },
-                        "type": "VariableDeclarator",
-                        "id": {
-                            "range": [
-                                11,
-                                12
-                            ],
-                            "loc": {
-                                "start": {
-                                    "line": 1,
-                                    "column": 11
-                                },
-                                "end": {
-                                    "line": 1,
-                                    "column": 12
-                                }
-                            },
-                            "type": "Identifier",
-                            "name": "a"
-                        },
-                        "init": {
-                            "range": [
-                                15,
-                                28
-                            ],
-                            "loc": {
-                                "start": {
-                                    "line": 1,
-                                    "column": 15
-                                },
-                                "end": {
-                                    "line": 1,
-                                    "column": 28
-                                }
-                            },
-                            "type": "FunctionExpression",
-                            "id": null,
-                            "params": [],
-                            "body": {
-                                "range": [
-                                    26,
-                                    28
-                                ],
-                                "loc": {
-                                    "start": {
-                                        "line": 1,
-                                        "column": 26
-                                    },
-                                    "end": {
-                                        "line": 1,
-                                        "column": 28
-                                    }
-                                },
-                                "type": "BlockStatement",
-                                "body": []
-                            },
-                            "generator": false,
-                            "expression": false
-                        }
-                    }
-                ],
-                "kind": "var"
-            },
-            "specifiers": [],
-            "source": null
-        }
-    ]
+                "type": "BlockStatement",
+                "body": []
+              },
+              "generator": false,
+              "expression": false
+            }
+          }
+        ],
+        "kind": "var"
+      },
+      "specifiers": [],
+      "source": null
+    }
+  ]
 }

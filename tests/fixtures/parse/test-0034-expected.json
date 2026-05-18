@@ -1,59 +1,59 @@
 {
-    "range": [
+  "range": [
+    0,
+    5
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 5
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
         0,
         5
-    ],
-    "loc": {
+      ],
+      "loc": {
         "start": {
-            "line": 1,
-            "column": 0
+          "line": 1,
+          "column": 0
         },
         "end": {
+          "line": 1,
+          "column": 5
+        }
+      },
+      "type": "ExpressionStatement",
+      "expression": {
+        "range": [
+          0,
+          5
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
             "line": 1,
             "column": 5
+          }
+        },
+        "type": "Literal",
+        "value": {},
+        "raw": "/42/g",
+        "regex": {
+          "pattern": "42",
+          "flags": "g"
         }
-    },
-    "type": "Program",
-    "body": [
-        {
-            "range": [
-                0,
-                5
-            ],
-            "loc": {
-                "start": {
-                    "line": 1,
-                    "column": 0
-                },
-                "end": {
-                    "line": 1,
-                    "column": 5
-                }
-            },
-            "type": "ExpressionStatement",
-            "expression": {
-                "range": [
-                    0,
-                    5
-                ],
-                "loc": {
-                    "start": {
-                        "line": 1,
-                        "column": 0
-                    },
-                    "end": {
-                        "line": 1,
-                        "column": 5
-                    }
-                },
-                "type": "Literal",
-                "value": {},
-                "raw": "/42/g",
-                "regex": {
-                    "pattern": "42",
-                    "flags": "g"
-                }
-            }
-        }
-    ]
+      }
+    }
+  ]
 }

@@ -1,126 +1,126 @@
 {
-    "range": [
+  "range": [
+    0,
+    13
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 13
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
         0,
         13
-    ],
-    "loc": {
+      ],
+      "loc": {
         "start": {
-            "line": 1,
-            "column": 0
+          "line": 1,
+          "column": 0
         },
         "end": {
+          "line": 1,
+          "column": 13
+        }
+      },
+      "type": "ExpressionStatement",
+      "expression": {
+        "range": [
+          0,
+          13
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
             "line": 1,
             "column": 13
-        }
-    },
-    "type": "Program",
-    "body": [
-        {
+          }
+        },
+        "type": "CallExpression",
+        "callee": {
+          "range": [
+            0,
+            4
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 4
+            }
+          },
+          "type": "Identifier",
+          "name": "func"
+        },
+        "arguments": [
+          {
             "range": [
-                0,
-                13
+              5,
+              9
             ],
             "loc": {
+              "start": {
+                "line": 1,
+                "column": 5
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "type": "SpreadElement",
+            "argument": {
+              "range": [
+                8,
+                9
+              ],
+              "loc": {
                 "start": {
-                    "line": 1,
-                    "column": 0
+                  "line": 1,
+                  "column": 8
                 },
                 "end": {
-                    "line": 1,
-                    "column": 13
+                  "line": 1,
+                  "column": 9
                 }
-            },
-            "type": "ExpressionStatement",
-            "expression": {
-                "range": [
-                    0,
-                    13
-                ],
-                "loc": {
-                    "start": {
-                        "line": 1,
-                        "column": 0
-                    },
-                    "end": {
-                        "line": 1,
-                        "column": 13
-                    }
-                },
-                "type": "CallExpression",
-                "callee": {
-                    "range": [
-                        0,
-                        4
-                    ],
-                    "loc": {
-                        "start": {
-                            "line": 1,
-                            "column": 0
-                        },
-                        "end": {
-                            "line": 1,
-                            "column": 4
-                        }
-                    },
-                    "type": "Identifier",
-                    "name": "func"
-                },
-                "arguments": [
-                    {
-                        "range": [
-                            5,
-                            9
-                        ],
-                        "loc": {
-                            "start": {
-                                "line": 1,
-                                "column": 5
-                            },
-                            "end": {
-                                "line": 1,
-                                "column": 9
-                            }
-                        },
-                        "type": "SpreadElement",
-                        "argument": {
-                            "range": [
-                                8,
-                                9
-                            ],
-                            "loc": {
-                                "start": {
-                                    "line": 1,
-                                    "column": 8
-                                },
-                                "end": {
-                                    "line": 1,
-                                    "column": 9
-                                }
-                            },
-                            "type": "Identifier",
-                            "name": "a"
-                        }
-                    },
-                    {
-                        "range": [
-                            11,
-                            12
-                        ],
-                        "loc": {
-                            "start": {
-                                "line": 1,
-                                "column": 11
-                            },
-                            "end": {
-                                "line": 1,
-                                "column": 12
-                            }
-                        },
-                        "type": "Identifier",
-                        "name": "b"
-                    }
-                ]
+              },
+              "type": "Identifier",
+              "name": "a"
             }
-        }
-    ]
+          },
+          {
+            "range": [
+              11,
+              12
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 11
+              },
+              "end": {
+                "line": 1,
+                "column": 12
+              }
+            },
+            "type": "Identifier",
+            "name": "b"
+          }
+        ]
+      }
+    }
+  ]
 }
