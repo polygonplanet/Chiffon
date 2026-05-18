@@ -1,39 +1,7 @@
-module.exports = [
-    {
-        "type": "Punctuator",
-        "value": "++"
-    },
-    {
-        "type": "Identifier",
-        "value": "a"
-    },
-    {
-        "type": "Punctuator",
-        "value": "**"
-    },
+[
     {
         "type": "Numeric",
         "value": "2"
-    },
-    {
-        "type": "Punctuator",
-        "value": ";"
-    },
-    {
-        "type": "Punctuator",
-        "value": "("
-    },
-    {
-        "type": "Punctuator",
-        "value": "-"
-    },
-    {
-        "type": "Numeric",
-        "value": "2"
-    },
-    {
-        "type": "Punctuator",
-        "value": ")"
     },
     {
         "type": "Punctuator",
@@ -46,46 +14,6 @@ module.exports = [
     {
         "type": "Punctuator",
         "value": ";"
-    },
-    {
-        "type": "Identifier",
-        "value": "x"
-    },
-    {
-        "type": "Punctuator",
-        "value": "="
-    },
-    {
-        "type": "Identifier",
-        "value": "a"
-    },
-    {
-        "type": "Punctuator",
-        "value": "**"
-    },
-    {
-        "type": "Identifier",
-        "value": "b"
-    },
-    {
-        "type": "Punctuator",
-        "value": "+"
-    },
-    {
-        "type": "Identifier",
-        "value": "c"
-    },
-    {
-        "type": "Punctuator",
-        "value": ";"
-    },
-    {
-        "type": "Identifier",
-        "value": "f"
-    },
-    {
-        "type": "Punctuator",
-        "value": "("
     },
     {
         "type": "Numeric",
@@ -101,7 +29,7 @@ module.exports = [
     },
     {
         "type": "Punctuator",
-        "value": ","
+        "value": "**"
     },
     {
         "type": "Numeric",
@@ -109,23 +37,31 @@ module.exports = [
     },
     {
         "type": "Punctuator",
-        "value": ")"
+        "value": ";"
+    },
+    {
+        "type": "Numeric",
+        "value": "2"
+    },
+    {
+        "type": "Punctuator",
+        "value": "*"
+    },
+    {
+        "type": "Numeric",
+        "value": "3"
+    },
+    {
+        "type": "Punctuator",
+        "value": "**"
+    },
+    {
+        "type": "Numeric",
+        "value": "4"
     },
     {
         "type": "Punctuator",
         "value": ";"
-    },
-    {
-        "type": "Punctuator",
-        "value": "["
-    },
-    {
-        "type": "Numeric",
-        "value": "1"
-    },
-    {
-        "type": "Punctuator",
-        "value": ","
     },
     {
         "type": "Numeric",
@@ -141,7 +77,7 @@ module.exports = [
     },
     {
         "type": "Punctuator",
-        "value": ","
+        "value": "*"
     },
     {
         "type": "Numeric",
@@ -149,6 +85,26 @@ module.exports = [
     },
     {
         "type": "Punctuator",
-        "value": "]"
+        "value": ";"
+    },
+    {
+        "type": "Numeric",
+        "value": "2"
+    },
+    {
+        "type": "Punctuator",
+        "value": "**"
+    },
+    {
+        "type": "Numeric",
+        "value": "3"
+    },
+    {
+        "type": "Punctuator",
+        "value": "==="
+    },
+    {
+        "type": "Numeric",
+        "value": "8"
     }
-];
+]

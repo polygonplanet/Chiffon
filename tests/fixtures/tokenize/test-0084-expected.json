@@ -1,4 +1,4 @@
-module.exports = [
+[
     {
         "type": "Identifier",
         "value": "a"
@@ -35,4 +35,4 @@ module.exports = [
         "type": "Identifier",
         "value": "c"
     }
-];
+]

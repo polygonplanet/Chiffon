@@ -1,4 +1,4 @@
-module.exports = [
+[
     {
         "type": "Numeric",
         "value": "2"
@@ -11,4 +11,4 @@ module.exports = [
         "type": "Numeric",
         "value": "3"
     }
-];
+]
