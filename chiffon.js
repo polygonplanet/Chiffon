@@ -87,7 +87,7 @@
             '|' + '[^/' + lineTerminator + '\\\\]' +
             ')+' +
     '/' +
-    '(?:[gimuy]+\\b|)' +
+    '(?:[gimsuy]+\\b|)' +
   ')';
 
   var templateLiteral = '`(?:' +
@@ -947,8 +947,11 @@
       this.value = this.token.value;
       this.type = this.token.type;
     },
-    lookahead: function() {
-      return this.tokens[this.index + 1] || TOKEN_END;
+    lookahead: function(i) {
+      if (i == null) {
+        i = 1;
+      }
+      return this.tokens[this.index + i] || TOKEN_END;
     },
     assertValue: function(value) {
       if (this.value !== value) {
@@ -1428,7 +1431,9 @@
     parseObjectDefinition: function() {
       var node;
 
-      if (this.value === 'get' || this.value === 'set') {
+      if (this.value === '...') {
+        node = this.parseSpreadElement();
+      } else if (this.value === 'get' || this.value === 'set') {
         node = this.parseObjectGetterSetter();
       } else {
         node = this.parseObjectProperty();
@@ -1620,7 +1625,12 @@
         case _ObjectExpression:
           expr.type = _ObjectPattern;
           for (i = 0, len = expr.properties.length; i < len; i++) {
-            this.reinterpretExpression(expr.properties[i].value);
+            var prop = expr.properties[i];
+            if (prop.type === _SpreadElement) {
+              this.reinterpretExpression(prop);
+            } else {
+              this.reinterpretExpression(prop.value);
+            }
           }
           break;
         case _SpreadElement:
@@ -2025,9 +2035,8 @@
 
       // `async ident =>`
       if (next.type === _Identifier) {
-        var afterIdent = this.tokens[this.index + 2];
-        return !!(afterIdent && afterIdent.value === '=>' &&
-          !afterIdent.hasLineTerminator);
+        var afterIdent = this.lookahead(2);
+        return afterIdent.value === '=>' && !afterIdent.hasLineTerminator;
       }
 
       // `async (...) =>`
@@ -2039,9 +2048,8 @@
             depth++;
           } else if (token.value === ')') {
             if (--depth === 0) {
-              var after = this.tokens[i + 1];
-              return !!(after && after.value === '=>' &&
-                !after.hasLineTerminator);
+              var after = this.lookahead(i - this.index + 1);
+              return after.value === '=>' && !after.hasLineTerminator;
             }
           }
         }
@@ -2326,6 +2334,10 @@
       return this.finishNode(node);
     },
     parseObjectPropertyPattern: function() {
+      if (this.value === '...') {
+        return this.parseRestElement();
+      }
+
       var node = this.startNode(_Property);
       var key, value;
 
@@ -2568,15 +2580,23 @@
     parseForStatement: function() {
       var node = this.startNode(_ForStatement);
       this.expect('for');
+
+      // ES2018 for-await-of only valid inside async functions.
+      var isAwait = false;
+      if (this.inAsync && this.value === 'await') {
+        isAwait = true;
+        this.next();
+      }
+
       this.expect('(');
 
       var init = null;
 
       if (this.value !== ';') {
         if (this.value === 'var' || this.value === 'let' || this.value === 'const') {
-          init = this.parseForVarStatement(node);
+          init = this.parseForVarStatement(node, isAwait);
         } else {
-          init = this.parseForExpressionStatement(node);
+          init = this.parseForExpressionStatement(node, isAwait);
         }
 
         if (init.type === _ForInStatement || init.type === _ForOfStatement) {
@@ -2606,7 +2626,7 @@
       node.body = body;
       return this.finishNode(node);
     },
-    parseForExpressionStatement: function(node) {
+    parseForExpressionStatement: function(node, isAwait) {
       var expr = this.parseExpression(false);
 
       if (this.value === 'in') {
@@ -2614,12 +2634,12 @@
       }
 
       if (this.value === 'of') {
-        return this.parseForOfStatement(expr, node);
+        return this.parseForOfStatement(expr, node, isAwait);
       }
 
       return expr;
     },
-    parseForVarStatement: function(node) {
+    parseForVarStatement: function(node, isAwait) {
       var kind = this.value;
       var decl = this.parseVariableStatement(kind, true);
 
@@ -2628,7 +2648,7 @@
       }
 
       if (this.value === 'of') {
-        return this.parseForOfStatement(decl, node);
+        return this.parseForOfStatement(decl, node, isAwait);
       }
 
       return decl;
@@ -2648,7 +2668,7 @@
       node.each = false;
       return this.finishNode(node);
     },
-    parseForOfStatement: function(left, node) {
+    parseForOfStatement: function(left, node, isAwait) {
       node.type = _ForOfStatement;
       this.expect('of');
 
@@ -2660,6 +2680,9 @@
       node.left = left;
       node.right = right;
       node.body = body;
+      if (isAwait) {
+        node.await = true;
+      }
       return this.finishNode(node);
     },
     // ECMA-262 15.2.2 Imports
