@@ -107,8 +107,10 @@
   ')+';
 
   // Keywords that can come before a Regular Expression Literal. e.g., `typeof /a/`
+  // `await` is included because `await /a/;` is valid syntax inside an
+  // async context, where the `/` starts a regular expression literal.
   var regexPrefixKeywords = 'typeof|in|void|case|instanceof|yield|throw|delete|' +
-    'else|return|do';
+    'else|return|do|await';
   // Keywords that allow a Regex Literal immediately after a closing
   // parenthesis. e.g., `if (1) /a/`
   var regexParenKeywords = 'if|while|for|with';
@@ -1720,6 +1722,7 @@
     },
     parseAwaitExpression: function() {
       var node = this.startNode(_AwaitExpression);
+
       this.expect('await');
       node.argument = this.parseUnaryExpression();
       return this.finishNode(node);
@@ -2272,6 +2275,12 @@
     parseBindingPattern: function() {
       if (this.type === _Identifier) {
         return this.parseIdentifier();
+      }
+
+      // `await` is a keyword only inside async contexts; elsewhere it is a
+      // valid binding identifier. e.g. `var await = 1;`
+      if (this.value === 'await' && !this.inAsync) {
+        return this.parseIdentifier(true);
       }
 
       if (this.value === '{') {
