@@ -106,23 +106,24 @@
   '|' + '[^\\s\\\\+/%*=&|^~<>!?:;,.()[\\]{}\'"`@#-]' +
   ')+';
 
-  // Valid keywords for Regular Expression Literal. e.g. `typeof /a/`
-  var regexPreWords = 'typeof|in|void|case|instanceof|yield|throw|delete|' +
+  // Keywords that can come before a Regular Expression Literal. e.g., `typeof /a/`
+  var regexPrefixKeywords = 'typeof|in|void|case|instanceof|yield|throw|delete|' +
     'else|return|do';
-  // Valid keywords when previous token of the regex literal is a paren.
-  // e.g. `if (1) /a/`
-  var regexParenWords = 'if|while|for|with';
+  // Keywords that allow a Regex Literal immediately after a closing
+  // parenthesis. e.g., `if (1) /a/`
+  var regexParenKeywords = 'if|while|for|with';
 
   // Reserved Words
   var keywordsRe = new RegExp('^(?:' +
-    regexParenWords + '|' + regexPreWords + '|' +
+    regexParenKeywords + '|' + regexPrefixKeywords + '|' +
     'var|function|this|new|break|catch|finally|try|default|continue|' +
     'switch|const|export|import|class|extends|debugger|super|enum|' +
 
     // ECMA-262 11.6.2.2 Future Reserved Words
     // Contextually disallowed as identifiers, in strict mode code:
-    // `await` is not defined in this pattern because it acts as a keyword only
-    // inside async contexts; otherwise, it is treated as a valid identifier.
+    // `await` is listed in `regexPrefixKeywords` above because ECMA-262
+    // includes it in the ReservedWord production; it is reserved only inside
+    // async contexts and modules, but otherwise may be used as an identifier.
     'let|static|' +
     'implements|package|protected|interface|private|public' +
   ')$');
@@ -138,10 +139,10 @@
 
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
-          '(?:^(?:' + regexPreWords + ')$)' +
+          '(?:^(?:' + regexPrefixKeywords + ')$)' +
     '|' + '(?:' + '(?![.\\]])' + punctuators + '$)' +
   ')');
-  var regexParenWordsRe = new RegExp('^(?:' + regexParenWords + ')$');
+  var regexParenKeywordsRe = new RegExp('^(?:' + regexParenKeywords + ')$');
 
   var tokenizeNotWhiteSpaceRe = getPattern(_WhiteSpace);
   var tokenizeNotTemplateRe = getPattern(_Template);
@@ -156,8 +157,8 @@
   regexpLiteral =
   templateLiteral =
   identToken =
-  regexPreWords =
-  regexParenWords = null;
+  regexPrefixKeywords =
+  regexParenKeywords = null;
 
 
   function getPattern(ignore) {
@@ -303,7 +304,7 @@
         }
 
         if (type === _RegularExpression) {
-          if (this.fixRegExpTokens(matches, i, tokens, value)) {
+          if (this.resolveRegExpMatch(matches, i, tokens, value)) {
             i--;
             continue;
           }
@@ -590,8 +591,9 @@
         }
       }
     },
-    // Fix Regular Expression missing matches e.g. `var g=1,a=2/3/g;`
-    fixRegExpTokens: function(matches, index, tokens, regexValue) {
+    // Resolve the `/` regex/division ambiguity by looking behind at the
+    // preceding token. e.g. `var g=1,a=2/3/g;` is divisions, not a regex.
+    resolveRegExpMatch: function(matches, matchIndex, tokens, regexValue) {
       var i = tokens.length;
 
       while (--i >= 0) {
@@ -619,7 +621,7 @@
         }
 
         var parts = regexValue.match(tokenizeNotRegExpRe);
-        splice.apply(matches, [index, 1].concat(parts));
+        splice.apply(matches, [matchIndex, 1].concat(parts));
         return true;
       }
       return false;
@@ -639,7 +641,7 @@
           if (--level === 0) {
             prev = tokens[i - 1];
             if (prev && prev.type === _Keyword &&
-                regexParenWordsRe.test(prev.value)) {
+                regexParenKeywordsRe.test(prev.value)) {
               return true;
             }
             return false;
@@ -1017,7 +1019,7 @@
     },
     finishNode: function(node) {
       if (this.lastGroup && this.lastGroup.expr === node) {
-        // Restore the kept position
+        // Restore the original position
         var startNode = this.lastGroup.startNode;
         var endToken = this.lastGroup.endToken;
         this.lastGroup = null;
