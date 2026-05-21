@@ -1299,9 +1299,9 @@
           return this.parsePrimaryPunctuatorExpression();
         case _Template:
           return this.parseTemplateLiteral();
-        default:
-          this.unexpected();
       }
+
+      this.unexpected();
     },
     parseAsyncArrowHead: function() {
       var startNode = this.startNode();
@@ -1347,9 +1347,9 @@
           return this.parseArrayInitializer();
         case '(':
           return this.parseGroupExpression();
-        default:
-          this.unexpected();
       }
+
+      this.unexpected();
     },
     parseGroupExpression: function() {
       var startNode = this.startNode();
