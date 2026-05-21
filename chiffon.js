@@ -1260,6 +1260,17 @@
       node.name = name;
       return this.finishNode(node);
     },
+    // `yield` and `await` are allowed as identifiers outside their context
+    // (i.e. outside generators / async functions).
+    isContextualIdentifier: function() {
+      return this.type === _Identifier ||
+        (this.value === 'yield' && !this.inGenerator) ||
+        (this.value === 'await' && !this.inAsync);
+    },
+    // Callers should guard with `isContextualIdentifier()` beforehand.
+    parseContextualIdentifier: function() {
+      return this.parseIdentifier(true);
+    },
     parseCommaSeparatedElements: function(start, end, elems, callback, args) {
       this.expect(start);
 
@@ -1709,7 +1720,6 @@
         body = this.parseAssignmentExpression(true);
         expression = true;
       }
-
       this.inAsync = prevInAsync;
 
       node.params = params;
@@ -1958,7 +1968,16 @@
 
       node.computed = false;
       node.object = expr;
-      node.property = this.parseIdentifier();
+
+      // Same type check as parseObjectPropertyName
+      // IdentifierName after `.` allows reserved words and `null, true, false`
+      // (e.g. `obj.static`, `obj.class`, `obj.null`)
+      var type = this.type;
+      if (type !== _Identifier && type !== _Keyword &&
+          type !== _Boolean && type !== _Null) {
+        this.unexpected();
+      }
+      node.property = this.parseIdentifier(true);
       return this.finishNode(node);
     },
     parseArguments: function(node) {
@@ -2215,9 +2234,8 @@
       } else if (options.setter) {
         this.parseParams(node);
       } else {
-        if (this.type === _Identifier || this.value === 'yield' ||
-          (this.value === 'await' && !this.inAsync)) {
-          node.id = this.parseIdentifier(true);
+        if (this.isContextualIdentifier()) {
+          node.id = this.parseContextualIdentifier();
         }
         this.parseParams(node);
       }
@@ -2273,14 +2291,8 @@
     },
     // ECMA-262 13.3.3 Destructuring Binding Patterns
     parseBindingPattern: function() {
-      if (this.type === _Identifier) {
-        return this.parseIdentifier();
-      }
-
-      // `await` is a keyword only inside async contexts; elsewhere it is a
-      // valid binding identifier. e.g. `var await = 1;`
-      if (this.value === 'await' && !this.inAsync) {
-        return this.parseIdentifier(true);
+      if (this.isContextualIdentifier()) {
+        return this.parseContextualIdentifier();
       }
 
       if (this.value === '{') {
@@ -2353,8 +2365,8 @@
       var node = this.startNode(_Property);
       var key, value;
 
-      if (this.type === _Identifier) {
-        key = this.parseIdentifier();
+      if (this.isContextualIdentifier()) {
+        key = this.parseContextualIdentifier();
         if (this.value === '=') {
           value = this.parseAssignmentPattern(key);
           this.startNodeAt(value, node);
@@ -2406,9 +2418,8 @@
       this.expect('continue');
 
       var label = null;
-
-      if (this.type === _Identifier && !this.token.hasLineTerminator) {
-        label = this.parseIdentifier();
+      if (!this.token.hasLineTerminator && this.isContextualIdentifier()) {
+        label = this.parseContextualIdentifier();
       }
 
       this.expectSemicolon();
@@ -2420,9 +2431,8 @@
       this.expect('break');
 
       var label = null;
-
-      if (this.type === _Identifier && !this.token.hasLineTerminator) {
-        label = this.parseIdentifier();
+      if (!this.token.hasLineTerminator && this.isContextualIdentifier()) {
+        label = this.parseContextualIdentifier();
       }
 
       this.expectSemicolon();
@@ -2877,8 +2887,12 @@
       this.expect('class');
 
       var id = null;
-      if (this.type === _Identifier) {
-        id = this.parseIdentifier();
+      // Class definitions are always in strict mode, where `yield` is not
+      // allowed, so `isContextualIdentifier()` cannot be used here.
+      // `await` is allowed as an identifier outside of async functions.
+      if (this.type === _Identifier ||
+        (this.value === 'await' && !this.inAsync)) {
+        id = this.parseContextualIdentifier();
       }
 
       var superClass = null;
@@ -2947,9 +2961,9 @@
       return this.finishNode(node);
     },
     parseMaybeLabelledStatement: function() {
-      if (this.type === _Identifier && this.lookahead().value === ':') {
+      if (this.isContextualIdentifier() && this.lookahead().value === ':') {
         var node = this.startNode(_LabeledStatement);
-        var label = this.parseIdentifier();
+        var label = this.parseContextualIdentifier();
 
         this.next();
         var body = this.parseStatement();
