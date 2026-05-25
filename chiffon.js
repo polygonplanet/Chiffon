@@ -2959,6 +2959,8 @@
       this.startNodeAt(node, startNode);
       node.type = _MethodDefinition;
       node['static'] = isStatic;
+      delete node.method;
+      delete node.shorthand;
 
       if (node.key.name === 'constructor') {
         node.kind = 'constructor';
