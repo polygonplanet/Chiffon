@@ -1460,6 +1460,8 @@
     parseObjectProperty: function() {
       var node = this.startNode(_Property);
       var computed = false;
+      var method = false;
+      var shorthand = false;
       var generator = false;
       var isAsync = false;
 
@@ -1489,12 +1491,14 @@
         this.next();
         value = this.parseAssignmentExpression(true);
       } else if (this.value === '(') {
+        method = true;
         value = this.parseFunction({
           expression: true,
           generator: generator,
           async: isAsync
         });
       } else if (key.type === _Identifier) {
+        shorthand = true;
         if (this.value === '=') {
           value = this.parseAssignmentPattern(key);
         } else {
@@ -1508,12 +1512,16 @@
       node.computed = computed;
       node.value = value;
       node.kind = 'init';
+      node.method = method;
+      node.shorthand = shorthand;
       return this.finishNode(node);
     },
     parseObjectGetterSetter: function() {
       var node = this.startNode(_Property);
       var lookahead = this.lookahead();
       var computed = false;
+      var method = false;
+      var shorthand = false;
       var kind = 'init';
       var key, value;
 
@@ -1522,6 +1530,7 @@
         this.next();
         value = this.parseAssignmentExpression(true);
       } else if (lookahead.value === '(') {
+        method = true;
         key = this.parseObjectPropertyName();
         value = this.parseFunction({ expression: true });
       } else {
@@ -1548,6 +1557,8 @@
       node.computed = computed;
       node.value = value;
       node.kind = kind;
+      node.method = method;
+      node.shorthand = shorthand;
       return this.finishNode(node);
     },
     parseObjectPropertyName: function() {
@@ -2364,16 +2375,23 @@
 
       var node = this.startNode(_Property);
       var key, value;
+      var computed = false;
+      var shorthand = false;
 
       if (this.isContextualIdentifier()) {
         key = this.parseContextualIdentifier();
         if (this.value === '=') {
           value = this.parseAssignmentPattern(key);
           this.startNodeAt(value, node);
+          shorthand = true;
         } else if (this.value !== ':') {
           value = key;
+          shorthand = true;
         }
       } else {
+        if (this.value === '[') {
+          computed = true;
+        }
         key = this.parseObjectPropertyName();
       }
 
@@ -2383,8 +2401,11 @@
       }
 
       node.key = key;
+      node.computed = computed;
       node.value = value;
       node.kind = 'init';
+      node.method = false;
+      node.shorthand = shorthand;
       return this.finishNode(node);
     },
     // ECMA-262 13 Statements and Declarations
