@@ -154,7 +154,9 @@
                     "raw": "0"
                   }
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": true
               }
             ]
           }

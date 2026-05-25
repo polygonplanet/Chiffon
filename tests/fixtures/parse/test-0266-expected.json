@@ -152,6 +152,7 @@
                         "type": "Identifier",
                         "name": "a"
                       },
+                      "computed": false,
                       "value": {
                         "range": [
                           10,
@@ -203,6 +204,7 @@
                               "type": "Identifier",
                               "name": "w"
                             },
+                            "computed": false,
                             "value": {
                               "range": [
                                 12,
@@ -221,7 +223,9 @@
                               "type": "Identifier",
                               "name": "w"
                             },
-                            "kind": "init"
+                            "kind": "init",
+                            "method": false,
+                            "shorthand": true
                           },
                           {
                             "range": [
@@ -257,6 +261,7 @@
                               "type": "Identifier",
                               "name": "x"
                             },
+                            "computed": false,
                             "value": {
                               "range": [
                                 15,
@@ -275,11 +280,15 @@
                               "type": "Identifier",
                               "name": "x"
                             },
-                            "kind": "init"
+                            "kind": "init",
+                            "method": false,
+                            "shorthand": true
                           }
                         ]
                       },
-                      "kind": "init"
+                      "kind": "init",
+                      "method": false,
+                      "shorthand": false
                     },
                     {
                       "range": [
@@ -315,6 +324,7 @@
                         "type": "Identifier",
                         "name": "b"
                       },
+                      "computed": false,
                       "value": {
                         "range": [
                           23,
@@ -370,7 +380,9 @@
                           }
                         ]
                       },
-                      "kind": "init"
+                      "kind": "init",
+                      "method": false,
+                      "shorthand": false
                     }
                   ]
                 },
@@ -486,7 +498,9 @@
               "generator": false,
               "expression": false
             },
-            "kind": "init"
+            "kind": "init",
+            "method": true,
+            "shorthand": false
           }
         ]
       }

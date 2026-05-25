@@ -102,7 +102,9 @@
               "value": 1,
               "raw": "1"
             },
-            "kind": "init"
+            "kind": "init",
+            "method": false,
+            "shorthand": false
           },
           {
             "range": [
@@ -158,7 +160,9 @@
               "value": 2,
               "raw": "2"
             },
-            "kind": "init"
+            "kind": "init",
+            "method": false,
+            "shorthand": false
           }
         ]
       },

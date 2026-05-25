@@ -101,6 +101,7 @@
                 "type": "Identifier",
                 "name": "a"
               },
+              "computed": false,
               "value": {
                 "range": [
                   16,
@@ -155,7 +156,9 @@
                   "raw": "1"
                 }
               },
-              "kind": "init"
+              "kind": "init",
+              "method": false,
+              "shorthand": false
             }
           ]
         }

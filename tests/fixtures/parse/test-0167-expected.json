@@ -99,6 +99,7 @@
                   "type": "Identifier",
                   "name": "a"
                 },
+                "computed": false,
                 "value": {
                   "range": [
                     8,
@@ -117,7 +118,9 @@
                   "type": "Identifier",
                   "name": "A"
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": false
               },
               {
                 "range": [
@@ -153,6 +156,7 @@
                   "type": "Identifier",
                   "name": "b"
                 },
+                "computed": false,
                 "value": {
                   "range": [
                     14,
@@ -207,7 +211,9 @@
                     "raw": "1"
                   }
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": false
               },
               {
                 "range": [
@@ -243,6 +249,7 @@
                   "type": "Identifier",
                   "name": "c"
                 },
+                "computed": false,
                 "value": {
                   "range": [
                     24,
@@ -294,6 +301,7 @@
                         "type": "Identifier",
                         "name": "d"
                       },
+                      "computed": false,
                       "value": {
                         "range": [
                           26,
@@ -312,11 +320,15 @@
                         "type": "Identifier",
                         "name": "d"
                       },
-                      "kind": "init"
+                      "kind": "init",
+                      "method": false,
+                      "shorthand": true
                     }
                   ]
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": false
               }
             ]
           },

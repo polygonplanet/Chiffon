@@ -258,15 +258,21 @@
                               "raw": "\"it worked\""
                             }
                           },
-                          "kind": "init"
+                          "kind": "init",
+                          "method": false,
+                          "shorthand": true
                         }
                       ]
                     },
-                    "kind": "init"
+                    "kind": "init",
+                    "method": false,
+                    "shorthand": false
                   }
                 ]
               },
-              "kind": "init"
+              "kind": "init",
+              "method": false,
+              "shorthand": false
             }
           ]
         },
@@ -392,11 +398,15 @@
                       "type": "ObjectExpression",
                       "properties": []
                     },
-                    "kind": "init"
+                    "kind": "init",
+                    "method": false,
+                    "shorthand": false
                   }
                 ]
               },
-              "kind": "init"
+              "kind": "init",
+              "method": false,
+              "shorthand": false
             }
           ]
         }

@@ -193,7 +193,9 @@
                   "generator": false,
                   "expression": false
                 },
-                "kind": "get"
+                "kind": "get",
+                "method": false,
+                "shorthand": false
               }
             ]
           }

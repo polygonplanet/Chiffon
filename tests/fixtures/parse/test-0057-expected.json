@@ -102,7 +102,9 @@
               "value": 1,
               "raw": "1"
             },
-            "kind": "init"
+            "kind": "init",
+            "method": false,
+            "shorthand": false
           }
         ]
       }

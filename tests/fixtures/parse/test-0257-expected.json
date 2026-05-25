@@ -117,6 +117,7 @@
                   "type": "Identifier",
                   "name": "a"
                 },
+                "computed": false,
                 "value": {
                   "range": [
                     12,
@@ -135,7 +136,9 @@
                   "type": "Identifier",
                   "name": "a"
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": true
               },
               {
                 "range": [
@@ -171,6 +174,7 @@
                   "type": "Identifier",
                   "name": "b"
                 },
+                "computed": false,
                 "value": {
                   "range": [
                     15,
@@ -189,7 +193,9 @@
                   "type": "Identifier",
                   "name": "b"
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": true
               },
               {
                 "range": [
@@ -225,6 +231,7 @@
                   "type": "Identifier",
                   "name": "c"
                 },
+                "computed": false,
                 "value": {
                   "range": [
                     18,
@@ -243,7 +250,9 @@
                   "type": "Identifier",
                   "name": "c"
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": true
               }
             ]
           },
@@ -333,6 +342,7 @@
                   "type": "Identifier",
                   "name": "d"
                 },
+                "computed": false,
                 "value": {
                   "range": [
                     28,
@@ -351,7 +361,9 @@
                   "type": "Identifier",
                   "name": "d"
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": true
               }
             ]
           },

@@ -195,7 +195,9 @@
               "generator": false,
               "expression": false
             },
-            "kind": "init"
+            "kind": "init",
+            "method": true,
+            "shorthand": false
           }
         ]
       }

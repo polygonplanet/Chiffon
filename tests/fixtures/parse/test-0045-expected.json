@@ -213,7 +213,9 @@
                   "generator": false,
                   "expression": false
                 },
-                "kind": "set"
+                "kind": "set",
+                "method": false,
+                "shorthand": false
               }
             ]
           }

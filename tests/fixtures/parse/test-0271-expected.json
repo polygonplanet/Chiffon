@@ -155,7 +155,9 @@
                     }
                   ]
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": false
               }
             ]
           },

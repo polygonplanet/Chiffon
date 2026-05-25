@@ -157,7 +157,9 @@
                   "generator": false,
                   "expression": false
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": false
               },
               {
                 "range": [
@@ -233,7 +235,9 @@
                   "generator": false,
                   "expression": false
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": false
               },
               {
                 "range": [
@@ -309,7 +313,9 @@
                   "generator": false,
                   "expression": false
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": true,
+                "shorthand": false
               },
               {
                 "range": [
@@ -385,7 +391,9 @@
                   "generator": false,
                   "expression": false
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": true,
+                "shorthand": false
               },
               {
                 "range": [
@@ -461,7 +469,9 @@
                   "generator": false,
                   "expression": false
                 },
-                "kind": "get"
+                "kind": "get",
+                "method": false,
+                "shorthand": false
               },
               {
                 "range": [
@@ -556,7 +566,9 @@
                   "generator": false,
                   "expression": false
                 },
-                "kind": "set"
+                "kind": "set",
+                "method": false,
+                "shorthand": false
               }
             ]
           }

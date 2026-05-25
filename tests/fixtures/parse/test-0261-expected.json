@@ -136,7 +136,9 @@
                   "type": "Identifier",
                   "name": "a"
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": true
               },
               {
                 "range": [
@@ -191,7 +193,9 @@
                   "type": "Identifier",
                   "name": "b"
                 },
-                "kind": "init"
+                "kind": "init",
+                "method": false,
+                "shorthand": true
               }
             ]
           }
