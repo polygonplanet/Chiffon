@@ -1,0 +1,152 @@
+{
+  "range": [
+    0,
+    66
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 2,
+      "column": 35
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        30
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 30
+        }
+      },
+      "type": "ExportNamedDeclaration",
+      "declaration": {
+        "range": [
+          13,
+          30
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 13
+          },
+          "end": {
+            "line": 1,
+            "column": 30
+          }
+        },
+        "type": "FunctionDeclaration",
+        "id": {
+          "range": [
+            22,
+            25
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 22
+            },
+            "end": {
+              "line": 1,
+              "column": 25
+            }
+          },
+          "type": "Identifier",
+          "name": "foo"
+        },
+        "params": [],
+        "body": {
+          "range": [
+            28,
+            30
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 28
+            },
+            "end": {
+              "line": 1,
+              "column": 30
+            }
+          },
+          "type": "BlockStatement",
+          "body": []
+        },
+        "generator": false,
+        "async": true,
+        "expression": false
+      },
+      "specifiers": [],
+      "source": null
+    },
+    {
+      "range": [
+        31,
+        66
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 2,
+          "column": 35
+        }
+      },
+      "type": "ExportDefaultDeclaration",
+      "declaration": {
+        "range": [
+          52,
+          66
+        ],
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 21
+          },
+          "end": {
+            "line": 2,
+            "column": 35
+          }
+        },
+        "type": "FunctionDeclaration",
+        "id": null,
+        "params": [],
+        "body": {
+          "range": [
+            64,
+            66
+          ],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 33
+            },
+            "end": {
+              "line": 2,
+              "column": 35
+            }
+          },
+          "type": "BlockStatement",
+          "body": []
+        },
+        "generator": false,
+        "async": true,
+        "expression": false
+      }
+    }
+  ]
+}
