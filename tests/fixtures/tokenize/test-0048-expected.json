@@ -1,10 +1,10 @@
 [
-    {
-        "type": "RegularExpression",
-        "value": "/[/][/]/",
-        "regex": {
-            "pattern": "[/][/]",
-            "flags": ""
-        }
+  {
+    "type": "RegularExpression",
+    "value": "/[/][/]/",
+    "regex": {
+      "pattern": "[/][/]",
+      "flags": ""
     }
+  }
 ]

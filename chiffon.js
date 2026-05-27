@@ -69,11 +69,12 @@
   ')';
 
   // ECMA-262 11.7 Punctuators
+  // Must be ordered from longest to shortest to ensure correct matching.
   var punctuators = '(?:' +
-          '>>>=?|[.]{3}|<<=|===|!==|>>=' +
+          '>>>=?|[.]{3}|<<=|===|!==|>>=|[*][*]=' +
     '|' + '[+][+](?=[+])|--(?=-)' +
     '|' + '[=!<>*%+/&|^-]=' +
-    '|' + '&&|[|][|]|[+][+]|--|<<|>>|=>' +
+    '|' + '&&|[|][|]|[+][+]|--|[*][*]|<<|>>|=>' +
     '|' + '[-+*/%<>=&|^~!?:;,.()[\\]{}]' +
   ')';
 
@@ -87,7 +88,7 @@
             '|' + '[^/' + lineTerminator + '\\\\]' +
             ')+' +
     '/' +
-    '(?:[gimuy]+\\b|)' +
+    '(?:[gimsuy]+\\b|)' +
   ')';
 
   var templateLiteral = '`(?:' +
@@ -105,22 +106,27 @@
   '|' + '[^\\s\\\\+/%*=&|^~<>!?:;,.()[\\]{}\'"`@#-]' +
   ')+';
 
-  // Valid keywords for Regular Expression Literal. e.g. `typeof /a/`
-  var regexPreWords = 'typeof|in|void|case|instanceof|yield|throw|delete|' +
-    'else|return|do';
-  // Valid keywords when previous token of the regex literal is a paren.
-  // e.g. `if (1) /a/`
-  var regexParenWords = 'if|while|for|with';
+  // Keywords that can come before a Regular Expression Literal. e.g., `typeof /a/`
+  // `await` is included because `await /a/;` is valid syntax inside an
+  // async context, where the `/` starts a regular expression literal.
+  var regexPrefixKeywords = 'typeof|in|void|case|instanceof|yield|throw|delete|' +
+    'else|return|do|await';
+  // Keywords that allow a Regex Literal immediately after a closing
+  // parenthesis. e.g., `if (1) /a/`
+  var regexParenKeywords = 'if|while|for|with';
 
+  // Reserved Words
   var keywordsRe = new RegExp('^(?:' +
-    // ECMA-262 11.6.2.1 Keywords
-    regexParenWords + '|' + regexPreWords + '|' +
+    regexParenKeywords + '|' + regexPrefixKeywords + '|' +
     'var|function|this|new|break|catch|finally|try|default|continue|' +
-    'switch|const|export|import|class|extends|debugger|super|' +
-    // Reserved keywords
-    'let|static|' +
+    'switch|const|export|import|class|extends|debugger|super|enum|' +
+
     // ECMA-262 11.6.2.2 Future Reserved Words
-    'enum|await|' +
+    // Contextually disallowed as identifiers, in strict mode code:
+    // `await` is listed in `regexPrefixKeywords` above because ECMA-262
+    // includes it in the ReservedWord production; it is reserved only inside
+    // async contexts and modules, but otherwise may be used as an identifier.
+    'let|static|' +
     'implements|package|protected|interface|private|public' +
   ')$');
 
@@ -135,10 +141,10 @@
 
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
-          '(?:^(?:' + regexPreWords + ')$)' +
+          '(?:^(?:' + regexPrefixKeywords + ')$)' +
     '|' + '(?:' + '(?![.\\]])' + punctuators + '$)' +
   ')');
-  var regexParenWordsRe = new RegExp('^(?:' + regexParenWords + ')$');
+  var regexParenKeywordsRe = new RegExp('^(?:' + regexParenKeywords + ')$');
 
   var tokenizeNotWhiteSpaceRe = getPattern(_WhiteSpace);
   var tokenizeNotTemplateRe = getPattern(_Template);
@@ -153,8 +159,8 @@
   regexpLiteral =
   templateLiteral =
   identToken =
-  regexPreWords =
-  regexParenWords = null;
+  regexPrefixKeywords =
+  regexParenKeywords = null;
 
 
   function getPattern(ignore) {
@@ -216,7 +222,6 @@
       'g'
     );
   }
-
 
   function fromCodePoint(c) {
     if (c <= 0xFFFF) {
@@ -301,7 +306,7 @@
         }
 
         if (type === _RegularExpression) {
-          if (this.fixRegExpTokens(matches, i, tokens, value)) {
+          if (this.resolveRegExpMatch(matches, i, tokens, value)) {
             i--;
             continue;
           }
@@ -588,8 +593,9 @@
         }
       }
     },
-    // Fix Regular Expression missing matches e.g. `var g=1,a=2/3/g;`
-    fixRegExpTokens: function(matches, index, tokens, regexValue) {
+    // Resolve the `/` regex/division ambiguity by looking behind at the
+    // preceding token. e.g. `var g=1,a=2/3/g;` is divisions, not a regex.
+    resolveRegExpMatch: function(matches, matchIndex, tokens, regexValue) {
       var i = tokens.length;
 
       while (--i >= 0) {
@@ -617,7 +623,7 @@
         }
 
         var parts = regexValue.match(tokenizeNotRegExpRe);
-        splice.apply(matches, [index, 1].concat(parts));
+        splice.apply(matches, [matchIndex, 1].concat(parts));
         return true;
       }
       return false;
@@ -637,7 +643,7 @@
           if (--level === 0) {
             prev = tokens[i - 1];
             if (prev && prev.type === _Keyword &&
-                regexParenWordsRe.test(prev.value)) {
+                regexParenKeywordsRe.test(prev.value)) {
               return true;
             }
             return false;
@@ -867,6 +873,7 @@
       _ArrayPattern = 'ArrayPattern',
       _ArrowFunctionExpression = 'ArrowFunctionExpression',
       _ArrowParameters = 'ArrowParameters',
+      _AwaitExpression = 'AwaitExpression',
       _BlockStatement = 'BlockStatement',
       _BinaryExpression = 'BinaryExpression',
       _BreakStatement = 'BreakStatement',
@@ -927,7 +934,7 @@
       _YieldExpression = 'YieldExpression';
 
 
-  var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=)$/;
+  var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=|\*\*=)$/;
   var unaryOpRe = /^(?:[-+!~]|\+\+|--|typeof|void|delete)$/;
   var octalDigitRe = /^0[0-7]+$/;
 
@@ -945,8 +952,11 @@
       this.value = this.token.value;
       this.type = this.token.type;
     },
-    lookahead: function() {
-      return this.tokens[this.index + 1] || TOKEN_END;
+    lookahead: function(i) {
+      if (i == null) {
+        i = 1;
+      }
+      return this.tokens[this.index + i] || TOKEN_END;
     },
     assertValue: function(value) {
       if (this.value !== value) {
@@ -1011,7 +1021,7 @@
     },
     finishNode: function(node) {
       if (this.lastGroup && this.lastGroup.expr === node) {
-        // Restore the kept position
+        // Restore the original position
         var startNode = this.lastGroup.startNode;
         var endToken = this.lastGroup.endToken;
         this.lastGroup = null;
@@ -1250,6 +1260,17 @@
       node.name = name;
       return this.finishNode(node);
     },
+    // `yield` and `await` are allowed as identifiers outside their context
+    // (i.e. outside generators / async functions).
+    isContextualIdentifier: function() {
+      return this.type === _Identifier ||
+        (this.value === 'yield' && !this.inGenerator) ||
+        (this.value === 'await' && !this.inAsync);
+    },
+    // Callers should guard with `isContextualIdentifier()` beforehand.
+    parseContextualIdentifier: function() {
+      return this.parseIdentifier(true);
+    },
     parseCommaSeparatedElements: function(start, end, elems, callback, args) {
       this.expect(start);
 
@@ -1265,6 +1286,15 @@
     },
     // ECMA-262 12.2 Primary Expression
     parsePrimaryExpression: function() {
+      // Detect async function before treating it as a plain Identifier
+      // because `async` is a contextual keyword.
+      if (this.isAsyncFunctionAhead()) {
+        this.next(); // consume 'async'
+        return this.parseFunctionExpression({ async: true });
+      }
+      if (this.isAsyncArrowAhead()) {
+        return this.parseAsyncArrowHead();
+      }
       switch (this.type) {
         case _Numeric:
         case _String:
@@ -1280,9 +1310,28 @@
           return this.parsePrimaryPunctuatorExpression();
         case _Template:
           return this.parseTemplateLiteral();
-        default:
-          this.unexpected();
       }
+
+      this.unexpected();
+    },
+    parseAsyncArrowHead: function() {
+      var startNode = this.startNode();
+      this.next(); // consume 'async'
+
+      var head;
+      if (this.value === '(') {
+        head = this.parseGroupExpression();
+      } else {
+        // single-identifier param: `async ident =>`
+        var id = this.parseIdentifier(true);
+        head = {
+          type: _ArrowParameters,
+          params: [id]
+        };
+      }
+      head.async = true;
+      head.startNode = startNode;
+      return head;
     },
     parsePrimaryKeywordExpression: function() {
       switch (this.value) {
@@ -1309,9 +1358,9 @@
           return this.parseArrayInitializer();
         case '(':
           return this.parseGroupExpression();
-        default:
-          this.unexpected();
       }
+
+      this.unexpected();
     },
     parseGroupExpression: function() {
       var startNode = this.startNode();
@@ -1341,6 +1390,10 @@
           break;
         }
         this.next();
+        // ES2017: trailing comma in arrow parameters
+        if (this.value === ')') {
+          break;
+        }
       }
 
       var endToken = this.tokens[this.index - 1];
@@ -1394,7 +1447,9 @@
     parseObjectDefinition: function() {
       var node;
 
-      if (this.value === 'get' || this.value === 'set') {
+      if (this.value === '...') {
+        node = this.parseSpreadElement();
+      } else if (this.value === 'get' || this.value === 'set') {
         node = this.parseObjectGetterSetter();
       } else {
         node = this.parseObjectProperty();
@@ -1405,7 +1460,22 @@
     parseObjectProperty: function() {
       var node = this.startNode(_Property);
       var computed = false;
-      var generator;
+      var method = false;
+      var shorthand = false;
+      var generator = false;
+      var isAsync = false;
+
+      // `async method() {}`
+      // `async` is the modifier only when followed by a property name
+      // (not by `(`, `:`, `,`, `}`, or `=`) on the same line.
+      if (this.value === 'async' && !this.lookahead().hasLineTerminator) {
+        var afterAsync = this.lookahead().value;
+        if (afterAsync !== '(' && afterAsync !== ':' &&
+          afterAsync !== ',' && afterAsync !== '}' && afterAsync !== '=') {
+          isAsync = true;
+          this.next();
+        }
+      }
 
       if (this.value === '*') {
         generator = true;
@@ -1421,11 +1491,14 @@
         this.next();
         value = this.parseAssignmentExpression(true);
       } else if (this.value === '(') {
+        method = true;
         value = this.parseFunction({
           expression: true,
-          generator: generator
+          generator: generator,
+          async: isAsync
         });
       } else if (key.type === _Identifier) {
+        shorthand = true;
         if (this.value === '=') {
           value = this.parseAssignmentPattern(key);
         } else {
@@ -1439,12 +1512,16 @@
       node.computed = computed;
       node.value = value;
       node.kind = 'init';
+      node.method = method;
+      node.shorthand = shorthand;
       return this.finishNode(node);
     },
     parseObjectGetterSetter: function() {
       var node = this.startNode(_Property);
       var lookahead = this.lookahead();
       var computed = false;
+      var method = false;
+      var shorthand = false;
       var kind = 'init';
       var key, value;
 
@@ -1453,6 +1530,7 @@
         this.next();
         value = this.parseAssignmentExpression(true);
       } else if (lookahead.value === '(') {
+        method = true;
         key = this.parseObjectPropertyName();
         value = this.parseFunction({ expression: true });
       } else {
@@ -1479,6 +1557,8 @@
       node.computed = computed;
       node.value = value;
       node.kind = kind;
+      node.method = method;
+      node.shorthand = shorthand;
       return this.finishNode(node);
     },
     parseObjectPropertyName: function() {
@@ -1572,7 +1652,12 @@
         case _ObjectExpression:
           expr.type = _ObjectPattern;
           for (i = 0, len = expr.properties.length; i < len; i++) {
-            this.reinterpretExpression(expr.properties[i].value);
+            var prop = expr.properties[i];
+            if (prop.type === _SpreadElement) {
+              this.reinterpretExpression(prop);
+            } else {
+              this.reinterpretExpression(prop.value);
+            }
           }
           break;
         case _SpreadElement:
@@ -1633,8 +1718,12 @@
       this.expect('=>');
 
       var params = expr.params || [];
+      var isAsync = !!expr.async;
       var expression = false;
       var body;
+
+      var prevInAsync = this.inAsync;
+      this.inAsync = isAsync;
 
       if (this.value === '{') {
         body = this.parseBlockStatement();
@@ -1642,10 +1731,21 @@
         body = this.parseAssignmentExpression(true);
         expression = true;
       }
+      this.inAsync = prevInAsync;
 
       node.params = params;
       node.body = body;
+      if (isAsync) {
+        node.async = true;
+      }
       node.expression = expression;
+      return this.finishNode(node);
+    },
+    parseAwaitExpression: function() {
+      var node = this.startNode(_AwaitExpression);
+
+      this.expect('await');
+      node.argument = this.parseUnaryExpression();
       return this.finishNode(node);
     },
     parseYieldExpression: function() {
@@ -1715,7 +1815,7 @@
       }
 
       var startNode = this.startNode();
-      var left = this.parseUnaryExpression();
+      var left = this.parseExponentiationExpression();
       var prec = this.getBinaryPrecedence(allowIn);
       if (!prec) {
         return left;
@@ -1734,7 +1834,7 @@
           this.next();
 
           if (prec === 1) {
-            right = this.parseUnaryExpression();
+            right = this.parseExponentiationExpression();
           } else {
             right = this.parseBinaryExpression(allowIn, prec - 1);
           }
@@ -1751,8 +1851,29 @@
       this.startNodeAt(left, startNode);
       return this.finishNode(left);
     },
+    // ECMA-262 12.6 Exponentiation Operator (ES2016).
+    // Right-associative; binds tighter than multiplicative.
+    parseExponentiationExpression: function() {
+      var startNode = this.startNode();
+      var left = this.parseUnaryExpression();
+      if (this.value !== '**') {
+        return left;
+      }
+
+      var node = this.startNode(_BinaryExpression);
+      this.startNodeAt(node, startNode);
+      this.next();
+
+      node.operator = '**';
+      node.left = left;
+      node.right = this.parseExponentiationExpression();
+      return this.finishNode(node);
+    },
     parseUnaryExpression: function() {
       var value = this.value;
+      if (this.inAsync && value === 'await') {
+        return this.parseAwaitExpression();
+      }
       if (!unaryOpRe.test(value)) {
         return this.parsePostfixExpression();
       }
@@ -1858,7 +1979,16 @@
 
       node.computed = false;
       node.object = expr;
-      node.property = this.parseIdentifier();
+
+      // Same type check as parseObjectPropertyName
+      // IdentifierName after `.` allows reserved words and `null, true, false`
+      // (e.g. `obj.static`, `obj.class`, `obj.null`)
+      var type = this.type;
+      if (type !== _Identifier && type !== _Keyword &&
+          type !== _Boolean && type !== _Null) {
+        this.unexpected();
+      }
+      node.property = this.parseIdentifier(true);
       return this.finishNode(node);
     },
     parseArguments: function(node) {
@@ -1922,8 +2052,52 @@
       node.quasi = quasi;
       return this.finishNode(node);
     },
+    isAsyncFunctionAhead: function() {
+      if (this.value !== 'async') {
+        return false;
+      }
+      var next = this.lookahead();
+      return next.value === 'function' && !next.hasLineTerminator;
+    },
+    isAsyncArrowAhead: function() {
+      if (this.value !== 'async') {
+        return false;
+      }
+
+      var next = this.lookahead();
+      if (!next || next.hasLineTerminator) {
+        return false;
+      }
+
+      // `async ident =>`
+      if (next.type === _Identifier) {
+        var afterIdent = this.lookahead(2);
+        return afterIdent.value === '=>' && !afterIdent.hasLineTerminator;
+      }
+
+      // `async (...) =>`
+      if (next.value === '(') {
+        var depth = 0;
+        for (var i = this.index + 1, len = this.tokens.length; i < len; i++) {
+          var token = this.tokens[i];
+          if (token.value === '(') {
+            depth++;
+          } else if (token.value === ')') {
+            if (--depth === 0) {
+              var after = this.lookahead(i - this.index + 1);
+              return after.value === '=>' && !after.hasLineTerminator;
+            }
+          }
+        }
+      }
+      return false;
+    },
     // ECMA-262 13 ECMAScript Language: Statements and Declarations
     parseStatement: function() {
+      if (this.isAsyncFunctionAhead()) {
+        this.next(); // consume 'async'
+        return this.parseFunctionDeclaration({ async: true });
+      }
       switch (this.value) {
         case '{':
           return this.parseBlockStatement();
@@ -2025,14 +2199,17 @@
       return this.finishNode(node);
     },
     // ECMA-262 14.1 Function Definitions
-    parseFunctionDeclaration: function() {
-      return this.parseFunctionDefinition();
+    parseFunctionDeclaration: function(options) {
+      return this.parseFunctionDefinition(options || {});
     },
-    parseFunctionExpression: function() {
-      return this.parseFunctionDefinition(true);
+    parseFunctionExpression: function(options) {
+      options = options || {};
+      options.expression = true;
+      return this.parseFunctionDefinition(options);
     },
-    parseFunctionDefinition: function(expression) {
-      var node = this.startNode();
+    parseFunctionDefinition: function(options) {
+      options = options || {};
+      var node = options.node || this.startNode();
       var generator = false;
 
       this.expect('function');
@@ -2044,7 +2221,8 @@
       return this.parseFunction({
         node: node,
         generator: generator,
-        expression: expression
+        expression: options.expression,
+        async: options.async
       });
     },
     parseFunction: function(options) {
@@ -2054,9 +2232,11 @@
       node.type = options.expression ? _FunctionExpression : _FunctionDeclaration;
       node.id = null;
       node.params = [];
-      node.defaults = [];
       node.body = null;
       node.generator = !!options.generator;
+      if (options.async) {
+        node.async = true;
+      }
       node.expression = false;
 
       if (options.getter) {
@@ -2065,16 +2245,19 @@
       } else if (options.setter) {
         this.parseParams(node);
       } else {
-        if (this.type === _Identifier || this.value === 'yield') {
-          node.id = this.parseIdentifier(true);
+        if (this.isContextualIdentifier()) {
+          node.id = this.parseContextualIdentifier();
         }
         this.parseParams(node);
       }
 
       var prevInGenerator = this.inGenerator;
+      var prevInAsync = this.inAsync;
       this.inGenerator = node.generator;
+      this.inAsync = node.async;
       node.body = this.parseBlockStatement();
       this.inGenerator = prevInGenerator;
+      this.inAsync = prevInAsync;
       return this.finishNode(node);
     },
     parseParams: function(node) {
@@ -2085,35 +2268,17 @@
           break;
         }
       }
-
-      if (!node._hasDefaults) {
-        node.defaults.length = 0;
-      } else {
-        delete node._hasDefaults;
-      }
-
       this.expect(')');
     },
     parseParam: function(node) {
       var params = node.params;
-      var defaults = node.defaults;
-
       if (this.value === '...') {
         params[params.length] = this.parseRestElement();
-        defaults[defaults.length] = null;
         return false;
       }
 
       var pattern = this.parseBindingElement();
-
-      if (pattern.type === _AssignmentPattern) {
-        params[params.length] = pattern.left;
-        defaults[defaults.length] = pattern.right;
-        node._hasDefaults = true;
-      } else {
-        params[params.length] = pattern;
-        defaults[defaults.length] = null;
-      }
+      params[params.length] = pattern;
 
       if (this.value !== ')') {
         this.expect(',');
@@ -2137,8 +2302,8 @@
     },
     // ECMA-262 13.3.3 Destructuring Binding Patterns
     parseBindingPattern: function() {
-      if (this.type === _Identifier) {
-        return this.parseIdentifier();
+      if (this.isContextualIdentifier()) {
+        return this.parseContextualIdentifier();
       }
 
       if (this.value === '{') {
@@ -2204,18 +2369,29 @@
       return this.finishNode(node);
     },
     parseObjectPropertyPattern: function() {
+      if (this.value === '...') {
+        return this.parseRestElement();
+      }
+
       var node = this.startNode(_Property);
       var key, value;
+      var computed = false;
+      var shorthand = false;
 
-      if (this.type === _Identifier) {
-        key = this.parseIdentifier();
+      if (this.isContextualIdentifier()) {
+        key = this.parseContextualIdentifier();
         if (this.value === '=') {
           value = this.parseAssignmentPattern(key);
           this.startNodeAt(value, node);
+          shorthand = true;
         } else if (this.value !== ':') {
           value = key;
+          shorthand = true;
         }
       } else {
+        if (this.value === '[') {
+          computed = true;
+        }
         key = this.parseObjectPropertyName();
       }
 
@@ -2225,8 +2401,11 @@
       }
 
       node.key = key;
+      node.computed = computed;
       node.value = value;
       node.kind = 'init';
+      node.method = false;
+      node.shorthand = shorthand;
       return this.finishNode(node);
     },
     // ECMA-262 13 Statements and Declarations
@@ -2260,9 +2439,8 @@
       this.expect('continue');
 
       var label = null;
-
-      if (this.type === _Identifier && !this.token.hasLineTerminator) {
-        label = this.parseIdentifier();
+      if (!this.token.hasLineTerminator && this.isContextualIdentifier()) {
+        label = this.parseContextualIdentifier();
       }
 
       this.expectSemicolon();
@@ -2274,9 +2452,8 @@
       this.expect('break');
 
       var label = null;
-
-      if (this.type === _Identifier && !this.token.hasLineTerminator) {
-        label = this.parseIdentifier();
+      if (!this.token.hasLineTerminator && this.isContextualIdentifier()) {
+        label = this.parseContextualIdentifier();
       }
 
       this.expectSemicolon();
@@ -2446,15 +2623,23 @@
     parseForStatement: function() {
       var node = this.startNode(_ForStatement);
       this.expect('for');
+
+      // ES2018 for-await-of only valid inside async functions.
+      var isAwait = false;
+      if (this.inAsync && this.value === 'await') {
+        isAwait = true;
+        this.next();
+      }
+
       this.expect('(');
 
       var init = null;
 
       if (this.value !== ';') {
         if (this.value === 'var' || this.value === 'let' || this.value === 'const') {
-          init = this.parseForVarStatement(node);
+          init = this.parseForVarStatement(node, isAwait);
         } else {
-          init = this.parseForExpressionStatement(node);
+          init = this.parseForExpressionStatement(node, isAwait);
         }
 
         if (init.type === _ForInStatement || init.type === _ForOfStatement) {
@@ -2484,7 +2669,7 @@
       node.body = body;
       return this.finishNode(node);
     },
-    parseForExpressionStatement: function(node) {
+    parseForExpressionStatement: function(node, isAwait) {
       var expr = this.parseExpression(false);
 
       if (this.value === 'in') {
@@ -2492,12 +2677,12 @@
       }
 
       if (this.value === 'of') {
-        return this.parseForOfStatement(expr, node);
+        return this.parseForOfStatement(expr, node, isAwait);
       }
 
       return expr;
     },
-    parseForVarStatement: function(node) {
+    parseForVarStatement: function(node, isAwait) {
       var kind = this.value;
       var decl = this.parseVariableStatement(kind, true);
 
@@ -2506,7 +2691,7 @@
       }
 
       if (this.value === 'of') {
-        return this.parseForOfStatement(decl, node);
+        return this.parseForOfStatement(decl, node, isAwait);
       }
 
       return decl;
@@ -2526,7 +2711,7 @@
       node.each = false;
       return this.finishNode(node);
     },
-    parseForOfStatement: function(left, node) {
+    parseForOfStatement: function(left, node, isAwait) {
       node.type = _ForOfStatement;
       this.expect('of');
 
@@ -2538,6 +2723,9 @@
       node.left = left;
       node.right = right;
       node.body = body;
+      if (isAwait) {
+        node.await = true;
+      }
       return this.finishNode(node);
     },
     // ECMA-262 15.2.2 Imports
@@ -2640,6 +2828,10 @@
       if (this.value === 'function') {
         expr = this.parseFunctionDeclaration();
         skipSemicolon = true;
+      } else if (this.isAsyncFunctionAhead()) {
+        this.next(); // consume 'async'
+        expr = this.parseFunctionDeclaration({ async: true });
+        skipSemicolon = true;
       } else {
         expr = this.parseAssignmentExpression(true);
       }
@@ -2670,8 +2862,8 @@
       var specs = [];
       var source = null;
 
-      if (this.type === _Keyword) {
-        // export var|let|const|function|...
+      if (this.type === _Keyword || this.isAsyncFunctionAhead()) {
+        // export var|let|const|function|async function|...
         decl = this.parseStatement();
       } else {
         this.parseCommaSeparatedElements('{', '}', specs,
@@ -2716,8 +2908,12 @@
       this.expect('class');
 
       var id = null;
-      if (this.type === _Identifier) {
-        id = this.parseIdentifier();
+      // Class definitions are always in strict mode, where `yield` is not
+      // allowed, so `isContextualIdentifier()` cannot be used here.
+      // `await` is allowed as an identifier outside of async functions.
+      if (this.type === _Identifier ||
+        (this.value === 'await' && !this.inAsync)) {
+        id = this.parseContextualIdentifier();
       }
 
       var superClass = null;
@@ -2763,6 +2959,8 @@
       this.startNodeAt(node, startNode);
       node.type = _MethodDefinition;
       node['static'] = isStatic;
+      delete node.method;
+      delete node.shorthand;
 
       if (node.key.name === 'constructor') {
         node.kind = 'constructor';
@@ -2786,9 +2984,9 @@
       return this.finishNode(node);
     },
     parseMaybeLabelledStatement: function() {
-      if (this.type === _Identifier && this.lookahead().value === ':') {
+      if (this.isContextualIdentifier() && this.lookahead().value === ':') {
         var node = this.startNode(_LabeledStatement);
-        var label = this.parseIdentifier();
+        var label = this.parseContextualIdentifier();
 
         this.next();
         var body = this.parseStatement();

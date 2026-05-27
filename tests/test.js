@@ -52,8 +52,8 @@ function test(desc, parser) {
       var whiteSpaces = [
         0x20, 0x09, 0x0B, 0x0C, 0xA0,
         0x1680,
-        //0x180E,
-        // U+180E stops being one as of Unicode 6.3.0
+        // 0x180E (Mongolian Vowel Separator) was removed because it was
+        // reclassified as a non-whitespace character in Unicode 6.3.0.
         0x2000, 0x2001, 0x2002, 0x2003, 0x2004,
         0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F,
         0x205F, 0x3000, 0xFEFF
@@ -240,13 +240,13 @@ function test(desc, parser) {
           assert.equal(getFixturesNo(expectedName), no);
           var expected = require(expectedName);
           var ast = parser.parse(code, { range: true, loc: true });
+          normalizeRegExpValue(ast);
           assert.deepEqual(ast, expected);
         });
       });
     });
   });
 }
-
 
 function getFixtureFiles(type) {
   var files = getFiles(__dirname + '/fixtures/' + type);
@@ -277,19 +277,16 @@ function getFixtureFiles(type) {
   };
 }
 
-
 function getFixturesNo(filename) {
   var re = /^\w+-(\d+)/;
   var basename = path.basename(filename);
   return basename.match(re)[1];
 }
 
-
 function testSyntax(code) {
   /*jslint evil: true */
   new Function('return;' + code)();
 }
-
 
 function fakeRequire(code) {
   /*jslint evil: true */
@@ -299,7 +296,6 @@ function fakeRequire(code) {
     'return module.exports;'
   )();
 }
-
 
 function getFiles(dir) {
   var results = [];
@@ -318,7 +314,6 @@ function getFiles(dir) {
 
   return results;
 }
-
 
 function filterForEsprima(ast) {
   astFilter(ast, [
@@ -354,6 +349,22 @@ function filterForEsprima(ast) {
   return ast;
 }
 
+// Normalizes a RegExp literal's `value` field to `{}` so the parsed AST can be
+// compared against the JSON expected fixtures. JSON cannot represent a regular
+// expression. The `regex` property still holds the pattern and flags.
+function normalizeRegExpValue(ast) {
+  astFilter(ast, [
+    {
+      type: 'Literal',
+      callback: function(node) {
+        if (node.regex && node.value instanceof RegExp) {
+          node.value = {};
+        }
+      }
+    }
+  ]);
+  return ast;
+}
 
 function astFilter(node, filters) {
   if (Array.isArray(node)) {

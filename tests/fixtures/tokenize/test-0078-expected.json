@@ -1,42 +1,42 @@
 [
-    {
-        "type": "Punctuator",
-        "value": "("
-    },
-    {
-        "type": "Punctuator",
-        "value": "{"
-    },
-    {
-        "type": "Punctuator",
-        "value": "*"
-    },
-    {
-        "type": "Keyword",
-        "value": "yield"
-    },
-    {
-        "type": "Punctuator",
-        "value": "("
-    },
-    {
-        "type": "Punctuator",
-        "value": ")"
-    },
-    {
-        "type": "Punctuator",
-        "value": "{"
-    },
-    {
-        "type": "Punctuator",
-        "value": "}"
-    },
-    {
-        "type": "Punctuator",
-        "value": "}"
-    },
-    {
-        "type": "Punctuator",
-        "value": ")"
-    }
+  {
+    "type": "Punctuator",
+    "value": "("
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "Punctuator",
+    "value": "*"
+  },
+  {
+    "type": "Keyword",
+    "value": "yield"
+  },
+  {
+    "type": "Punctuator",
+    "value": "("
+  },
+  {
+    "type": "Punctuator",
+    "value": ")"
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  },
+  {
+    "type": "Punctuator",
+    "value": ")"
+  }
 ]

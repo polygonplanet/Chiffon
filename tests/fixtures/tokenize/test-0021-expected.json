@@ -1,18 +1,18 @@
 [
-    {
-        "type": "Keyword",
-        "value": "this"
-    },
-    {
-        "type": "Punctuator",
-        "value": "/"
-    },
-    {
-        "type": "Numeric",
-        "value": "100"
-    },
-    {
-        "type": "Punctuator",
-        "value": ";"
-    }
+  {
+    "type": "Keyword",
+    "value": "this"
+  },
+  {
+    "type": "Punctuator",
+    "value": "/"
+  },
+  {
+    "type": "Numeric",
+    "value": "100"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
 ]

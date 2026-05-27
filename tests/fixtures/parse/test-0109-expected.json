@@ -1,127 +1,127 @@
 {
-    "range": [
+  "range": [
+    0,
+    39
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 3,
+      "column": 12
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
         0,
         39
-    ],
-    "loc": {
+      ],
+      "loc": {
         "start": {
-            "line": 1,
-            "column": 0
+          "line": 1,
+          "column": 0
         },
         "end": {
-            "line": 3,
-            "column": 12
+          "line": 3,
+          "column": 12
         }
-    },
-    "type": "Program",
-    "body": [
-        {
+      },
+      "type": "TryStatement",
+      "block": {
+        "range": [
+          4,
+          28
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 4
+          },
+          "end": {
+            "line": 3,
+            "column": 1
+          }
+        },
+        "type": "BlockStatement",
+        "body": [
+          {
             "range": [
-                0,
-                39
+              8,
+              26
             ],
             "loc": {
+              "start": {
+                "line": 2,
+                "column": 2
+              },
+              "end": {
+                "line": 2,
+                "column": 20
+              }
+            },
+            "type": "ThrowStatement",
+            "argument": {
+              "range": [
+                14,
+                25
+              ],
+              "loc": {
                 "start": {
-                    "line": 1,
-                    "column": 0
+                  "line": 2,
+                  "column": 8
                 },
                 "end": {
-                    "line": 3,
-                    "column": 12
+                  "line": 2,
+                  "column": 19
                 }
-            },
-            "type": "TryStatement",
-            "block": {
+              },
+              "type": "NewExpression",
+              "callee": {
                 "range": [
-                    4,
-                    28
+                  18,
+                  23
                 ],
                 "loc": {
-                    "start": {
-                        "line": 1,
-                        "column": 4
-                    },
-                    "end": {
-                        "line": 3,
-                        "column": 1
-                    }
+                  "start": {
+                    "line": 2,
+                    "column": 12
+                  },
+                  "end": {
+                    "line": 2,
+                    "column": 17
+                  }
                 },
-                "type": "BlockStatement",
-                "body": [
-                    {
-                        "range": [
-                            8,
-                            26
-                        ],
-                        "loc": {
-                            "start": {
-                                "line": 2,
-                                "column": 2
-                            },
-                            "end": {
-                                "line": 2,
-                                "column": 20
-                            }
-                        },
-                        "type": "ThrowStatement",
-                        "argument": {
-                            "range": [
-                                14,
-                                25
-                            ],
-                            "loc": {
-                                "start": {
-                                    "line": 2,
-                                    "column": 8
-                                },
-                                "end": {
-                                    "line": 2,
-                                    "column": 19
-                                }
-                            },
-                            "type": "NewExpression",
-                            "callee": {
-                                "range": [
-                                    18,
-                                    23
-                                ],
-                                "loc": {
-                                    "start": {
-                                        "line": 2,
-                                        "column": 12
-                                    },
-                                    "end": {
-                                        "line": 2,
-                                        "column": 17
-                                    }
-                                },
-                                "type": "Identifier",
-                                "name": "Error"
-                            },
-                            "arguments": []
-                        }
-                    }
-                ]
-            },
-            "handler": null,
-            "finalizer": {
-                "range": [
-                    37,
-                    39
-                ],
-                "loc": {
-                    "start": {
-                        "line": 3,
-                        "column": 10
-                    },
-                    "end": {
-                        "line": 3,
-                        "column": 12
-                    }
-                },
-                "type": "BlockStatement",
-                "body": []
+                "type": "Identifier",
+                "name": "Error"
+              },
+              "arguments": []
             }
-        }
-    ]
+          }
+        ]
+      },
+      "handler": null,
+      "finalizer": {
+        "range": [
+          37,
+          39
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 10
+          },
+          "end": {
+            "line": 3,
+            "column": 12
+          }
+        },
+        "type": "BlockStatement",
+        "body": []
+      }
+    }
+  ]
 }

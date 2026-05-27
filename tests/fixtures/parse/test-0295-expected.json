@@ -1,0 +1,129 @@
+{
+  "range": [
+    0,
+    32
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 32
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        6,
+        32
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 6
+        },
+        "end": {
+          "line": 1,
+          "column": 32
+        }
+      },
+      "type": "FunctionDeclaration",
+      "id": {
+        "range": [
+          15,
+          18
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 15
+          },
+          "end": {
+            "line": 1,
+            "column": 18
+          }
+        },
+        "type": "Identifier",
+        "name": "eof"
+      },
+      "params": [],
+      "body": {
+        "range": [
+          21,
+          32
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 21
+          },
+          "end": {
+            "line": 1,
+            "column": 32
+          }
+        },
+        "type": "BlockStatement",
+        "body": [
+          {
+            "range": [
+              23,
+              30
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 23
+              },
+              "end": {
+                "line": 1,
+                "column": 30
+              }
+            },
+            "type": "ExpressionStatement",
+            "expression": {
+              "range": [
+                23,
+                30
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 23
+                },
+                "end": {
+                  "line": 1,
+                  "column": 30
+                }
+              },
+              "type": "AwaitExpression",
+              "argument": {
+                "range": [
+                  29,
+                  30
+                ],
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 29
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 30
+                  }
+                },
+                "type": "Identifier",
+                "name": "x"
+              }
+            }
+          }
+        ]
+      },
+      "generator": false,
+      "async": true,
+      "expression": false
+    }
+  ]
+}
