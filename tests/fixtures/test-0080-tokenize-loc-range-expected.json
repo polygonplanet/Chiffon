@@ -1,0 +1,20 @@
+[
+  {
+    "type": "Template",
+    "value": "`a\\u0062\\u{63}\\u0064\\r\\n\\v\\b\\f\\t`",
+    "range": [
+      0,
+      33
+    ],
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 0
+      },
+      "end": {
+        "line": 1,
+        "column": 33
+      }
+    }
+  }
+]

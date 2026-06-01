@@ -1,0 +1,14 @@
+[
+  {
+    "type": "String",
+    "value": "''"
+  },
+  {
+    "type": "Punctuator",
+    "value": "+"
+  },
+  {
+    "type": "String",
+    "value": "\"\""
+  }
+]

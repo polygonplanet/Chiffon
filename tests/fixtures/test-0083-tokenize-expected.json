@@ -1,0 +1,30 @@
+[
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "Template",
+    "value": "`1 + 1 = ${"
+  },
+  {
+    "type": "Numeric",
+    "value": "1"
+  },
+  {
+    "type": "Punctuator",
+    "value": "+"
+  },
+  {
+    "type": "Numeric",
+    "value": "1"
+  },
+  {
+    "type": "Template",
+    "value": "}`"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

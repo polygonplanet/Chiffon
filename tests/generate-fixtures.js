@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Regenerates the expected fixtures for the parser and tokenizer tests.
  *
@@ -8,8 +6,8 @@
  *   - regenerate parser fixtures: `node tests/generate-fixtures.js parse`
  *   - regenerate tokenizer fixtures: `node tests/generate-fixtures.js tokenize`
  *
- * For every fixtures/<group>/test-NNNN.js, this runs Chiffon and writes the
- * result to test-NNNN-expected.json. To add a new test case, create a
+ * For every fixtures/test-NNNN.js, this runs Chiffon and writes the result to
+ * test-NNNN-xxx-expected.json. To add a new test case, create a
  * test-NNNN.js file and run this script; the matching expected file is
  * created automatically.
  *
@@ -18,113 +16,146 @@
  * is lost because the `regex` property still holds the pattern and flags.
  * The test runner applies the same normalization before comparing.
  */
+'use strict';
 
-var Chiffon = require('../chiffon');
-var fs = require('fs');
-var path = require('path');
+const Chiffon = require('../chiffon');
+const fs = require('fs');
+const path = require('path');
 
-var groups = {
-  parse: [
-    {
-      dir: 'fixtures/parse',
-      run: function (code) {
-        return Chiffon.parse(code, { range: true, loc: true });
-      }
+const FIXTURES_DIR = path.resolve(__dirname, 'fixtures');
+
+const stats = { created: 0, updated: 0, skipped: 0, errors: 0 };
+
+const methods = {
+  parse: {
+    pathName: 'parse',
+    method: (code) => {
+      return Chiffon.parse(code, { loc: true, range: true });
     }
-  ],
-  tokenize: [
-    {
-      dir: 'fixtures/tokenize',
-      run: function (code) {
-        return Chiffon.tokenize(code);
-      }
-    },
-    {
-      dir: 'fixtures/tokenize/range',
-      run: function (code) {
-        return Chiffon.tokenize(code, { range: true });
-      }
-    },
-    {
-      dir: 'fixtures/tokenize/loc',
-      run: function (code) {
-        return Chiffon.tokenize(code, { loc: true });
-      }
+  },
+  tokenize: {
+    pathName: 'tokenize',
+    method: (code) => {
+      return Chiffon.tokenize(code);
     }
-  ]
+  },
+  tokenizeLocRange: {
+    pathName: 'tokenize-loc-range',
+    method: (code) => {
+      return Chiffon.tokenize(code, { loc: true, range: true });
+    }
+  }
 };
 
-var arg = process.argv[2];
-var selected;
-if (!arg) {
-  selected = ['parse', 'tokenize'];
-} else if (groups.hasOwnProperty(arg)) {
-  selected = [arg];
-} else {
-  console.error('Unknown group: ' + arg + ' (expected "parse" or "tokenize")');
-  process.exit(1);
-}
-
-var total = { created: 0, updated: 0, skipped: 0, removed: 0, errors: 0 };
-
-selected.forEach(function (groupName) {
-  groups[groupName].forEach(function (group) {
-    generate(group);
-  });
-});
-
-console.log(
-  [
-    '\nDone: ' + total.created + ' created',
-    total.updated + ' updated',
-    total.skipped + ' unchanged',
-    total.removed + ' stale removed',
-    total.errors + ' errors'
-  ].join(', ')
-);
-
-if (total.errors > 0) {
-  process.exit(1);
-}
-
-function generate(group) {
-  var fixturesDir = path.resolve(__dirname, group.dir);
-
-  var testFiles = fs
-    .readdirSync(fixturesDir)
-    .filter(function (f) {
-      return /^test-\d+\.js$/.test(f);
-    })
+function generateExpected(selectedMethods = []) {
+  const testFiles = fs
+    .readdirSync(FIXTURES_DIR)
+    .filter((f) => /^test-\d+(?:-module)?\.js$/.test(f))
     .sort();
 
-  testFiles.forEach(function (testFile) {
-    var no = testFile.match(/test-(\d+)/)[1];
-    var testPath = path.join(fixturesDir, testFile);
-    var expectedPath = path.join(fixturesDir, 'test-' + no + '-expected.json');
-    var code = fs.readFileSync(testPath).toString();
-    var result;
-    try {
-      result = group.run(code);
-    } catch (e) {
-      console.log('ERROR ' + group.dir + ' ' + no + ': ' + e.message);
-      total.errors++;
-      return;
-    }
+  testFiles.forEach((testFile) => {
+    const testMatch = testFile.match(/^test-(\d+)(-module|)\.js$/);
+    if (!testMatch) return;
 
-    var newContent = JSON.stringify(result, null, 2) + '\n';
+    const no = testMatch[1];
+    const isModule = !!testMatch[2];
+    const testPath = path.join(FIXTURES_DIR, testFile);
 
-    var exists = fs.existsSync(expectedPath);
-    if (exists && fs.readFileSync(expectedPath).toString() === newContent) {
-      total.skipped++;
+    let code;
+    if (isModule) {
+      const mod = require(testPath);
+      code = mod.code;
     } else {
-      fs.writeFileSync(expectedPath, newContent);
-      if (exists) {
-        console.log('UPDATE ' + group.dir + ' ' + no);
-        total.updated++;
-      } else {
-        console.log('CREATE ' + group.dir + ' ' + no);
-        total.created++;
-      }
+      code = fs.readFileSync(testPath).toString();
     }
+
+    Object.entries(methods).forEach(([methodName, { pathName, method }]) => {
+      if (!selectedMethods.includes(methodName)) {
+        return;
+      }
+
+      const expectedPath = path.join(FIXTURES_DIR, `test-${no}-${pathName}-expected.json`);
+
+      let result;
+      try {
+        result = method(code);
+      } catch (e) {
+        console.log(`ERROR ${methodName} ${no}: ${e.message}`);
+        stats.errors++;
+        return;
+      }
+
+      writeExpected(expectedPath, result, `${methodName} ${no}`);
+    });
   });
 }
+
+function writeExpected(expectedPath, result, logLabel) {
+  writeFile(expectedPath, JSON.stringify(result, bigintReplacer, 2) + '\n', logLabel);
+}
+
+function writeFile(filePath, content, logLabel) {
+  const exists = fs.existsSync(filePath);
+  if (exists && fs.readFileSync(filePath).toString() === content) {
+    stats.skipped++;
+  } else {
+    fs.writeFileSync(filePath, content);
+    if (exists) {
+      console.log('UPDATE ' + logLabel);
+      stats.updated++;
+    } else {
+      console.log('CREATE ' + logLabel);
+      stats.created++;
+    }
+  }
+}
+
+function bigintReplacer(key, value) {
+  return typeof value === 'bigint' ? value.toString() : value;
+}
+
+// tokenize-loc-range -> tokenizeLocRange
+// tokenize_loc_range -> tokenizeLocRange
+// tokenizeLocRange -> tokenizeLocRange
+// "tokenize loc range" -> tokenizeLocRange
+function normalizeArg(arg) {
+  if (!arg) {
+    return '';
+  }
+  return arg
+    .toLowerCase()
+    .split(/[^a-zA-Z0-9]+/)
+    .map((part, index) => (index === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)))
+    .join('');
+}
+
+function run() {
+  const defaultMethods = ['parse', 'tokenize', 'tokenizeLocRange'];
+  let selected;
+  const arg = normalizeArg(process.argv[2]);
+
+  if (!arg) {
+    selected = [...defaultMethods];
+  } else if (defaultMethods.includes(arg)) {
+    selected = [arg];
+  } else {
+    console.error('Unknown method: ' + arg + ' (expected ' + defaultMethods.join(', ') + ')');
+    process.exit(1);
+  }
+
+  generateExpected(selected);
+  console.log(
+    [
+      '\nDone: ' + stats.created + ' created',
+      stats.updated + ' updated',
+      stats.skipped + ' unchanged',
+      stats.errors + ' errors'
+    ].join(', ')
+  );
+
+  if (stats.errors > 0) {
+    process.exit(1);
+  }
+}
+
+run();
