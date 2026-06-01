@@ -1,0 +1,95 @@
+{
+  "range": [
+    0,
+    21
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 21
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        21
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 21
+        }
+      },
+      "type": "ExpressionStatement",
+      "expression": {
+        "range": [
+          0,
+          21
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 21
+          }
+        },
+        "type": "AssignmentExpression",
+        "operator": "/=",
+        "left": {
+          "range": [
+            0,
+            1
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 1
+            }
+          },
+          "type": "Identifier",
+          "name": "a"
+        },
+        "right": {
+          "range": [
+            8,
+            21
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 8
+            },
+            "end": {
+              "line": 1,
+              "column": 21
+            }
+          },
+          "type": "Literal",
+          "value": {},
+          "raw": "/ a[ 1 /g ] /",
+          "regex": {
+            "pattern": " a[ 1 /g ] ",
+            "flags": ""
+          }
+        }
+      }
+    }
+  ]
+}

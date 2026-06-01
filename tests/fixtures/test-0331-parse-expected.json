@@ -1,0 +1,116 @@
+{
+  "range": [
+    0,
+    21
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 21
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        21
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 21
+        }
+      },
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "range": [
+            6,
+            20
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 6
+            },
+            "end": {
+              "line": 1,
+              "column": 20
+            }
+          },
+          "type": "VariableDeclarator",
+          "id": {
+            "range": [
+              6,
+              7
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 6
+              },
+              "end": {
+                "line": 1,
+                "column": 7
+              }
+            },
+            "type": "Identifier",
+            "name": "t"
+          },
+          "init": {
+            "range": [
+              10,
+              20
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 10
+              },
+              "end": {
+                "line": 1,
+                "column": 20
+              }
+            },
+            "type": "TemplateLiteral",
+            "quasis": [
+              {
+                "range": [
+                  10,
+                  20
+                ],
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 10
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 20
+                  }
+                },
+                "type": "TemplateElement",
+                "tail": true,
+                "value": {
+                  "cooked": "template",
+                  "raw": "template"
+                }
+              }
+            ],
+            "expressions": []
+          }
+        }
+      ],
+      "kind": "const"
+    }
+  ]
+}

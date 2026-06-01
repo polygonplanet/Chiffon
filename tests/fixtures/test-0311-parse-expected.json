@@ -1,0 +1,114 @@
+{
+  "range": [
+    0,
+    21
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 21
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        21
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 21
+        }
+      },
+      "type": "WithStatement",
+      "object": {
+        "range": [
+          6,
+          11
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 6
+          },
+          "end": {
+            "line": 1,
+            "column": 11
+          }
+        },
+        "type": "Literal",
+        "value": false,
+        "raw": "false"
+      },
+      "body": {
+        "range": [
+          13,
+          21
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 13
+          },
+          "end": {
+            "line": 1,
+            "column": 21
+          }
+        },
+        "type": "BlockStatement",
+        "body": [
+          {
+            "range": [
+              15,
+              19
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 15
+              },
+              "end": {
+                "line": 1,
+                "column": 19
+              }
+            },
+            "type": "ExpressionStatement",
+            "expression": {
+              "range": [
+                15,
+                19
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 15
+                },
+                "end": {
+                  "line": 1,
+                  "column": 19
+                }
+              },
+              "type": "Literal",
+              "value": {},
+              "raw": "/42/",
+              "regex": {
+                "pattern": "42",
+                "flags": ""
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

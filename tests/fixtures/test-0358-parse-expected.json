@@ -1,0 +1,151 @@
+{
+  "range": [
+    0,
+    16
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 2,
+      "column": 9
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        6
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 6
+        }
+      },
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "range": [
+            4,
+            5
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 4
+            },
+            "end": {
+              "line": 1,
+              "column": 5
+            }
+          },
+          "type": "VariableDeclarator",
+          "id": {
+            "range": [
+              4,
+              5
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 4
+              },
+              "end": {
+                "line": 1,
+                "column": 5
+              }
+            },
+            "type": "Identifier",
+            "name": "i"
+          },
+          "init": null
+        }
+      ],
+      "kind": "var"
+    },
+    {
+      "range": [
+        7,
+        16
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 2,
+          "column": 9
+        }
+      },
+      "type": "ExpressionStatement",
+      "expression": {
+        "range": [
+          7,
+          16
+        ],
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 0
+          },
+          "end": {
+            "line": 2,
+            "column": 9
+          }
+        },
+        "type": "BinaryExpression",
+        "operator": "in",
+        "left": {
+          "range": [
+            7,
+            8
+          ],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 0
+            },
+            "end": {
+              "line": 2,
+              "column": 1
+            }
+          },
+          "type": "Identifier",
+          "name": "i"
+        },
+        "right": {
+          "range": [
+            12,
+            16
+          ],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 5
+            },
+            "end": {
+              "line": 2,
+              "column": 9
+            }
+          },
+          "type": "Literal",
+          "value": {},
+          "raw": "/42/",
+          "regex": {
+            "pattern": "42",
+            "flags": ""
+          }
+        }
+      }
+    }
+  ]
+}

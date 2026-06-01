@@ -1,1 +1,0 @@
-var a = `${ (function(o) { return o.a }({a:1})) }`;

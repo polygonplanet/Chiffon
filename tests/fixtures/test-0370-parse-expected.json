@@ -1,0 +1,109 @@
+{
+  "range": [
+    0,
+    48
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 2,
+      "column": 21
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        26
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 26
+        }
+      },
+      "type": "ExportAllDeclaration",
+      "exported": {
+        "range": [
+          12,
+          14
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 12
+          },
+          "end": {
+            "line": 1,
+            "column": 14
+          }
+        },
+        "type": "Identifier",
+        "name": "ns"
+      },
+      "source": {
+        "range": [
+          20,
+          25
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 20
+          },
+          "end": {
+            "line": 1,
+            "column": 25
+          }
+        },
+        "type": "Literal",
+        "value": "mod",
+        "raw": "\"mod\""
+      }
+    },
+    {
+      "range": [
+        27,
+        48
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 2,
+          "column": 21
+        }
+      },
+      "type": "ExportAllDeclaration",
+      "source": {
+        "range": [
+          41,
+          48
+        ],
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 14
+          },
+          "end": {
+            "line": 2,
+            "column": 21
+          }
+        },
+        "type": "Literal",
+        "value": "other",
+        "raw": "\"other\""
+      }
+    }
+  ]
+}

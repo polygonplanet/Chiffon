@@ -1,1 +1,0 @@
-async function eof() { await x }

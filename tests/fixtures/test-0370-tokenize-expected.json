@@ -1,0 +1,46 @@
+[
+  {
+    "type": "Keyword",
+    "value": "export"
+  },
+  {
+    "type": "Punctuator",
+    "value": "*"
+  },
+  {
+    "type": "Identifier",
+    "value": "as"
+  },
+  {
+    "type": "Identifier",
+    "value": "ns"
+  },
+  {
+    "type": "Identifier",
+    "value": "from"
+  },
+  {
+    "type": "String",
+    "value": "\"mod\""
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "export"
+  },
+  {
+    "type": "Punctuator",
+    "value": "*"
+  },
+  {
+    "type": "Identifier",
+    "value": "from"
+  },
+  {
+    "type": "String",
+    "value": "\"other\""
+  }
+]

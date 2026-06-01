@@ -1,0 +1,4 @@
+const a = x ?? y;
+const b = x ?? y ?? z;
+const c = (x ?? y) || z;
+const d = obj?.prop ?? fallback
