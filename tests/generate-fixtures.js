@@ -29,6 +29,7 @@ const stats = { created: 0, updated: 0, skipped: 0, errors: 0 };
 const methods = {
   parse: {
     pathName: 'parse',
+    errorPathName: 'parse-error',
     method: (code) => {
       return Chiffon.parse(code, { loc: true, range: true });
     }
@@ -69,7 +70,7 @@ function generateExpected(selectedMethods = []) {
       code = fs.readFileSync(testPath).toString();
     }
 
-    Object.entries(methods).forEach(([methodName, { pathName, method }]) => {
+    Object.entries(methods).forEach(([methodName, { pathName, errorPathName, method }]) => {
       if (!selectedMethods.includes(methodName)) {
         return;
       }
@@ -80,6 +81,16 @@ function generateExpected(selectedMethods = []) {
       try {
         result = method(code);
       } catch (e) {
+        if (errorPathName) {
+          const errorResult = {
+            name: e.name,
+            message: e.message
+          };
+          const errorExpectedPath = path.join(FIXTURES_DIR, `test-${no}-${errorPathName}-expected.json`);
+          writeExpected(errorExpectedPath, errorResult, `${methodName} ${no} (error)`);
+          return;
+        }
+
         console.log(`ERROR ${methodName} ${no}: ${e.message}`);
         stats.errors++;
         return;
@@ -101,10 +112,10 @@ function writeFile(filePath, content, logLabel) {
   } else {
     fs.writeFileSync(filePath, content);
     if (exists) {
-      console.log('UPDATE ' + logLabel);
+      console.log(`UPDATE ${logLabel}`);
       stats.updated++;
     } else {
-      console.log('CREATE ' + logLabel);
+      console.log(`CREATE ${logLabel}`);
       stats.created++;
     }
   }
@@ -139,17 +150,17 @@ function run() {
   } else if (defaultMethods.includes(arg)) {
     selected = [arg];
   } else {
-    console.error('Unknown method: ' + arg + ' (expected ' + defaultMethods.join(', ') + ')');
+    console.error(`Unknown method: ${arg} (expected ${defaultMethods.join(', ')})`);
     process.exit(1);
   }
 
   generateExpected(selected);
   console.log(
     [
-      '\nDone: ' + stats.created + ' created',
-      stats.updated + ' updated',
-      stats.skipped + ' unchanged',
-      stats.errors + ' errors'
+      `\nDone: ${stats.created} created`,
+      `${stats.updated} updated`,
+      `${stats.skipped} unchanged`,
+      `${stats.errors} errors`
     ].join(', ')
   );
 
