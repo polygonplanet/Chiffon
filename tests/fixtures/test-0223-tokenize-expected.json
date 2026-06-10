@@ -1,0 +1,78 @@
+[
+  {
+    "type": "Keyword",
+    "value": "export"
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Identifier",
+    "value": "b"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Identifier",
+    "value": "c"
+  },
+  {
+    "type": "Identifier",
+    "value": "as"
+  },
+  {
+    "type": "Identifier",
+    "value": "C"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Identifier",
+    "value": "d"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Identifier",
+    "value": "e"
+  },
+  {
+    "type": "Identifier",
+    "value": "as"
+  },
+  {
+    "type": "Identifier",
+    "value": "E"
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  },
+  {
+    "type": "Identifier",
+    "value": "from"
+  },
+  {
+    "type": "String",
+    "value": "'mod'"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

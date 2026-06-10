@@ -1,0 +1,20 @@
+[
+  {
+    "type": "Template",
+    "value": "`\na\n`",
+    "range": [
+      0,
+      5
+    ],
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 0
+      },
+      "end": {
+        "line": 3,
+        "column": 1
+      }
+    }
+  }
+]

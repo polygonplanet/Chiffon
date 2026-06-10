@@ -1,0 +1,22 @@
+[
+  {
+    "type": "Template",
+    "value": "`a`"
+  },
+  {
+    "type": "Punctuator",
+    "value": "."
+  },
+  {
+    "type": "Identifier",
+    "value": "charCodeAt"
+  },
+  {
+    "type": "Punctuator",
+    "value": "("
+  },
+  {
+    "type": "Punctuator",
+    "value": ")"
+  }
+]

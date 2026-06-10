@@ -1,0 +1,14 @@
+[
+  {
+    "type": "Keyword",
+    "value": "import"
+  },
+  {
+    "type": "String",
+    "value": "'mod'"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

@@ -1,0 +1,184 @@
+{
+  "range": [
+    0,
+    20
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 20
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        20
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 20
+        }
+      },
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "range": [
+            6,
+            20
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 6
+            },
+            "end": {
+              "line": 1,
+              "column": 20
+            }
+          },
+          "type": "VariableDeclarator",
+          "id": {
+            "range": [
+              6,
+              7
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 6
+              },
+              "end": {
+                "line": 1,
+                "column": 7
+              }
+            },
+            "type": "Identifier",
+            "name": "v"
+          },
+          "init": {
+            "range": [
+              10,
+              20
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 10
+              },
+              "end": {
+                "line": 1,
+                "column": 20
+              }
+            },
+            "type": "LogicalExpression",
+            "operator": "??",
+            "left": {
+              "type": "ChainExpression",
+              "range": [
+                10,
+                14
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 10
+                },
+                "end": {
+                  "line": 1,
+                  "column": 14
+                }
+              },
+              "expression": {
+                "range": [
+                  10,
+                  14
+                ],
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 10
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 14
+                  }
+                },
+                "type": "MemberExpression",
+                "computed": false,
+                "optional": true,
+                "object": {
+                  "range": [
+                    10,
+                    11
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 10
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 11
+                    }
+                  },
+                  "type": "Identifier",
+                  "name": "a"
+                },
+                "property": {
+                  "range": [
+                    13,
+                    14
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 13
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 14
+                    }
+                  },
+                  "type": "Identifier",
+                  "name": "b"
+                }
+              }
+            },
+            "right": {
+              "range": [
+                18,
+                20
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 18
+                },
+                "end": {
+                  "line": 1,
+                  "column": 20
+                }
+              },
+              "type": "Literal",
+              "value": "0",
+              "raw": "0n",
+              "bigint": "0"
+            }
+          }
+        }
+      ],
+      "kind": "const"
+    }
+  ]
+}

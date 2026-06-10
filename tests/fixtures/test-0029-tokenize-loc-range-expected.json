@@ -1,0 +1,20 @@
+[
+  {
+    "type": "String",
+    "value": "'\\0112\\b\\t\\r\\n\\v\\f\\u0061\\u{0061}\\u{62}\\x63'",
+    "range": [
+      0,
+      43
+    ],
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 0
+      },
+      "end": {
+        "line": 1,
+        "column": 43
+      }
+    }
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "type": "Keyword",
+    "value": "try"
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "Keyword",
+    "value": "throw"
+  },
+  {
+    "type": "Keyword",
+    "value": "new"
+  },
+  {
+    "type": "Identifier",
+    "value": "Error"
+  },
+  {
+    "type": "Punctuator",
+    "value": "("
+  },
+  {
+    "type": "Punctuator",
+    "value": ")"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  },
+  {
+    "type": "Keyword",
+    "value": "finally"
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "type": "Keyword",
+    "value": "var"
+  },
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "String",
+    "value": "\"aaa\\\nbbb\\\nccc\\nddd\\\neee\""
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "var"
+  },
+  {
+    "type": "Identifier",
+    "value": "t"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Template",
+    "value": "`foo\nbar\\n\nbaz`"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "var"
+  },
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Numeric",
+    "value": "1"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "var"
+  },
+  {
+    "type": "Identifier",
+    "value": "b"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Numeric",
+    "value": "2"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

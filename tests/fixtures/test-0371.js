@@ -1,0 +1,1 @@
+const v = a?.b ?? 0n

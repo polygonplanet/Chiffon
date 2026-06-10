@@ -1,0 +1,82 @@
+[
+  {
+    "type": "Keyword",
+    "value": "for"
+  },
+  {
+    "type": "Punctuator",
+    "value": "("
+  },
+  {
+    "type": "Identifier",
+    "value": "i"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Numeric",
+    "value": "0"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Identifier",
+    "value": "len"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "Punctuator",
+    "value": "."
+  },
+  {
+    "type": "Identifier",
+    "value": "length"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Identifier",
+    "value": "i"
+  },
+  {
+    "type": "Punctuator",
+    "value": "<"
+  },
+  {
+    "type": "Identifier",
+    "value": "len"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Identifier",
+    "value": "i"
+  },
+  {
+    "type": "Punctuator",
+    "value": "++"
+  },
+  {
+    "type": "Punctuator",
+    "value": ")"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

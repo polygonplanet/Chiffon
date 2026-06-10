@@ -1,0 +1,42 @@
+[
+  {
+    "type": "Keyword",
+    "value": "import"
+  },
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "Identifier",
+    "value": "from"
+  },
+  {
+    "type": "String",
+    "value": "'mod'"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "import"
+  },
+  {
+    "type": "Identifier",
+    "value": "b"
+  },
+  {
+    "type": "Identifier",
+    "value": "from"
+  },
+  {
+    "type": "String",
+    "value": "'mod2'"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

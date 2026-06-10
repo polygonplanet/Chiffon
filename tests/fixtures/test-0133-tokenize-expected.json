@@ -1,0 +1,14 @@
+[
+  {
+    "type": "Template",
+    "value": "`a`"
+  },
+  {
+    "type": "Punctuator",
+    "value": "+"
+  },
+  {
+    "type": "Template",
+    "value": "`b`"
+  }
+]

@@ -1,0 +1,30 @@
+[
+  {
+    "type": "Keyword",
+    "value": "export"
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "Identifier",
+    "value": "v"
+  },
+  {
+    "type": "Identifier",
+    "value": "as"
+  },
+  {
+    "type": "Identifier",
+    "value": "x"
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

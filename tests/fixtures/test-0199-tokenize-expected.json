@@ -1,0 +1,22 @@
+[
+  {
+    "type": "Keyword",
+    "value": "import"
+  },
+  {
+    "type": "Identifier",
+    "value": "v"
+  },
+  {
+    "type": "Identifier",
+    "value": "from"
+  },
+  {
+    "type": "String",
+    "value": "\"mod\""
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

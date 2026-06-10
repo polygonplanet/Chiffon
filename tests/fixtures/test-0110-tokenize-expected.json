@@ -1,0 +1,10 @@
+[
+  {
+    "type": "Keyword",
+    "value": "debugger"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

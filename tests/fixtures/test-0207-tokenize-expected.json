@@ -1,0 +1,18 @@
+[
+  {
+    "type": "Keyword",
+    "value": "export"
+  },
+  {
+    "type": "Keyword",
+    "value": "default"
+  },
+  {
+    "type": "Numeric",
+    "value": "42"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

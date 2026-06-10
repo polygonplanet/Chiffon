@@ -1,0 +1,38 @@
+[
+  {
+    "type": "Punctuator",
+    "value": "["
+  },
+  {
+    "type": "Numeric",
+    "value": "01"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Numeric",
+    "value": "011"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Numeric",
+    "value": "0111"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Numeric",
+    "value": "01111"
+  },
+  {
+    "type": "Punctuator",
+    "value": "]"
+  }
+]

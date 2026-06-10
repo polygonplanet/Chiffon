@@ -1,0 +1,20 @@
+[
+  {
+    "type": "String",
+    "value": "'a'",
+    "range": [
+      13,
+      16
+    ],
+    "loc": {
+      "start": {
+        "line": 2,
+        "column": 0
+      },
+      "end": {
+        "line": 2,
+        "column": 3
+      }
+    }
+  }
+]

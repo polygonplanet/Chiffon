@@ -1,0 +1,34 @@
+[
+  {
+    "type": "Keyword",
+    "value": "export"
+  },
+  {
+    "type": "Keyword",
+    "value": "default"
+  },
+  {
+    "type": "Keyword",
+    "value": "function"
+  },
+  {
+    "type": "Punctuator",
+    "value": "("
+  },
+  {
+    "type": "Punctuator",
+    "value": ")"
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

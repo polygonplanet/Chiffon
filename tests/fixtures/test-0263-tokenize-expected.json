@@ -1,0 +1,34 @@
+[
+  {
+    "type": "Keyword",
+    "value": "const"
+  },
+  {
+    "type": "Identifier",
+    "value": "f"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Identifier",
+    "value": "x"
+  },
+  {
+    "type": "Punctuator",
+    "value": "=>"
+  },
+  {
+    "type": "Identifier",
+    "value": "x"
+  },
+  {
+    "type": "Punctuator",
+    "value": "*"
+  },
+  {
+    "type": "Identifier",
+    "value": "x"
+  }
+]

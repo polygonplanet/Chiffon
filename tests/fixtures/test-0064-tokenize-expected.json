@@ -1,0 +1,22 @@
+[
+  {
+    "type": "Numeric",
+    "value": "1"
+  },
+  {
+    "type": "Punctuator",
+    "value": "?"
+  },
+  {
+    "type": "Numeric",
+    "value": "2"
+  },
+  {
+    "type": "Punctuator",
+    "value": ":"
+  },
+  {
+    "type": "Numeric",
+    "value": "3"
+  }
+]
