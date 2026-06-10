@@ -23,86 +23,114 @@ const fs = require('fs');
 const path = require('path');
 
 const FIXTURES_DIR = path.resolve(__dirname, 'fixtures');
+const FIXTURES_MINIFY_DIR = path.resolve(FIXTURES_DIR, 'minify');
 
 const stats = { created: 0, updated: 0, skipped: 0, errors: 0 };
 
 const methods = {
   parse: {
+    dir: FIXTURES_DIR,
     pathName: 'parse',
     errorPathName: 'parse-error',
+    expectedExt: 'json',
     method: (code) => {
       return Chiffon.parse(code, { loc: true, range: true });
     }
   },
   tokenize: {
+    dir: FIXTURES_DIR,
     pathName: 'tokenize',
+    expectedExt: 'json',
     method: (code) => {
       return Chiffon.tokenize(code);
     }
   },
   tokenizeLocRange: {
+    dir: FIXTURES_DIR,
     pathName: 'tokenize-loc-range',
+    expectedExt: 'json',
     method: (code) => {
       return Chiffon.tokenize(code, { loc: true, range: true });
+    }
+  },
+  minify: {
+    dir: FIXTURES_MINIFY_DIR,
+    pathName: 'minify',
+    expectedExt: 'js',
+    method: (code) => {
+      return Chiffon.minify(code);
     }
   }
 };
 
 function generateExpected(selectedMethods = []) {
-  const testFiles = fs
-    .readdirSync(FIXTURES_DIR)
-    .filter((f) => /^test-\d+(?:-module)?\.js$/.test(f))
-    .sort();
+  const getTestFiles = (dir) => {
+    return fs
+      .readdirSync(dir)
+      .filter((f) => /^test-\d+(?:-module)?\.js$/.test(f))
+      .sort();
+  };
 
-  testFiles.forEach((testFile) => {
-    const testMatch = testFile.match(/^test-(\d+)(-module|)\.js$/);
-    if (!testMatch) return;
+  const testFilesByDir = {};
+  Object.values(methods).forEach(({ dir }) => (testFilesByDir[dir] = getTestFiles(dir)));
 
-    const no = testMatch[1];
-    const isModule = !!testMatch[2];
-    const testPath = path.join(FIXTURES_DIR, testFile);
+  Object.entries(testFilesByDir).forEach(([targetDir, testFiles]) => {
+    testFiles.forEach((testFile) => {
+      const testMatch = testFile.match(/^test-(\d+)(-module|)\.js$/);
+      if (!testMatch) return;
 
-    let code;
-    if (isModule) {
-      const mod = require(testPath);
-      code = mod.code;
-    } else {
-      code = fs.readFileSync(testPath).toString();
-    }
+      const no = testMatch[1];
+      const isModule = !!testMatch[2];
+      const testPath = path.join(targetDir, testFile);
 
-    Object.entries(methods).forEach(([methodName, { pathName, errorPathName, method }]) => {
-      if (!selectedMethods.includes(methodName)) {
-        return;
+      let code;
+      if (isModule) {
+        const mod = require(testPath);
+        code = mod.code;
+      } else {
+        code = fs.readFileSync(testPath).toString();
       }
 
-      const expectedPath = path.join(FIXTURES_DIR, `test-${no}-${pathName}-expected.json`);
-
-      let result;
-      try {
-        result = method(code);
-      } catch (e) {
-        if (errorPathName) {
-          const errorResult = {
-            name: e.name,
-            message: e.message
-          };
-          const errorExpectedPath = path.join(FIXTURES_DIR, `test-${no}-${errorPathName}-expected.json`);
-          writeExpected(errorExpectedPath, errorResult, `${methodName} ${no} (error)`);
+      Object.entries(methods).forEach(([methodName, { dir, pathName, errorPathName, expectedExt, method }]) => {
+        if (dir !== targetDir) {
           return;
         }
 
-        console.log(`ERROR ${methodName} ${no}: ${e.message}`);
-        stats.errors++;
-        return;
-      }
+        if (!selectedMethods.includes(methodName)) {
+          return;
+        }
 
-      writeExpected(expectedPath, result, `${methodName} ${no}`);
+        const expectedPath = path.join(targetDir, `test-${no}-${pathName}-expected.${expectedExt}`);
+
+        let result;
+        try {
+          result = method(code);
+        } catch (e) {
+          if (errorPathName) {
+            const errorResult = {
+              name: e.name,
+              message: e.message
+            };
+            const errorExpectedPath = path.join(targetDir, `test-${no}-${errorPathName}-expected.${expectedExt}`);
+            writeExpected(errorExpectedPath, errorResult, `${methodName} ${no} (error)`);
+            return;
+          }
+
+          console.log(`ERROR ${methodName} ${no}: ${e.message}`);
+          stats.errors++;
+          return;
+        }
+
+        writeExpected(expectedPath, result, `${methodName} ${no}`);
+      });
     });
   });
 }
 
 function writeExpected(expectedPath, result, logLabel) {
-  writeFile(expectedPath, JSON.stringify(result, bigintReplacer, 2) + '\n', logLabel);
+  const isJson = expectedPath.endsWith('.json');
+
+  writeFile(expectedPath, (isJson ? JSON.stringify(result, bigintReplacer, 2) : result) + '\n', logLabel);
 }
 
 function writeFile(filePath, content, logLabel) {
@@ -141,7 +169,7 @@ function normalizeArg(arg) {
 }
 
 function run() {
-  const defaultMethods = ['parse', 'tokenize', 'tokenizeLocRange'];
+  const defaultMethods = ['parse', 'tokenize', 'tokenizeLocRange', 'minify'];
   let selected;
   const arg = normalizeArg(process.argv[2]);
 

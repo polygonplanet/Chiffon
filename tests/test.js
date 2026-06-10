@@ -1,286 +1,469 @@
 /* global describe, it, expect, require */
-(function test_chiffon() {
 'use strict';
 
-var Chiffon = require('../chiffon');
-var ChiffonMin;
+const Chiffon = require('../chiffon');
+let ChiffonMin;
 
-var assert = require('assert');
-var fs = require('fs');
-var path = require('path');
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const esprima = require(path.resolve(__dirname, 'thirdparty/esprima'));
 
-var libs = [
+const FIXTURES_DIR = path.resolve(__dirname, 'fixtures');
+const FIXTURES_MINIFY_DIR = path.resolve(FIXTURES_DIR, 'minify');
+const THIRDPARTY_DIR = path.resolve(__dirname, 'thirdparty');
+
+const THIRDPARTY_LIBS = [
   'angular',
   'backbone',
-  'bluebird',
+  //'bluebird',
   'esprima',
   'jquery-ui',
   'jquery',
   'moment',
   'react-with-addons',
   'underscore'
-].reduce(function(obj, name) {
-  var buffer = fs.readFileSync(__dirname + '/thirdparty/' + name + '.js');
-  obj[name] = buffer.toString();
-  return obj;
+].reduce((memo, libraryName) => {
+  // Preload all source instead of reading per-iteration:
+  // memory cost is negligible and it avoids repeated disk I/O.
+  memo[libraryName] = readThirdpartyLibrary(libraryName);
+  return memo;
 }, {});
 
-var esprima = require(__dirname + '/thirdparty/esprima');
-
-var fixtures = {
-  tokenize: getFixtureFiles('tokenize'),
-  tokenizeRange: getFixtureFiles('tokenize/range'),
-  tokenizeLoc: getFixtureFiles('tokenize/loc'),
-  minify: getFixtureFiles('minify'),
-  parse: getFixtureFiles('parse')
+const methods = {
+  parse: {
+    dir: FIXTURES_DIR,
+    pathName: 'parse',
+    errorPathName: 'parse-error',
+    expectedExt: 'json',
+    execute: (chiffon, code, options) => {
+      return chiffon.parse(code, options);
+    }
+  },
+  tokenize: {
+    dir: FIXTURES_DIR,
+    pathName: 'tokenize',
+    expectedExt: 'json',
+    execute: (chiffon, code, options) => {
+      return chiffon.tokenize(code, options);
+    }
+  },
+  tokenizeLocRange: {
+    dir: FIXTURES_DIR,
+    pathName: 'tokenize-loc-range',
+    expectedExt: 'json',
+    execute: (chiffon, code, options) => {
+      return chiffon.tokenize(code, options);
+    }
+  },
+  minify: {
+    dir: FIXTURES_MINIFY_DIR,
+    pathName: 'minify',
+    expectedExt: 'js',
+    execute: (chiffon, code, options) => {
+      return chiffon.minify(code, options);
+    },
+    // `untokenize()` uses the test cases for minify
+    executeUntokenize: (chiffon, tokens, options) => {
+      return chiffon.untokenize(tokens, options);
+    }
+  }
 };
 
-fixtures.untokenize = fixtures.minify;
+/*
+const fixtures = {
+  test: {
+    '0001': { fileName: 'test-0001.js', isModule: false },
+    '0002': { fileName: 'test-0002.js', isModule: false },
+    ...
+  },
+  minify: {
+    '0001': {
+      expectedFileName: 'test-0001-minify-expected.js',
+      expectError: false
+    },
+    ...
+  },
+  parse: {
+    '0001': {
+      expectedFileName: 'test-0001-parse-expected.json',
+      expectError: false
+    },
+    ...
+  },
+  tokenize: {
+    '0001': {
+      expectedFileName: 'test-0001-tokenize-expected.json',
+      expectError: false
+    },
+    ...
+  },
+  tokenizeLocRange: {
+    '0001': {
+      expectedFileName: 'test-0001-tokenize-loc-range-expected.json',
+      expectError: false
+    },
+    ...
+  },
+  untokenize: {
+    '0001': {
+      expectedFileName: 'test-0001-untokenize-expected.js',
+      expectError: false
+    },
+    ...
+  },
+};
+*/
+const fixtures = {
+  test: {},
+  minify: {},
+  parse: {},
+  tokenize: {},
+  tokenizeLocRange: {}
+};
 
-var min = process.argv.slice().pop() === '--min';
+const fixtureCache = {};
+parseFixtures();
 
-test('Chiffon', Chiffon);
+const min = process.argv.slice().pop() === '--min';
+runTest('Chiffon', Chiffon);
 
 if (min) {
   ChiffonMin = require('../chiffon.min');
-  test('Chiffon (min)', ChiffonMin);
+  runTest('Chiffon (min)', ChiffonMin);
 }
 
-function test(desc, parser) {
-  describe(desc, function() {
-    describe('WhiteSpace', function() {
-      var whiteSpaces = [
-        0x20, 0x09, 0x0B, 0x0C, 0xA0,
-        0x1680,
+function runTest(description, parser) {
+  describe(description, () => {
+    describe('WhiteSpace', () => {
+      const whiteSpaces = [
+        0x20, 0x09, 0x0b, 0x0c, 0xa0, 0x1680,
         // 0x180E (Mongolian Vowel Separator) was removed because it was
         // reclassified as a non-whitespace character in Unicode 6.3.0.
-        0x2000, 0x2001, 0x2002, 0x2003, 0x2004,
-        0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F,
-        0x205F, 0x3000, 0xFEFF
+        0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200a, 0x202f, 0x205f, 0x3000,
+        0xfeff
       ];
-      whiteSpaces.forEach(function(ws) {
-        it('0x' + ('0000' + ws.toString(16).toUpperCase()).slice(-4), function() {
-          var c = String.fromCharCode(ws);
-          var code = c + '1';
-          var chiffon_tokens = parser.tokenize(code);
-          var esprima_tokens = esprima.parse(code, { tokens: true }).tokens;
-          assert.deepEqual(chiffon_tokens, esprima_tokens);
+
+      whiteSpaces.forEach((ws) => {
+        it(`0x${('0000' + ws.toString(16).toUpperCase()).slice(-4)}`, () => {
+          const c = String.fromCharCode(ws);
+          const dummyExpr = '1 + 2';
+          const code = c + dummyExpr + c;
+
+          const chiffonTokens = methods.tokenize.execute(parser, code);
+          const esprimaTokens = esprima.parse(code, { tokens: true }).tokens;
+          assert.deepEqual(chiffonTokens, esprimaTokens);
         });
       });
     });
 
-    describe('tokenize', function() {
-      Object.keys(libs).forEach(function(name) {
-        it(name, function() {
-          var code = libs[name];
+    describe('tokenize', () => {
+      const methodName = 'tokenize';
+
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(libraryName, () => {
           assert(code.length > 0);
-          var chiffon_tokens = parser.tokenize(code, { range: true });
-          var esprima_tokens = esprima.parse(code, { tokens: true, range: true }).tokens;
-          assert.deepEqual(chiffon_tokens, esprima_tokens);
+          const chiffonTokens = methods[methodName].execute(parser, code, { range: true });
+          const esprimaTokens = normalizeEsprimaTokens(esprima.parse(code, { tokens: true, range: true }).tokens);
+          assert.deepEqual(chiffonTokens, esprimaTokens);
         });
       });
 
-      Object.keys(libs).forEach(function(name) {
-        it(name + ' (CRLF)', function() {
-          var code = libs[name].replace(/\r\n|\r|\n/g, '\r\n');
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(`${libraryName} (CRLF)`, () => {
+          code = code.replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
-          var chiffon_tokens = parser.tokenize(code, { range: true });
-          var esprima_tokens = esprima.parse(code, { tokens: true, range: true }).tokens;
-          assert.deepEqual(chiffon_tokens, esprima_tokens);
+
+          const chiffonTokens = methods[methodName].execute(parser, code, { range: true });
+          const esprimaTokens = normalizeEsprimaTokens(esprima.parse(code, { tokens: true, range: true }).tokens);
+          assert.deepEqual(chiffonTokens, esprimaTokens);
         });
       });
 
-      fixtures.tokenize.test.forEach(function(testName, i) {
-        var no = getFixturesNo(testName);
-        it('fixtures ' + no, function() {
-          var code = fs.readFileSync(testName).toString();
-          var expectedName = fixtures.tokenize.expected[i];
-          assert.equal(getFixturesNo(expectedName), no);
-          var expected = require(expectedName);
-          var tokens = parser.tokenize(code);
+      Object.entries(fixtures.tokenize).forEach(([no, { expectedFileName }]) => {
+        it(`fixtures ${no}`, () => {
+          assert.equal(getFixturesNo(expectedFileName), no);
+          const fixture = getTestFixture(methodName, no);
+          const code = readFixtureCode(methodName, fixture);
+          const expectedCode = readFixtureFile(methodName, expectedFileName);
+          const expected = JSON.parse(expectedCode);
+          const tokens = methods[methodName].execute(parser, code);
           assert.deepEqual(tokens, expected);
         });
       });
 
-      fixtures.tokenizeRange.test.forEach(function(testName, i) {
-        var no = getFixturesNo(testName);
-        it('fixtures range ' + no, function() {
-          var code = fs.readFileSync(testName).toString();
-          var expectedName = fixtures.tokenizeRange.expected[i];
-          assert.equal(getFixturesNo(expectedName), no);
-          var expected = require(expectedName);
-          var tokens = parser.tokenize(code, { range: true });
-          assert.deepEqual(tokens, expected);
-        });
-      });
-
-      fixtures.tokenizeLoc.test.forEach(function(testName, i) {
-        var no = getFixturesNo(testName);
-        it('fixtures loc ' + no, function() {
-          var code = fs.readFileSync(testName).toString();
-          var expectedName = fixtures.tokenizeLoc.expected[i];
-          assert.equal(getFixturesNo(expectedName), no);
-          var expected = require(expectedName);
-          var tokens = parser.tokenize(code, { loc: true });
+      Object.entries(fixtures.tokenizeLocRange).forEach(([no, { expectedFileName }]) => {
+        it(`fixtures (loc-range) ${no}`, () => {
+          const methodName = 'tokenizeLocRange';
+          assert.equal(getFixturesNo(expectedFileName), no);
+          const fixture = getTestFixture(methodName, no);
+          const code = readFixtureCode(methodName, fixture);
+          const expectedCode = readFixtureFile(methodName, expectedFileName);
+          const expected = JSON.parse(expectedCode);
+          const tokens = methods[methodName].execute(parser, code, { loc: true, range: true });
           assert.deepEqual(tokens, expected);
         });
       });
     });
 
-    describe('untokenize', function() {
-      fixtures.untokenize.test.forEach(function(testName, i) {
-        var no = getFixturesNo(testName);
-        it('fixtures ' + no, function() {
-          var code = fs.readFileSync(testName).toString();
-          var func = require(testName);
+    describe('untokenize', () => {
+      const methodName = 'minify'; // use minify fixtures for untokenize
+
+      Object.entries(fixtures.minify).forEach(([no, { expectedFileName }]) => {
+        it('fixtures ' + no, () => {
+          assert.equal(getFixturesNo(expectedFileName), no);
+          const fixture = getTestFixture(methodName, no);
+          const code = readFixtureCode(methodName, fixture);
+
+          const func = requireFixture(methodName, fixture);
           assert(func() === true);
-          var tokens = parser.tokenize(code, {
+
+          const tokens = methods.tokenize.execute(parser, code, {
             comment: true,
             whiteSpace: true,
             lineTerminator: true
           });
           assert(Array.isArray(tokens));
-          var result = parser.untokenize(tokens, {
+
+          const untokenized = methods[methodName].executeUntokenize(parser, tokens, {
             unsafe: true
           });
-
-          assert(result === code);
-          var resFunc = fakeRequire(result);
+          assert(untokenized === code);
+          const resFunc = fakeRequire(untokenized);
           assert(func() === resFunc());
         });
       });
     });
 
-    describe('minify', function() {
-      Object.keys(libs).forEach(function(name) {
-        it(name, function() {
-          var code = libs[name];
+    describe('minify', () => {
+      const methodName = 'minify';
+
+      Object.keys(THIRDPARTY_LIBS).forEach((libraryName) => {
+        it(libraryName, () => {
+          const code = THIRDPARTY_LIBS[libraryName];
           assert(code.length > 0);
-          var minCode = parser.minify(code);
+          const minCode = methods[methodName].execute(parser, code);
           assert(minCode.length > 0);
           assert(code.length > minCode.length);
           testSyntax(minCode);
         });
       });
 
-      fixtures.minify.test.forEach(function(testName, i) {
-        var no = getFixturesNo(testName);
-        it('fixtures ' + no, function() {
-          var code = fs.readFileSync(testName).toString();
-          var func = require(testName);
-          assert(func() === true);
-          var minCode = parser.minify(code);
+      Object.entries(fixtures.minify).forEach(([no, { expectedFileName }]) => {
+        it('fixtures ' + no, () => {
+          assert.equal(getFixturesNo(expectedFileName), no);
+          const fixture = getTestFixture(methodName, no);
+          const code = readFixtureCode(methodName, fixture);
+          const expectedCode = readFixtureFile(methodName, expectedFileName);
 
+          const func = requireFixture(methodName, fixture);
+          assert(func() === true);
+
+          const minCode = methods[methodName].execute(parser, code);
           assert(code.length > minCode.length);
           testSyntax(minCode);
+          assert.strictEqual(minCode, expectedCode.replace(/\n$/, ''));
 
-          var minFunc = fakeRequire(minCode);
+          const minFunc = fakeRequire(minCode);
           assert(func() === minFunc());
         });
       });
     });
 
-    describe('parse', function() {
-      Object.keys(libs).forEach(function(name) {
-        it(name, function() {
-          var code = libs[name];
+    describe('parse', () => {
+      const methodName = 'parse';
+
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(libraryName, () => {
           assert(code.length > 0);
-          var chiffon_ast = parser.parse(code, { range: true, loc: true });
-          var esprima_ast = esprima.parse(code, { range: true, loc: true });
-          esprima_ast = filterForEsprima(esprima_ast);
-          assert.deepEqual(chiffon_ast, esprima_ast);
-          chiffon_ast = esprima_ast = null;
+          const chiffonAst = methods[methodName].execute(parser, code, { loc: true, range: true });
+          const esprimaAst = normalizeEsprimaAst(esprima.parse(code, { loc: true, range: true }));
+          assert.deepEqual(chiffonAst, esprimaAst);
         });
       });
 
-      Object.keys(libs).forEach(function(name) {
-        it(name + ' without location', function() {
-          var code = libs[name];
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(`${libraryName} without location`, () => {
           assert(code.length > 0);
-          var chiffon_ast = parser.parse(code);
-          var esprima_ast = esprima.parse(code);
-          esprima_ast = filterForEsprima(esprima_ast);
-          assert.deepEqual(chiffon_ast, esprima_ast);
-          chiffon_ast = esprima_ast = null;
+          const chiffonAst = methods[methodName].execute(parser, code);
+          const esprimaAst = normalizeEsprimaAst(esprima.parse(code));
+          assert.deepEqual(chiffonAst, esprimaAst);
         });
       });
 
-      Object.keys(libs).forEach(function(name) {
-        it(name + ' (CRLF)', function() {
-          var code = libs[name].replace(/\r\n|\r|\n/g, '\r\n');
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(`${libraryName} (CRLF)`, () => {
+          code = code.replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
-          var chiffon_ast = parser.parse(code, { range: true, loc: true });
-          var esprima_ast = esprima.parse(code, { range: true, loc: true });
-          esprima_ast = filterForEsprima(esprima_ast);
-          assert.deepEqual(chiffon_ast, esprima_ast);
-          chiffon_ast = esprima_ast = null;
+          const chiffonAst = methods[methodName].execute(parser, code, { loc: true, range: true });
+          const esprimaAst = normalizeEsprimaAst(esprima.parse(code, { loc: true, range: true }));
+          assert.deepEqual(chiffonAst, esprimaAst);
         });
       });
 
-      Object.keys(libs).forEach(function(name) {
-        it(name + ' without location (CRLF)', function() {
-          var code = libs[name].replace(/\r\n|\r|\n/g, '\r\n');
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(`${libraryName} without location (CRLF)`, () => {
+          code = code.replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
-          var chiffon_ast = parser.parse(code);
-          var esprima_ast = esprima.parse(code);
-          esprima_ast = filterForEsprima(esprima_ast);
-          assert.deepEqual(chiffon_ast, esprima_ast);
-          chiffon_ast = esprima_ast = null;
+          const chiffonAst = methods[methodName].execute(parser, code);
+          const esprimaAst = normalizeEsprimaAst(esprima.parse(code));
+          assert.deepEqual(chiffonAst, esprimaAst);
         });
       });
 
-      fixtures.parse.test.forEach(function(testName, i) {
-        var no = getFixturesNo(testName);
-        it('fixtures ' + no, function() {
-          var code = fs.readFileSync(testName).toString();
-          var expectedName = fixtures.parse.expected[i];
-          assert.equal(getFixturesNo(expectedName), no);
-          var expected = require(expectedName);
-          var ast = parser.parse(code, { range: true, loc: true });
-          normalizeRegExpValue(ast);
-          assert.deepEqual(ast, expected);
+      Object.entries(fixtures.parse).forEach(([no, { expectedFileName, expectError }]) => {
+        it(`fixtures ${no}`, () => {
+          assert.equal(getFixturesNo(expectedFileName), no);
+          const fixture = getTestFixture(methodName, no);
+          const code = readFixtureCode(methodName, fixture);
+          const expectedCode = readFixtureFile(methodName, expectedFileName);
+          const expected = JSON.parse(expectedCode);
+
+          if (expectError) {
+            assert.throws(
+              () => methods[methodName].execute(parser, code, { loc: true, range: true }),
+              (e) => {
+                assert.strictEqual(e.name, expected.name);
+                assert.strictEqual(e.message, expected.message);
+                return true;
+              }
+            );
+          } else {
+            const ast = methods[methodName].execute(parser, code, { loc: true, range: true });
+            normalizeAstForJson(ast);
+            assert.deepEqual(ast, expected);
+          }
         });
       });
     });
   });
 }
 
-function getFixtureFiles(type) {
-  var files = getFiles(__dirname + '/fixtures/' + type);
+function parseFixtures() {
+  const pathNames = Object.entries(methods).reduce((memo, [methodName, method]) => {
+    memo[method.pathName] = methodName;
+    return memo;
+  }, {});
 
-  var test = files.filter(function(f) {
-    return /test-\d+\.js$/.test(f);
+  const errorPathNames = Object.entries(methods).reduce((memo, [methodName, method]) => {
+    if (method.errorPathName) memo[method.errorPathName] = methodName;
+    return memo;
+  }, {});
+
+  const dirs = [];
+  Object.keys(methods).forEach((methodName) => {
+    const dir = methods[methodName].dir;
+    if (!dirs.includes(dir)) {
+      dirs.push(dir);
+    }
   });
-  var expected = files.filter(function(f) {
-    return /expected\.\w+$/.test(f);
+
+  dirs.forEach((dir) => {
+    const dirKey = toRelativeDir(dir);
+
+    const fileNames = getFileNames(dir);
+    const fixtureFileNames = fileNames.filter((f) => /^test-\d+(?:[-\w]+)?\.(?:js|json)$/.test(f));
+
+    fixtureFileNames.sort((a, b) => {
+      const aNo = getFixturesNo(a) - 0;
+      const bNo = getFixturesNo(b) - 0;
+      return aNo > bNo ? 1 : aNo < bNo ? -1 : 0;
+    });
+
+    fixtureFileNames.forEach((fileName) => {
+      const testMatch = fileName.match(/^test-(\d+)(-module|)\.js$/);
+      if (testMatch) {
+        const no = testMatch[1];
+        const isModule = !!testMatch[2];
+
+        fixtures.test[dirKey] || (fixtures.test[dirKey] = {});
+        fixtures.test[dirKey][no] = { fileName, isModule };
+        return;
+      }
+
+      const expectedMatch = fileName.match(/^test-(\d+)-(\w+(?:-\w+)*)-expected\.(\w+)$/);
+      if (!expectedMatch) {
+        return;
+      }
+
+      const no = expectedMatch[1];
+      const op = expectedMatch[2];
+      const ext = expectedMatch[3];
+      let expectError = false;
+      let matchedMethodName;
+
+      if (pathNames[op]) {
+        matchedMethodName = pathNames[op];
+      } else if (errorPathNames[op]) {
+        matchedMethodName = errorPathNames[op];
+        expectError = true;
+      } else {
+        throw new Error(`Unknown test operation: ${op}`);
+      }
+
+      const expectedExt = methods[matchedMethodName].expectedExt;
+      if (expectedExt !== ext) {
+        throw new Error(`Unexpected file extension for "${op}": .${ext} (expected .${expectedExt})`);
+      }
+      fixtures[matchedMethodName][no] = { expectedFileName: fileName, expectError };
+    });
   });
-
-
-  var comparator = function(a, b) {
-    var a_name = path.basename(a);
-    var b_name = path.basename(b);
-    var a_no = getFixturesNo(a_name) - 0;
-    var b_no = getFixturesNo(b_name) - 0;
-    return a_no > b_no ? 1 :
-           a_no < b_no ? -1 : 0;
-  };
-
-  test.sort(comparator);
-  expected.sort(comparator);
-
-  return {
-    test: test,
-    expected: expected
-  };
 }
 
-function getFixturesNo(filename) {
-  var re = /^\w+-(\d+)/;
-  var basename = path.basename(filename);
-  return basename.match(re)[1];
+function getFixturesNo(fileName) {
+  const match = path.basename(fileName).match(/^\w+-(\d+)/);
+  return match ? match[1] : null;
+}
+
+function readFixtureFile(methodName, fileName) {
+  const key = `${methodName}/${fileName}`;
+  if (fixtureCache[key] == null) {
+    const dir = getFixtureDir(methodName);
+    fixtureCache[key] = fs.readFileSync(path.join(dir, fileName), 'utf8');
+  }
+  return fixtureCache[key];
+}
+
+function readThirdpartyLibrary(libraryName) {
+  return fs.readFileSync(path.join(THIRDPARTY_DIR, `${libraryName}.js`), 'utf8');
+}
+
+function getFixtureDir(methodName) {
+  return methods[methodName].dir;
+}
+
+function getTestFixture(methodName, no) {
+  const dirKey = toRelativeDir(methods[methodName].dir);
+  return fixtures.test[dirKey][no];
+}
+
+// '/path/to/tests/fixtures/minify' -> 'fixtures/minify'
+function toRelativeDir(dir) {
+  return path.relative(__dirname, dir).split(path.sep).join('/');
+}
+
+function readFixtureCode(methodName, fixture) {
+  const { fileName, isModule } = fixture;
+  const dir = getFixtureDir(methodName);
+
+  if (isModule) {
+    const mod = require(path.join(dir, fileName));
+    return mod.code;
+  }
+  return readFixtureFile(methodName, fileName);
+}
+
+function requireFixture(methodName, fixture) {
+  const { fileName } = fixture;
+  const dir = getFixtureDir(methodName);
+  return require(path.join(dir, fileName));
+}
+
+function getFileNames(dir) {
+  return fs.readdirSync(dir).filter((f) => fs.statSync(dir + '/' + f).isFile());
 }
 
 function testSyntax(code) {
@@ -291,74 +474,83 @@ function testSyntax(code) {
 function fakeRequire(code) {
   /*jslint evil: true */
   return new Function(
-    'var module = { exports: {} };' +
-    code + ';' +
-    'return module.exports;'
+    // provide `module` so `code` can do `module.exports = ...`
+    'var module = { exports: {} };' + code + ';' + 'return module.exports;'
   )();
 }
 
-function getFiles(dir) {
-  var results = [];
-
-  var files = fs.readdirSync(dir);
-  for (var i in files) {
-    if (!files.hasOwnProperty(i)) {
-      continue;
+// Normalize Esprima's token list so it can be compared against Chiffon's.
+function normalizeEsprimaTokens(tokens) {
+  tokens.forEach((token) => {
+    if (token.type === 'Identifier' && token.value === 'await') {
+      token.type = 'Keyword';
     }
-
-    var name = dir + '/' + files[i];
-    if (!fs.statSync(name).isDirectory()) {
-      results.push(name);
-    }
-  }
-
-  return results;
+  });
+  return tokens;
 }
 
-function filterForEsprima(ast) {
+// Normalize Esprima's AST so it can be compared against Chiffon's AST
+function normalizeEsprimaAst(ast) {
   astFilter(ast, [
     {
+      type: '*',
+      callback: (node) => {
+        if (node.directive === 'use strict') {
+          delete node.directive;
+        }
+      }
+    },
+    {
       type: 'Program',
-      callback: function(node) {
+      callback: (node) => {
         delete node.sourceType;
       }
     },
     {
-      type: 'Property',
-      callback: function(node) {
-        delete node.method;
-        delete node.shorthand;
-      }
-    },
-    {
       type: 'TryStatement',
-      callback: function(node) {
+      callback: (node) => {
         delete node.handlers;
         delete node.guardedHandlers;
       }
     },
     {
+      type: 'FunctionDeclaration',
+      callback: (node) => {
+        if (!node.async) delete node.async;
+      }
+    },
+    {
+      type: 'FunctionExpression',
+      callback: (node) => {
+        if (!node.async) delete node.async;
+      }
+    },
+    {
       type: 'ArrowFunctionExpression',
-      callback: function(node) {
+      callback: (node) => {
         delete node.id;
-        delete node.defaults;
         delete node.generator;
+        if (!node.async) delete node.async;
       }
     }
   ]);
   return ast;
 }
 
-// Normalizes a RegExp literal's `value` field to `{}` so the parsed AST can be
-// compared against the JSON expected fixtures. JSON cannot represent a regular
-// expression. The `regex` property still holds the pattern and flags.
-function normalizeRegExpValue(ast) {
+// Normalizes Literal `value` fields that JSON cannot represent
+function normalizeAstForJson(ast) {
   astFilter(ast, [
     {
       type: 'Literal',
-      callback: function(node) {
+      callback: (node) => {
         if (node.regex && node.value instanceof RegExp) {
           node.value = {};
+        } else if (typeof node.value === 'bigint') {
+          // JSON cannot represent a BigInt
+          node.value = node.value.toString();
+        } else if (typeof node.value === 'number' && !isFinite(node.value)) {
+          // JSON cannot represent Infinity / -Infinity / NaN
+          node.value = null;
         }
       }
     }
@@ -368,19 +560,13 @@ function normalizeRegExpValue(ast) {
 
 function astFilter(node, filters) {
   if (Array.isArray(node)) {
-    node.forEach(function(child) {
-      astFilter(child, filters);
-    });
+    node.forEach((child) => astFilter(child, filters));
   } else if (node && typeof node === 'object') {
-    filters.forEach(function(filter) {
-      if (node.type === filter.type) {
+    filters.forEach((filter) => {
+      if (filter.type === '*' || node.type === filter.type) {
         filter.callback(node);
       }
     });
-    Object.keys(node).forEach(function(key) {
-      astFilter(node[key], filters);
-    });
+    Object.keys(node).forEach((key) => astFilter(node[key], filters));
   }
 }
-
-}());
