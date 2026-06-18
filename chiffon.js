@@ -36,6 +36,7 @@
   var slice = arrayProto.slice;
   var splice = arrayProto.splice;
   var fromCharCode = String.fromCharCode;
+  var hasBigInt = typeof BigInt === 'function';
 
   var _Comment = 'Comment',
       _WhiteSpace = 'WhiteSpace',
@@ -197,13 +198,16 @@
       (ignore === _RegularExpression ? '' :
         '|' + regexpLiteral + literalSuffix) +
 
-            // Numeric Literal
-      '|' + '0(?:' + '[xX][0-9a-fA-F]+' +
-               '|' + '[oO][0-7]+' +
-               '|' + '[bB][01]+' +
-               ')' +
-      '|' + '(?:\\d+(?:[.]\\d*)?|[.]\\d+)(?:[eE][+-]?\\d+)?' +
-      '|' + '[1-9]\\d*' +
+      // ECMA-262 (16th) Numeric Literal (with BigInt and Numeric Separators)
+      '|' + '0(?:' + '[xX][0-9a-fA-F](?:_?[0-9a-fA-F]+)*' +
+               '|' + '[oO][0-7](?:_?[0-7]+)*' +
+               '|' + '[bB][01](?:_?[01]+)*' +
+               ')n?' + // BigIntLiteralSuffix
+      '|' + '(?:0|[1-9](?:_?\\d+)*)n' +
+      '|' + '(?:' + '\\d(?:_?\\d+)*(?:[.](?:\\d(?:_?\\d+)*)?)?' +
+              '|' + '[.]\\d(?:_?\\d+)*' +
+              ')' + '(?:[eE][+-]?\\d(?:_?\\d+)*)?' +
+      '|' + '[1-9](?:_?\\d+)*' +
       '|' + '0[0-7]+' +
 
             // Operators
@@ -1101,6 +1105,10 @@
     },
     // ECMA-262 11.8.3 Numeric Literals
     parseNumeric: function(value) {
+      if (~value.indexOf('_')) {
+        value = value.replace(/_/g, '');
+      }
+
       var i = 0;
       var c = value.charAt(i++);
       var n;
@@ -1212,11 +1220,25 @@
     parseLiteral: function() {
       var node = this.startNode(_Literal);
       var raw = this.value;
-      var value, regex;
+      var value, regex, bigint;
 
       switch (this.type) {
         case _Numeric:
-          value = this.parseNumeric(raw);
+          // ES2020 BigInt literal
+          if (raw.charAt(raw.length - 1) === 'n') {
+            // Remove the 'n' suffix and numeric separators because the BigInt
+            // cannot parse them (e.g., BigInt('123_456') throws a SyntaxError)
+            bigint = raw.replace(/_|n$/g, '');
+            if (hasBigInt) {
+              // ESTree spec requires `bigint` to be the decimal string
+              value = BigInt(bigint);
+              bigint = value.toString();
+            } else {
+              value = null;
+            }
+          } else {
+            value = this.parseNumeric(raw);
+          }
           break;
         case _String:
           value = this.parseString(raw);
@@ -1245,6 +1267,9 @@
       node.raw = raw;
       if (regex) {
         node.regex = regex;
+      }
+      if (bigint != null) {
+        node.bigint = bigint;
       }
 
       return this.finishNode(node);
