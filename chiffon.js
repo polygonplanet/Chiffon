@@ -277,6 +277,7 @@
       var token, value, len, index, lines;
       var lineStart, columnStart, columnEnd, hasLineTerminator;
       var type, regex;
+      var options = this.options;
 
       for (var i = 0; i < matches.length; i++) {
         value = matches[i];
@@ -291,7 +292,7 @@
         regex = null;
         type = this.getTokenType(value);
 
-        if (this.options.loc) {
+        if (options.loc) {
           if (type === _String ||
               (type === _Comment && value.charAt(1) === '*')) {
             lines = value.split(lineTerminatorSequenceRe);
@@ -326,14 +327,14 @@
           continue;
         }
 
-        if (this.options.parse && type === _LineTerminator) {
+        if (options.parse && type === _LineTerminator) {
           hasLineTerminator = true;
           continue;
         }
 
-        if ((type === _Comment && !this.options.comment) ||
-            (type === _WhiteSpace && !this.options.whiteSpace) ||
-            (type === _LineTerminator && !this.options.lineTerminator)) {
+        if ((type === _Comment && !options.comment) ||
+            (type === _WhiteSpace && !options.whiteSpace) ||
+            (type === _LineTerminator && !options.lineTerminator)) {
           continue;
         }
 
@@ -351,10 +352,10 @@
           token.regex = regex;
         }
 
-        if (this.options.range) {
+        if (options.range) {
           token.range = [this.index - len, this.index];
         }
-        if (this.options.loc) {
+        if (options.loc) {
           columnEnd = this.index - this.prevLineIndex;
           this.addLoc(token, lineStart, columnStart, this.line, columnEnd);
         }
@@ -666,8 +667,9 @@
       }
       source = '' + source;
 
+      var options = this.options;
       var re;
-      if (this.options.whiteSpace || this.options.range || this.options.loc) {
+      if (options.whiteSpace || options.range || options.loc) {
         re = tokenizeRe;
       } else {
         re = tokenizeNotWhiteSpaceRe;
@@ -1380,7 +1382,7 @@
       var items = [];
       var restElement = null;
 
-      while (true) {
+      for (;;) {
         if (this.value === '...') {
           restElement = this.parseRestElement();
           break;
@@ -1445,11 +1447,12 @@
       return this.finishNode(node);
     },
     parseObjectDefinition: function() {
+      var value = this.value;
       var node;
 
-      if (this.value === '...') {
+      if (value === '...') {
         node = this.parseSpreadElement();
-      } else if (this.value === 'get' || this.value === 'set') {
+      } else if (value === 'get' || value === 'set') {
         node = this.parseObjectGetterSetter();
       } else {
         node = this.parseObjectProperty();
@@ -2809,12 +2812,12 @@
     parseExportDeclaration: function() {
       var node = this.startNode();
       this.expect('export');
-
-      if (this.value === 'default') {
+      var value = this.value;
+      if (value === 'default') {
         return this.parseExportDefaultDeclaration(node);
       }
 
-      if (this.value === '*') {
+      if (value === '*') {
         return this.parseExportAllDeclaration(node);
       }
 
