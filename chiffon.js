@@ -6,7 +6,7 @@
  * @version      2.5.4
  * @date         2016-04-17
  * @link         https://github.com/polygonplanet/Chiffon
- * @copyright    Copyright (c) 2015-2016 polygon planet <polygon.planet.aqua@gmail.com>
+ * @copyright    Copyright (c) 2015-2026 polygonplanet <polygon.planet.aqua@gmail.com>
  * @license      Licensed under the MIT license.
  */
 
