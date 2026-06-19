@@ -185,13 +185,15 @@
         '|' + templateLiteral + literalSuffix) +
 
             // String Literal
+            // ES2019 JSON superset: raw U+2028/U+2029 are allowed inside
+            // string literals, so only \r and \n are excluded here.
       '|' + '"(?:' + '\\\\\\r\\n' +
                '|' + '\\\\[\\s\\S]' +
-               '|' + '[^"' + lineTerminator + '\\\\]' +
+               '|' + '[^"\\r\\n\\\\]' +
                ')*"' +
       '|' + "'(?:" + '\\\\\\r\\n' +
                '|' + '\\\\[\\s\\S]' +
-               '|' + "[^'" + lineTerminator + "\\\\]" +
+               '|' + "[^'\\r\\n\\\\]" +
                ")*'" +
 
             // Regular Expression Literal
