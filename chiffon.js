@@ -51,7 +51,7 @@
       _Boolean = 'Boolean',
       _Keyword = 'Keyword';
 
-  // ECMA-262 11.3 Line Terminators
+  // ECMA-262, 16th: 12.3 Line Terminators
   var lineTerminator = '\\r\\n\\u2028\\u2029';
   var lineTerminatorSequence = '(?:\\r\\n|[' + lineTerminator + '])';
   var whiteSpace = '(?:(?![' + lineTerminator + '])\\s)+';
@@ -69,7 +69,7 @@
     ')' +
   ')';
 
-  // ECMA-262 11.7 Punctuators
+  // ECMA-262, 16th: 12.8 Punctuators
   // Must be ordered from longest to shortest to ensure correct matching.
   var punctuators = '(?:' +
           '>>>=?|[.]{3}|<<=|===|!==|>>=|[*][*]=' +
@@ -122,7 +122,7 @@
     'var|function|this|new|break|catch|finally|try|default|continue|' +
     'switch|const|export|import|class|extends|debugger|super|enum|' +
 
-    // ECMA-262 11.6.2.2 Future Reserved Words
+    // ECMA-262, 16th: 12.7.2 Keywords and Reserved Words
     // Contextually disallowed as identifiers, in strict mode code:
     // `await` is listed in `regexPrefixKeywords` above because ECMA-262
     // includes it in the ReservedWord production; it is reserved only inside
@@ -200,7 +200,7 @@
       (ignore === _RegularExpression ? '' :
         '|' + regexpLiteral + literalSuffix) +
 
-      // ECMA-262 (16th) Numeric Literal (with BigInt and Numeric Separators)
+      // ECMA-262, 16th: 12.9.3 Numeric Literals (with BigInt and Numeric Separators)
       '|' + '0(?:' + '[xX][0-9a-fA-F](?:_?[0-9a-fA-F]+)*' +
                '|' + '[oO][0-7](?:_?[0-7]+)*' +
                '|' + '[bB][01](?:_?[01]+)*' +
@@ -1105,7 +1105,7 @@
         }
       };
     },
-    // ECMA-262 11.8.3 Numeric Literals
+    // ECMA-262, 16th: 12.9.3 Numeric Literals
     parseNumeric: function(value) {
       if (~value.indexOf('_')) {
         value = value.replace(/_/g, '');
@@ -1137,7 +1137,7 @@
 
       return parseFloat(value);
     },
-    // ECMA-262 11.8.4 String Literals
+    // ECMA-262, 16th: 12.9.4 String Literals
     parseString: function(value) {
       var s = '';
       var i = 1;
@@ -1313,7 +1313,7 @@
       this.expect(end);
       return elems;
     },
-    // ECMA-262 12.2 Primary Expression
+    // ECMA-262, 16th: 13.2 Primary Expression
     parsePrimaryExpression: function() {
       // Detect async function before treating it as a plain Identifier
       // because `async` is a contextual keyword.
@@ -1465,7 +1465,7 @@
 
       return expr;
     },
-    // ECMA-262 12.2.6 Object Initializer
+    // ECMA-262, 16th: 13.2.5 Object Initializer
     parseObjectInitializer: function() {
       var node = this.startNode(_ObjectExpression);
       node.properties = this.parseCommaSeparatedElements('{', '}', [],
@@ -1615,7 +1615,7 @@
 
       this.unexpected();
     },
-    // ECMA-262 12.2.5 Array Initializer
+    // ECMA-262, 16th: 13.2.4 Array Initializer
     parseArrayInitializer: function() {
       var node = this.startNode(_ArrayExpression);
       var elems = [];
@@ -1645,7 +1645,7 @@
       node.elements = elems;
       return this.finishNode(node);
     },
-    // ECMA-262 A.2 Expressions
+    // ECMA-262, 16th: A.2 Expressions
     parseExpression: function(allowIn) {
       var node = this.startNode(_SequenceExpression);
       var expr = this.parseAssignmentExpression(allowIn);
@@ -1881,7 +1881,7 @@
       this.startNodeAt(left, startNode);
       return this.finishNode(left);
     },
-    // ECMA-262 12.6 Exponentiation Operator (ES2016).
+    // ECMA-262, 16th: 13.6 Exponentiation Operator
     // Right-associative; binds tighter than multiplicative.
     parseExponentiationExpression: function() {
       var startNode = this.startNode();
@@ -2122,7 +2122,7 @@
       }
       return false;
     },
-    // ECMA-262 13 ECMAScript Language: Statements and Declarations
+    // ECMA-262, 16th: 14 ECMAScript Language: Statements and Declarations
     parseStatement: function() {
       if (this.isAsyncFunctionAhead()) {
         this.next(); // consume 'async'
@@ -2189,7 +2189,7 @@
       node.body = body;
       return this.finishNode(node);
     },
-    // ECMA-262 13.3.2 Variable Statement
+    // ECMA-262, 16th: 14.3.2 Variable Statement
     parseVariableStatement: function(kind, inFor) {
       var node = this.startNode(_VariableDeclaration);
       var allowIn = !inFor;
@@ -2228,7 +2228,7 @@
       node.init = init;
       return this.finishNode(node);
     },
-    // ECMA-262 14.1 Function Definitions
+    // ECMA-262, 16th: 15.2 Function Definitions
     parseFunctionDeclaration: function(options) {
       return this.parseFunctionDefinition(options || {});
     },
@@ -2330,7 +2330,7 @@
       node.argument = this.parseAssignmentExpression(true);
       return this.finishNode(node);
     },
-    // ECMA-262 13.3.3 Destructuring Binding Patterns
+    // ECMA-262, 16th: 14.3.3 Destructuring Binding Patterns
     parseBindingPattern: function() {
       if (this.isContextualIdentifier()) {
         return this.parseContextualIdentifier();
@@ -2438,7 +2438,7 @@
       node.shorthand = shorthand;
       return this.finishNode(node);
     },
-    // ECMA-262 13 Statements and Declarations
+    // ECMA-262, 16th: 14 Statements and Declarations
     parseIfStatement: function() {
       var node = this.startNode(_IfStatement);
       this.expect('if');
@@ -2758,7 +2758,7 @@
       }
       return this.finishNode(node);
     },
-    // ECMA-262 15.2.2 Imports
+    // ECMA-262, 16th: 16.2.2 Imports
     parseImportDeclaration: function() {
       var node = this.startNode(_ImportDeclaration);
 
@@ -2835,7 +2835,7 @@
       node.local = this.parseIdentifier();
       return this.finishNode(node);
     },
-    // ECMA-262 15.2.3 Exports
+    // ECMA-262, 16th: 16.2.3 Exports
     parseExportDeclaration: function() {
       var node = this.startNode();
       this.expect('export');
@@ -2926,7 +2926,7 @@
       node.local = local;
       return this.finishNode(node);
     },
-    // ECMA-262 14.5 Class Definitions
+    // ECMA-262, 16th: 15.7 Class Definitions
     parseClassDeclaration: function() {
       return this.parseClass();
     },
