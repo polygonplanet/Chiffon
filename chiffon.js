@@ -75,7 +75,9 @@
           '>>>=?|[.]{3}|<<=|===|!==|>>=|[*][*]=' +
     '|' + '[+][+](?=[+])|--(?=-)' +
     '|' + '[=!<>*%+/&|^-]=' +
-    '|' + '&&|[|][|]|[+][+]|--|[*][*]|<<|>>|=>' +
+    '|' + '&&|[|][|]|[+][+]|--|[*][*]|<<|>>|=>|[?][?]' +
+    // ES2020 Optional Chaining `?.` (lookahead is not DecimalDigit)
+    '|' + '[?][.](?![0-9])' +
     '|' + '[-+*/%<>=&|^~!?:;,.()[\\]{}]' +
   ')';
 
@@ -887,6 +889,7 @@
       _BreakStatement = 'BreakStatement',
       _CallExpression = 'CallExpression',
       _CatchClause = 'CatchClause',
+      _ChainExpression = 'ChainExpression',
       _ClassBody = 'ClassBody',
       _ClassDeclaration = 'ClassDeclaration',
       _ClassExpression = 'ClassExpression',
@@ -1835,13 +1838,14 @@
           return 9;
         case '||':
           return 10;
-        default:
-          return 0;
+        case '??':
+          return 11;
       }
+      return 0;
     },
     parseBinaryExpression: function(allowIn, base) {
       if (base == null) {
-        base = 10;
+        base = 11;
       }
 
       var startNode = this.startNode();
@@ -1852,7 +1856,7 @@
       }
       var right, operator, node;
 
-      for (var i = 1; i <= 10; i++) {
+      for (var i = 1; i <= 11; i++) {
         while ((prec = this.getBinaryPrecedence(allowIn)) === i) {
           operator = this.value;
 
@@ -1946,8 +1950,19 @@
         expr = this.parsePrimaryExpression();
       }
 
+      var optionalChain = false;
       for (;;) {
-        if (this.value === '.') {
+        if (this.value === '?.') {
+          optionalChain = true;
+          this.next();
+          if (this.value === '(') {
+            expr = this.parseCallExpression(expr, node, true);
+          } else if (this.value === '[') {
+            expr = this.parseComputedMember(expr, node, true);
+          } else {
+            expr = this.parseNonComputedMember(expr, node, true);
+          }
+        } else if (this.value === '.') {
           expr = this.parseNonComputedMember(expr, node);
         } else if (this.value === '[') {
           expr = this.parseComputedMember(expr, node);
@@ -1960,6 +1975,12 @@
         }
       }
 
+      if (optionalChain) {
+        var chain = { type: _ChainExpression };
+        this.startNodeAt(chain, node);
+        chain.expression = expr;
+        return this.finishNodeAt(chain);
+      }
       return expr;
     },
     parseSuper: function() {
@@ -1981,33 +2002,44 @@
 
       return this.finishNode(node);
     },
-    parseCallExpression: function(expr, startNode) {
+    parseCallExpression: function(expr, startNode, optional) {
       var node = this.startNode(_CallExpression);
       this.startNodeAt(node, startNode);
 
       node.callee = expr;
+      if (optional) {
+        node.optional = true;
+      }
       node.arguments = [];
       this.parseArguments(node);
       return this.finishNode(node);
     },
-    parseComputedMember: function(expr, startNode) {
+    parseComputedMember: function(expr, startNode, optional) {
       var node = this.startNode(_MemberExpression);
       this.startNodeAt(node, startNode);
       this.next();
 
       node.computed = true;
+      if (optional) {
+        node.optional = true;
+      }
       node.object = expr;
       node.property = this.parseExpression(true);
 
       this.expect(']');
       return this.finishNode(node);
     },
-    parseNonComputedMember: function(expr, startNode) {
+    parseNonComputedMember: function(expr, startNode, optional) {
       var node = this.startNode(_MemberExpression);
       this.startNodeAt(node, startNode);
-      this.next();
+      if (!optional) {
+        this.next(); // eat '.'
+      }
 
       node.computed = false;
+      if (optional) {
+        node.optional = true;
+      }
       node.object = expr;
 
       // Same type check as parseObjectPropertyName
