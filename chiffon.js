@@ -911,12 +911,14 @@
       _IfStatement = 'IfStatement',
       _ImportDeclaration = 'ImportDeclaration',
       _ImportDefaultSpecifier = 'ImportDefaultSpecifier',
+      _ImportExpression = 'ImportExpression',
       _ImportNamespaceSpecifier = 'ImportNamespaceSpecifier',
       _ImportSpecifier = 'ImportSpecifier',
       _Literal = 'Literal',
       _LabeledStatement = 'LabeledStatement',
       _LogicalExpression = 'LogicalExpression',
       _MemberExpression = 'MemberExpression',
+      _MetaProperty = 'MetaProperty',
       _MethodDefinition = 'MethodDefinition',
       _NewExpression = 'NewExpression',
       _ObjectExpression = 'ObjectExpression',
@@ -1321,7 +1323,7 @@
       // Detect async function before treating it as a plain Identifier
       // because `async` is a contextual keyword.
       if (this.isAsyncFunctionAhead()) {
-        this.next(); // consume 'async'
+        this.next(); // eat 'async'
         return this.parseFunctionExpression({ async: true });
       }
       if (this.isAsyncArrowAhead()) {
@@ -1348,7 +1350,7 @@
     },
     parseAsyncArrowHead: function() {
       var startNode = this.startNode();
-      this.next(); // consume 'async'
+      this.next(); // eat 'async'
 
       var head;
       if (this.value === '(') {
@@ -1373,9 +1375,41 @@
           return this.parseClassExpression();
         case 'this':
           return this.parseThisExpression();
+        case 'import':
+          // ES2020: dynamic import() and import.meta
+          return this.parseImportExpression();
       }
 
       this.unexpected();
+    },
+    parseImportExpression: function() {
+      var node = this.startNode();
+
+      if (this.lookahead().value === '.') {
+        node.type = _MetaProperty;
+        node.meta = this.parseIdentifier(true);
+        this.expect('.');
+        node.property = this.parseIdentifier(true);
+        return this.finishNode(node);
+      }
+
+      this.expect('import');
+      node.type = _ImportExpression;
+      this.expect('(');
+      node.source = this.parseAssignmentExpression(true);
+
+      // Permissively accept (and ignore) the ES2025 options argument.
+      if (this.value === ',') {
+        this.next();
+        if (this.value !== ')') {
+          this.parseAssignmentExpression(true);
+        }
+        if (this.value === ',') {
+          this.next();
+        }
+      }
+      this.expect(')');
+      return this.finishNode(node);
     },
     parseThisExpression: function() {
       var node = this.startNode(_ThisExpression);
@@ -2157,7 +2191,7 @@
     // ECMA-262, 16th: 14 ECMAScript Language: Statements and Declarations
     parseStatement: function() {
       if (this.isAsyncFunctionAhead()) {
-        this.next(); // consume 'async'
+        this.next(); // eat 'async'
         return this.parseFunctionDeclaration({ async: true });
       }
       switch (this.value) {
@@ -2198,12 +2232,16 @@
         case 'for':
           return this.parseForStatement();
         case 'import':
+          var nextValue = this.lookahead().value;
+          if (nextValue === '(' || nextValue === '.') {
+            // Dynamic import and import.meta are expressions, not statements
+            break;
+          }
           return this.parseImportDeclaration();
         case 'export':
           return this.parseExportDeclaration();
-        default:
-          return this.parseMaybeExpressionStatement();
       }
+      return this.parseMaybeExpressionStatement();
     },
     parseScriptBody: function(body, end) {
       while (this.value !== end) {
@@ -2891,7 +2929,7 @@
         expr = this.parseFunctionDeclaration();
         skipSemicolon = true;
       } else if (this.isAsyncFunctionAhead()) {
-        this.next(); // consume 'async'
+        this.next(); // eat 'async'
         expr = this.parseFunctionDeclaration({ async: true });
         skipSemicolon = true;
       } else {
@@ -2909,8 +2947,14 @@
       node.type = _ExportAllDeclaration;
 
       this.expect('*');
-      this.expect('from');
 
+      // ES2020: `export * as foo from "mod"`
+      if (this.value === 'as') {
+        this.next();
+        node.exported = this.parseIdentifier(true);
+      }
+
+      this.expect('from');
       this.assertType(_String);
       node.source = this.parseLiteral();
       this.expectSemicolon();
