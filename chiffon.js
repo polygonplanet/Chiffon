@@ -2632,13 +2632,16 @@
     parseCatchClause: function() {
       var node = this.startNode(_CatchClause);
       this.expect('catch');
-      this.expect('(');
 
-      var param = this.parseBindingPattern();
-      this.expect(')');
+      // ES2019 optional catch binding: `catch {}` with no parameter.
+      var param = null;
+      if (this.value === '(') {
+        this.next();
+        param = this.parseBindingPattern();
+        this.expect(')');
+      }
 
       var body = this.parseBlockStatement();
-
       node.param = param;
       node.body = body;
       return this.finishNode(node);
