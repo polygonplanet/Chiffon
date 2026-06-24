@@ -91,7 +91,7 @@
             '|' + '[^/' + lineTerminator + '\\\\]' +
             ')+' +
     '/' +
-    '(?:[gimsuy]+\\b|)' +
+    '(?:[dgimsuvy]+\\b|)' +
   ')';
 
   var templateLiteral = '`(?:' +
