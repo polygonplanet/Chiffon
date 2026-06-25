@@ -72,7 +72,7 @@
   // ECMA-262, 16th: 12.8 Punctuators
   // Must be ordered from longest to shortest to ensure correct matching.
   var punctuators = '(?:' +
-          '>>>=?|[.]{3}|<<=|===|!==|>>=|[*][*]=' +
+          '>>>=?|[.]{3}|<<=|===|!==|>>=|[*][*]=|&&=|[|][|]=|[?][?]=' +
     '|' + '[+][+](?=[+])|--(?=-)' +
     '|' + '[=!<>*%+/&|^-]=' +
     '|' + '&&|[|][|]|[+][+]|--|[*][*]|<<|>>|=>|[?][?]' +
@@ -947,7 +947,7 @@
       _YieldExpression = 'YieldExpression';
 
 
-  var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=|\*\*=)$/;
+  var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=|\*\*=|&&=|\|\|=|\?\?=)$/;
   var unaryOpRe = /^(?:[-+!~]|\+\+|--|typeof|void|delete)$/;
   var octalDigitRe = /^0[0-7]+$/;
 
