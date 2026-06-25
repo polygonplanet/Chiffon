@@ -81,6 +81,7 @@
             "type": "Identifier",
             "name": "a"
           },
+          "optional": false,
           "arguments": []
         }
       },

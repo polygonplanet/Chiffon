@@ -346,6 +346,7 @@
                     },
                     "type": "MemberExpression",
                     "computed": false,
+                    "optional": false,
                     "object": {
                       "range": [
                         64,
@@ -388,6 +389,7 @@
                       "name": "test"
                     }
                   },
+                  "optional": false,
                   "arguments": [
                     {
                       "range": [
@@ -422,6 +424,7 @@
                         },
                         "type": "MemberExpression",
                         "computed": false,
+                        "optional": false,
                         "object": {
                           "range": [
                             73,
@@ -459,6 +462,7 @@
                           "name": "toString"
                         }
                       },
+                      "optional": false,
                       "arguments": []
                     }
                   ]

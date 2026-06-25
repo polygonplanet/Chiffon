@@ -121,6 +121,7 @@
         },
         "type": "MemberExpression",
         "computed": false,
+        "optional": false,
         "object": {
           "range": [
             16,
@@ -192,6 +193,7 @@
         },
         "type": "MemberExpression",
         "computed": false,
+        "optional": false,
         "object": {
           "range": [
             28,
@@ -263,6 +265,7 @@
         },
         "type": "MemberExpression",
         "computed": false,
+        "optional": false,
         "object": {
           "range": [
             39,
@@ -334,6 +337,7 @@
         },
         "type": "MemberExpression",
         "computed": false,
+        "optional": false,
         "object": {
           "range": [
             50,
@@ -405,6 +409,7 @@
         },
         "type": "MemberExpression",
         "computed": false,
+        "optional": false,
         "object": {
           "range": [
             61,
@@ -476,6 +481,7 @@
         },
         "type": "MemberExpression",
         "computed": false,
+        "optional": false,
         "object": {
           "range": [
             71,
@@ -547,6 +553,7 @@
         },
         "type": "MemberExpression",
         "computed": false,
+        "optional": false,
         "object": {
           "range": [
             82,
@@ -635,6 +642,7 @@
           },
           "type": "MemberExpression",
           "computed": false,
+          "optional": false,
           "object": {
             "range": [
               92,

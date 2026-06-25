@@ -65,6 +65,7 @@
           "type": "Identifier",
           "name": "func"
         },
+        "optional": false,
         "arguments": [
           {
             "range": [

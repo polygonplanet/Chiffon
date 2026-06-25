@@ -65,6 +65,7 @@
           "type": "Identifier",
           "name": "tokenize"
         },
+        "optional": false,
         "arguments": [
           {
             "range": [

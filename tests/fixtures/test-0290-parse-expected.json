@@ -425,6 +425,7 @@
                       "type": "Identifier",
                       "name": "foo"
                     },
+                    "optional": false,
                     "arguments": []
                   }
                 }

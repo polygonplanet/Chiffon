@@ -64,6 +64,7 @@
           },
           "type": "MemberExpression",
           "computed": false,
+          "optional": false,
           "object": {
             "range": [
               1,
@@ -159,6 +160,7 @@
             "name": "call"
           }
         },
+        "optional": false,
         "arguments": [
           {
             "range": [

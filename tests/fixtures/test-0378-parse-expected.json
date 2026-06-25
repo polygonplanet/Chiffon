@@ -172,6 +172,7 @@
                 "type": "Identifier",
                 "name": "undefinedFunc"
               },
+              "optional": false,
               "arguments": []
             }
           }

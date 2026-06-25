@@ -177,6 +177,7 @@
               },
               "type": "MemberExpression",
               "computed": false,
+              "optional": false,
               "object": {
                 "range": [
                   41,
@@ -214,6 +215,7 @@
                 "name": "exec"
               }
             },
+            "optional": false,
             "arguments": [
               {
                 "range": [
@@ -308,6 +310,7 @@
             },
             "type": "MemberExpression",
             "computed": false,
+            "optional": false,
             "object": {
               "range": [
                 77,

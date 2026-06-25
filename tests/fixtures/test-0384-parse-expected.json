@@ -177,6 +177,7 @@
               },
               "type": "MemberExpression",
               "computed": false,
+              "optional": false,
               "object": {
                 "range": [
                   55,
@@ -214,6 +215,7 @@
                 "name": "test"
               }
             },
+            "optional": false,
             "arguments": [
               {
                 "range": [

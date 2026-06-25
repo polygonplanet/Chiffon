@@ -532,6 +532,20 @@ function normalizeEsprimaAst(ast) {
         delete node.generator;
         if (!node.async) delete node.async;
       }
+    },
+    {
+      // Always add `optional: false` because Chiffon always sets it (ESTree spec),
+      // but Esprima 4.0.1 predates optional chaining and never emits it.
+      type: 'CallExpression',
+      callback: (node) => {
+        node.optional = false;
+      }
+    },
+    {
+      type: 'MemberExpression',
+      callback: (node) => {
+        node.optional = false;
+      }
     }
   ]);
   return ast;

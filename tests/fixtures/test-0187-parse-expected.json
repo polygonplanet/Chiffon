@@ -64,6 +64,7 @@
           },
           "type": "MemberExpression",
           "computed": false,
+          "optional": false,
           "object": {
             "range": [
               0,
@@ -125,6 +126,7 @@
             "name": "charCodeAt"
           }
         },
+        "optional": false,
         "arguments": []
       }
     }

@@ -1701,6 +1701,7 @@
           },
           "type": "MemberExpression",
           "computed": false,
+          "optional": false,
           "object": {
             "range": [
               418,

@@ -137,6 +137,7 @@
           },
           "type": "MemberExpression",
           "computed": false,
+          "optional": false,
           "object": {
             "range": [
               21,
@@ -170,6 +171,7 @@
               },
               "type": "MemberExpression",
               "computed": false,
+              "optional": false,
               "object": {
                 "range": [
                   21,
@@ -203,6 +205,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       21,
@@ -236,6 +239,7 @@
                       },
                       "type": "MemberExpression",
                       "computed": false,
+                      "optional": false,
                       "object": {
                         "range": [
                           21,
@@ -273,6 +277,7 @@
                         "name": "resolve"
                       }
                     },
+                    "optional": false,
                     "arguments": [
                       {
                         "range": [
@@ -314,6 +319,7 @@
                     "name": "then"
                   }
                 },
+                "optional": false,
                 "arguments": [
                   {
                     "range": [
@@ -429,6 +435,7 @@
                 "name": "catch"
               }
             },
+            "optional": false,
             "arguments": [
               {
                 "range": [
@@ -499,6 +506,7 @@
                     },
                     "type": "MemberExpression",
                     "computed": false,
+                    "optional": false,
                     "object": {
                       "range": [
                         91,
@@ -536,6 +544,7 @@
                       "name": "push"
                     }
                   },
+                  "optional": false,
                   "arguments": [
                     {
                       "range": [
@@ -580,6 +589,7 @@
             "name": "finally"
           }
         },
+        "optional": false,
         "arguments": [
           {
             "range": [
@@ -631,6 +641,7 @@
                 },
                 "type": "MemberExpression",
                 "computed": false,
+                "optional": false,
                 "object": {
                   "range": [
                     129,
@@ -668,6 +679,7 @@
                   "name": "push"
                 }
               },
+              "optional": false,
               "arguments": [
                 {
                   "range": [
@@ -1066,6 +1078,7 @@
           },
           "type": "MemberExpression",
           "computed": false,
+          "optional": false,
           "object": {
             "range": [
               254,
@@ -1103,6 +1116,7 @@
             "name": "push"
           }
         },
+        "optional": false,
         "arguments": [
           {
             "range": [
@@ -1137,6 +1151,7 @@
               },
               "type": "MemberExpression",
               "computed": false,
+              "optional": false,
               "object": {
                 "range": [
                   267,
@@ -1174,6 +1189,7 @@
                 "name": "catch"
               }
             },
+            "optional": false,
             "arguments": [
               {
                 "range": [
@@ -1285,6 +1301,7 @@
           },
           "type": "MemberExpression",
           "computed": false,
+          "optional": false,
           "object": {
             "range": [
               293,
@@ -1322,6 +1339,7 @@
             "name": "push"
           }
         },
+        "optional": false,
         "arguments": [
           {
             "range": [
@@ -1356,6 +1374,7 @@
               },
               "type": "MemberExpression",
               "computed": false,
+              "optional": false,
               "object": {
                 "range": [
                   306,
@@ -1393,6 +1412,7 @@
                 "name": "finally"
               }
             },
+            "optional": false,
             "arguments": []
           }
         ]

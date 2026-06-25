@@ -203,6 +203,7 @@
                         },
                         "type": "Super"
                       },
+                      "optional": false,
                       "arguments": []
                     }
                   }

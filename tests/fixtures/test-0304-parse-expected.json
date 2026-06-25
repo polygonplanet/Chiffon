@@ -401,6 +401,7 @@
           "generator": false,
           "expression": false
         },
+        "optional": false,
         "arguments": []
       }
     }

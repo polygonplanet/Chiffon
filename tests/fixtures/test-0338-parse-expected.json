@@ -232,6 +232,7 @@
                           },
                           "type": "MemberExpression",
                           "computed": false,
+                          "optional": false,
                           "object": {
                             "range": [
                               34,
@@ -275,6 +276,7 @@
                   "generator": false,
                   "expression": false
                 },
+                "optional": false,
                 "arguments": [
                   {
                     "range": [

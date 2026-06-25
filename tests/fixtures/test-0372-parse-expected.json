@@ -2044,6 +2044,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       791,
@@ -2083,6 +2084,7 @@
                     "name": "toString"
                   }
                 },
+                "optional": false,
                 "arguments": []
               },
               {
@@ -2118,6 +2120,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       808,
@@ -2156,6 +2159,7 @@
                     "name": "toString"
                   }
                 },
+                "optional": false,
                 "arguments": []
               },
               {
@@ -2191,6 +2195,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       825,
@@ -2229,6 +2234,7 @@
                     "name": "toString"
                   }
                 },
+                "optional": false,
                 "arguments": []
               },
               {
@@ -2264,6 +2270,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       843,
@@ -2302,6 +2309,7 @@
                     "name": "toString"
                   }
                 },
+                "optional": false,
                 "arguments": []
               },
               {
@@ -2337,6 +2345,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       860,
@@ -2375,6 +2384,7 @@
                     "name": "toString"
                   }
                 },
+                "optional": false,
                 "arguments": []
               }
             ]
@@ -2706,6 +2716,7 @@
             },
             "type": "MemberExpression",
             "computed": true,
+            "optional": false,
             "object": {
               "range": [
                 937,
@@ -2782,6 +2793,7 @@
         },
         "type": "MemberExpression",
         "computed": true,
+        "optional": false,
         "object": {
           "range": [
             954,

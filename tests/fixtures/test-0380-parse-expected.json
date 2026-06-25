@@ -171,6 +171,7 @@
                 "type": "Identifier",
                 "name": "undefinedFunc"
               },
+              "optional": false,
               "arguments": []
             }
           }
@@ -334,6 +335,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       70,
@@ -371,6 +373,7 @@
                     "name": "push"
                   }
                 },
+                "optional": false,
                 "arguments": [
                   {
                     "range": [
@@ -757,6 +760,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       167,
@@ -794,6 +798,7 @@
                     "name": "push"
                   }
                 },
+                "optional": false,
                 "arguments": [
                   {
                     "range": [
@@ -1086,6 +1091,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       255,
@@ -1123,6 +1129,7 @@
                     "name": "push"
                   }
                 },
+                "optional": false,
                 "arguments": [
                   {
                     "range": [
