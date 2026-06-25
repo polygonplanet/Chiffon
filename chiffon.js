@@ -1397,12 +1397,13 @@
       node.type = _ImportExpression;
       this.expect('(');
       node.source = this.parseAssignmentExpression(true);
+      node.options = null;
 
       // Permissively accept (and ignore) the ES2025 options argument.
       if (this.value === ',') {
         this.next();
         if (this.value !== ')') {
-          this.parseAssignmentExpression(true);
+          node.options = this.parseAssignmentExpression(true);
         }
         if (this.value === ',') {
           this.next();
@@ -2041,9 +2042,7 @@
       this.startNodeAt(node, startNode);
 
       node.callee = expr;
-      if (optional) {
-        node.optional = true;
-      }
+      node.optional = !!optional;
       node.arguments = [];
       this.parseArguments(node);
       return this.finishNode(node);
@@ -2054,9 +2053,7 @@
       this.next();
 
       node.computed = true;
-      if (optional) {
-        node.optional = true;
-      }
+      node.optional = !!optional;
       node.object = expr;
       node.property = this.parseExpression(true);
 
@@ -2071,9 +2068,7 @@
       }
 
       node.computed = false;
-      if (optional) {
-        node.optional = true;
-      }
+      node.optional = !!optional;
       node.object = expr;
 
       // Same type check as parseObjectPropertyName
@@ -2955,6 +2950,8 @@
       if (this.value === 'as') {
         this.next();
         node.exported = this.parseIdentifier(true);
+      } else {
+        node.exported = null;
       }
 
       this.expect('from');
