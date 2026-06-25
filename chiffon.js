@@ -6,7 +6,7 @@
  * @version      2.5.4
  * @date         2016-04-17
  * @link         https://github.com/polygonplanet/Chiffon
- * @copyright    Copyright (c) 2015-2016 polygon planet <polygon.planet.aqua@gmail.com>
+ * @copyright    Copyright (c) 2015-2026 polygonplanet <polygon.planet.aqua@gmail.com>
  * @license      Licensed under the MIT license.
  */
 
@@ -36,6 +36,7 @@
   var slice = arrayProto.slice;
   var splice = arrayProto.splice;
   var fromCharCode = String.fromCharCode;
+  var hasBigInt = typeof BigInt === 'function';
 
   var _Comment = 'Comment',
       _WhiteSpace = 'WhiteSpace',
@@ -50,7 +51,7 @@
       _Boolean = 'Boolean',
       _Keyword = 'Keyword';
 
-  // ECMA-262 11.3 Line Terminators
+  // ECMA-262, 16th: 12.3 Line Terminators
   var lineTerminator = '\\r\\n\\u2028\\u2029';
   var lineTerminatorSequence = '(?:\\r\\n|[' + lineTerminator + '])';
   var whiteSpace = '(?:(?![' + lineTerminator + '])\\s)+';
@@ -68,13 +69,15 @@
     ')' +
   ')';
 
-  // ECMA-262 11.7 Punctuators
+  // ECMA-262, 16th: 12.8 Punctuators
   // Must be ordered from longest to shortest to ensure correct matching.
   var punctuators = '(?:' +
-          '>>>=?|[.]{3}|<<=|===|!==|>>=|[*][*]=' +
+          '>>>=?|[.]{3}|<<=|===|!==|>>=|[*][*]=|&&=|[|][|]=|[?][?]=' +
     '|' + '[+][+](?=[+])|--(?=-)' +
     '|' + '[=!<>*%+/&|^-]=' +
-    '|' + '&&|[|][|]|[+][+]|--|[*][*]|<<|>>|=>' +
+    '|' + '&&|[|][|]|[+][+]|--|[*][*]|<<|>>|=>|[?][?]' +
+    // ES2020 Optional Chaining `?.` (lookahead is not DecimalDigit)
+    '|' + '[?][.](?![0-9])' +
     '|' + '[-+*/%<>=&|^~!?:;,.()[\\]{}]' +
   ')';
 
@@ -88,7 +91,7 @@
             '|' + '[^/' + lineTerminator + '\\\\]' +
             ')+' +
     '/' +
-    '(?:[gimsuy]+\\b|)' +
+    '(?:[dgimsuvy]+\\b|)' +
   ')';
 
   var templateLiteral = '`(?:' +
@@ -121,7 +124,7 @@
     'var|function|this|new|break|catch|finally|try|default|continue|' +
     'switch|const|export|import|class|extends|debugger|super|enum|' +
 
-    // ECMA-262 11.6.2.2 Future Reserved Words
+    // ECMA-262, 16th: 12.7.2 Keywords and Reserved Words
     // Contextually disallowed as identifiers, in strict mode code:
     // `await` is listed in `regexPrefixKeywords` above because ECMA-262
     // includes it in the ReservedWord production; it is reserved only inside
@@ -142,7 +145,7 @@
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
           '(?:^(?:' + regexPrefixKeywords + ')$)' +
-    '|' + '(?:' + '(?![.\\]])' + punctuators + '$)' +
+    '|' + '(?:^' + '(?![.\\]]|[+][+]$|--$)' + punctuators + '$)' +
   ')');
   var regexParenKeywordsRe = new RegExp('^(?:' + regexParenKeywords + ')$');
 
@@ -184,26 +187,31 @@
         '|' + templateLiteral + literalSuffix) +
 
             // String Literal
+            // ES2019 JSON superset: raw U+2028/U+2029 are allowed inside
+            // string literals, so only \r and \n are excluded here.
       '|' + '"(?:' + '\\\\\\r\\n' +
                '|' + '\\\\[\\s\\S]' +
-               '|' + '[^"' + lineTerminator + '\\\\]' +
+               '|' + '[^"\\r\\n\\\\]' +
                ')*"' +
       '|' + "'(?:" + '\\\\\\r\\n' +
                '|' + '\\\\[\\s\\S]' +
-               '|' + "[^'" + lineTerminator + "\\\\]" +
+               '|' + "[^'\\r\\n\\\\]" +
                ")*'" +
 
             // Regular Expression Literal
       (ignore === _RegularExpression ? '' :
         '|' + regexpLiteral + literalSuffix) +
 
-            // Numeric Literal
-      '|' + '0(?:' + '[xX][0-9a-fA-F]+' +
-               '|' + '[oO][0-7]+' +
-               '|' + '[bB][01]+' +
-               ')' +
-      '|' + '(?:\\d+(?:[.]\\d*)?|[.]\\d+)(?:[eE][+-]?\\d+)?' +
-      '|' + '[1-9]\\d*' +
+      // ECMA-262, 16th: 12.9.3 Numeric Literals (with BigInt and Numeric Separators)
+      '|' + '0(?:' + '[xX][0-9a-fA-F](?:_?[0-9a-fA-F]+)*' +
+               '|' + '[oO][0-7](?:_?[0-7]+)*' +
+               '|' + '[bB][01](?:_?[01]+)*' +
+               ')n?' + // BigIntLiteralSuffix
+      '|' + '(?:0|[1-9](?:_?\\d+)*)n' +
+      '|' + '(?:' + '\\d(?:_?\\d+)*(?:[.](?:\\d(?:_?\\d+)*)?)?' +
+              '|' + '[.]\\d(?:_?\\d+)*' +
+              ')' + '(?:[eE][+-]?\\d(?:_?\\d+)*)?' +
+      '|' + '[1-9](?:_?\\d+)*' +
       '|' + '0[0-7]+' +
 
             // Operators
@@ -277,6 +285,7 @@
       var token, value, len, index, lines;
       var lineStart, columnStart, columnEnd, hasLineTerminator;
       var type, regex;
+      var options = this.options;
 
       for (var i = 0; i < matches.length; i++) {
         value = matches[i];
@@ -291,7 +300,7 @@
         regex = null;
         type = this.getTokenType(value);
 
-        if (this.options.loc) {
+        if (options.loc) {
           if (type === _String ||
               (type === _Comment && value.charAt(1) === '*')) {
             lines = value.split(lineTerminatorSequenceRe);
@@ -326,14 +335,14 @@
           continue;
         }
 
-        if (this.options.parse && type === _LineTerminator) {
+        if (options.parse && type === _LineTerminator) {
           hasLineTerminator = true;
           continue;
         }
 
-        if ((type === _Comment && !this.options.comment) ||
-            (type === _WhiteSpace && !this.options.whiteSpace) ||
-            (type === _LineTerminator && !this.options.lineTerminator)) {
+        if ((type === _Comment && !options.comment) ||
+            (type === _WhiteSpace && !options.whiteSpace) ||
+            (type === _LineTerminator && !options.lineTerminator)) {
           continue;
         }
 
@@ -351,10 +360,10 @@
           token.regex = regex;
         }
 
-        if (this.options.range) {
+        if (options.range) {
           token.range = [this.index - len, this.index];
         }
-        if (this.options.loc) {
+        if (options.loc) {
           columnEnd = this.index - this.prevLineIndex;
           this.addLoc(token, lineStart, columnStart, this.line, columnEnd);
         }
@@ -666,8 +675,9 @@
       }
       source = '' + source;
 
+      var options = this.options;
       var re;
-      if (this.options.whiteSpace || this.options.range || this.options.loc) {
+      if (options.whiteSpace || options.range || options.loc) {
         re = tokenizeRe;
       } else {
         re = tokenizeNotWhiteSpaceRe;
@@ -879,6 +889,7 @@
       _BreakStatement = 'BreakStatement',
       _CallExpression = 'CallExpression',
       _CatchClause = 'CatchClause',
+      _ChainExpression = 'ChainExpression',
       _ClassBody = 'ClassBody',
       _ClassDeclaration = 'ClassDeclaration',
       _ClassExpression = 'ClassExpression',
@@ -900,12 +911,14 @@
       _IfStatement = 'IfStatement',
       _ImportDeclaration = 'ImportDeclaration',
       _ImportDefaultSpecifier = 'ImportDefaultSpecifier',
+      _ImportExpression = 'ImportExpression',
       _ImportNamespaceSpecifier = 'ImportNamespaceSpecifier',
       _ImportSpecifier = 'ImportSpecifier',
       _Literal = 'Literal',
       _LabeledStatement = 'LabeledStatement',
       _LogicalExpression = 'LogicalExpression',
       _MemberExpression = 'MemberExpression',
+      _MetaProperty = 'MetaProperty',
       _MethodDefinition = 'MethodDefinition',
       _NewExpression = 'NewExpression',
       _ObjectExpression = 'ObjectExpression',
@@ -934,7 +947,7 @@
       _YieldExpression = 'YieldExpression';
 
 
-  var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=|\*\*=)$/;
+  var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=|\*\*=|&&=|\|\|=|\?\?=)$/;
   var unaryOpRe = /^(?:[-+!~]|\+\+|--|typeof|void|delete)$/;
   var octalDigitRe = /^0[0-7]+$/;
 
@@ -1097,8 +1110,12 @@
         }
       };
     },
-    // ECMA-262 11.8.3 Numeric Literals
+    // ECMA-262, 16th: 12.9.3 Numeric Literals
     parseNumeric: function(value) {
+      if (~value.indexOf('_')) {
+        value = value.replace(/_/g, '');
+      }
+
       var i = 0;
       var c = value.charAt(i++);
       var n;
@@ -1125,7 +1142,7 @@
 
       return parseFloat(value);
     },
-    // ECMA-262 11.8.4 String Literals
+    // ECMA-262, 16th: 12.9.4 String Literals
     parseString: function(value) {
       var s = '';
       var i = 1;
@@ -1210,11 +1227,25 @@
     parseLiteral: function() {
       var node = this.startNode(_Literal);
       var raw = this.value;
-      var value, regex;
+      var value, regex, bigint;
 
       switch (this.type) {
         case _Numeric:
-          value = this.parseNumeric(raw);
+          // ES2020 BigInt literal
+          if (raw.charAt(raw.length - 1) === 'n') {
+            // Remove the 'n' suffix and numeric separators because the BigInt
+            // cannot parse them (e.g., BigInt('123_456') throws a SyntaxError)
+            bigint = raw.replace(/_|n$/g, '');
+            if (hasBigInt) {
+              // ESTree spec requires `bigint` to be the decimal string
+              value = BigInt(bigint);
+              bigint = value.toString();
+            } else {
+              value = null;
+            }
+          } else {
+            value = this.parseNumeric(raw);
+          }
           break;
         case _String:
           value = this.parseString(raw);
@@ -1243,6 +1274,9 @@
       node.raw = raw;
       if (regex) {
         node.regex = regex;
+      }
+      if (bigint != null) {
+        node.bigint = bigint;
       }
 
       return this.finishNode(node);
@@ -1284,12 +1318,12 @@
       this.expect(end);
       return elems;
     },
-    // ECMA-262 12.2 Primary Expression
+    // ECMA-262, 16th: 13.2 Primary Expression
     parsePrimaryExpression: function() {
       // Detect async function before treating it as a plain Identifier
       // because `async` is a contextual keyword.
       if (this.isAsyncFunctionAhead()) {
-        this.next(); // consume 'async'
+        this.next(); // eat 'async'
         return this.parseFunctionExpression({ async: true });
       }
       if (this.isAsyncArrowAhead()) {
@@ -1316,7 +1350,7 @@
     },
     parseAsyncArrowHead: function() {
       var startNode = this.startNode();
-      this.next(); // consume 'async'
+      this.next(); // eat 'async'
 
       var head;
       if (this.value === '(') {
@@ -1341,9 +1375,42 @@
           return this.parseClassExpression();
         case 'this':
           return this.parseThisExpression();
+        case 'import':
+          // ES2020: dynamic import() and import.meta
+          return this.parseImportExpression();
       }
 
       this.unexpected();
+    },
+    parseImportExpression: function() {
+      var node = this.startNode();
+
+      if (this.lookahead().value === '.') {
+        node.type = _MetaProperty;
+        node.meta = this.parseIdentifier(true);
+        this.expect('.');
+        node.property = this.parseIdentifier(true);
+        return this.finishNode(node);
+      }
+
+      this.expect('import');
+      node.type = _ImportExpression;
+      this.expect('(');
+      node.source = this.parseAssignmentExpression(true);
+      node.options = null;
+
+      // Permissively accept (and ignore) the ES2025 options argument.
+      if (this.value === ',') {
+        this.next();
+        if (this.value !== ')') {
+          node.options = this.parseAssignmentExpression(true);
+        }
+        if (this.value === ',') {
+          this.next();
+        }
+      }
+      this.expect(')');
+      return this.finishNode(node);
     },
     parseThisExpression: function() {
       var node = this.startNode(_ThisExpression);
@@ -1380,7 +1447,7 @@
       var items = [];
       var restElement = null;
 
-      while (true) {
+      for (;;) {
         if (this.value === '...') {
           restElement = this.parseRestElement();
           break;
@@ -1436,7 +1503,7 @@
 
       return expr;
     },
-    // ECMA-262 12.2.6 Object Initializer
+    // ECMA-262, 16th: 13.2.5 Object Initializer
     parseObjectInitializer: function() {
       var node = this.startNode(_ObjectExpression);
       node.properties = this.parseCommaSeparatedElements('{', '}', [],
@@ -1445,11 +1512,12 @@
       return this.finishNode(node);
     },
     parseObjectDefinition: function() {
+      var value = this.value;
       var node;
 
-      if (this.value === '...') {
+      if (value === '...') {
         node = this.parseSpreadElement();
-      } else if (this.value === 'get' || this.value === 'set') {
+      } else if (value === 'get' || value === 'set') {
         node = this.parseObjectGetterSetter();
       } else {
         node = this.parseObjectProperty();
@@ -1585,7 +1653,7 @@
 
       this.unexpected();
     },
-    // ECMA-262 12.2.5 Array Initializer
+    // ECMA-262, 16th: 13.2.4 Array Initializer
     parseArrayInitializer: function() {
       var node = this.startNode(_ArrayExpression);
       var elems = [];
@@ -1615,7 +1683,7 @@
       node.elements = elems;
       return this.finishNode(node);
     },
-    // ECMA-262 A.2 Expressions
+    // ECMA-262, 16th: A.2 Expressions
     parseExpression: function(allowIn) {
       var node = this.startNode(_SequenceExpression);
       var expr = this.parseAssignmentExpression(allowIn);
@@ -1805,13 +1873,14 @@
           return 9;
         case '||':
           return 10;
-        default:
-          return 0;
+        case '??':
+          return 11;
       }
+      return 0;
     },
     parseBinaryExpression: function(allowIn, base) {
       if (base == null) {
-        base = 10;
+        base = 11;
       }
 
       var startNode = this.startNode();
@@ -1822,7 +1891,7 @@
       }
       var right, operator, node;
 
-      for (var i = 1; i <= 10; i++) {
+      for (var i = 1; i <= 11; i++) {
         while ((prec = this.getBinaryPrecedence(allowIn)) === i) {
           operator = this.value;
 
@@ -1851,7 +1920,7 @@
       this.startNodeAt(left, startNode);
       return this.finishNode(left);
     },
-    // ECMA-262 12.6 Exponentiation Operator (ES2016).
+    // ECMA-262, 16th: 13.6 Exponentiation Operator
     // Right-associative; binds tighter than multiplicative.
     parseExponentiationExpression: function() {
       var startNode = this.startNode();
@@ -1916,8 +1985,19 @@
         expr = this.parsePrimaryExpression();
       }
 
+      var optionalChain = false;
       for (;;) {
-        if (this.value === '.') {
+        if (this.value === '?.') {
+          optionalChain = true;
+          this.next();
+          if (this.value === '(') {
+            expr = this.parseCallExpression(expr, node, true);
+          } else if (this.value === '[') {
+            expr = this.parseComputedMember(expr, node, true);
+          } else {
+            expr = this.parseNonComputedMember(expr, node, true);
+          }
+        } else if (this.value === '.') {
           expr = this.parseNonComputedMember(expr, node);
         } else if (this.value === '[') {
           expr = this.parseComputedMember(expr, node);
@@ -1930,6 +2010,12 @@
         }
       }
 
+      if (optionalChain) {
+        var chain = { type: _ChainExpression };
+        this.startNodeAt(chain, node);
+        chain.expression = expr;
+        return this.finishNodeAt(chain);
+      }
       return expr;
     },
     parseSuper: function() {
@@ -1951,33 +2037,38 @@
 
       return this.finishNode(node);
     },
-    parseCallExpression: function(expr, startNode) {
+    parseCallExpression: function(expr, startNode, optional) {
       var node = this.startNode(_CallExpression);
       this.startNodeAt(node, startNode);
 
       node.callee = expr;
+      node.optional = !!optional;
       node.arguments = [];
       this.parseArguments(node);
       return this.finishNode(node);
     },
-    parseComputedMember: function(expr, startNode) {
+    parseComputedMember: function(expr, startNode, optional) {
       var node = this.startNode(_MemberExpression);
       this.startNodeAt(node, startNode);
       this.next();
 
       node.computed = true;
+      node.optional = !!optional;
       node.object = expr;
       node.property = this.parseExpression(true);
 
       this.expect(']');
       return this.finishNode(node);
     },
-    parseNonComputedMember: function(expr, startNode) {
+    parseNonComputedMember: function(expr, startNode, optional) {
       var node = this.startNode(_MemberExpression);
       this.startNodeAt(node, startNode);
-      this.next();
+      if (!optional) {
+        this.next(); // eat '.'
+      }
 
       node.computed = false;
+      node.optional = !!optional;
       node.object = expr;
 
       // Same type check as parseObjectPropertyName
@@ -2092,10 +2183,10 @@
       }
       return false;
     },
-    // ECMA-262 13 ECMAScript Language: Statements and Declarations
+    // ECMA-262, 16th: 14 ECMAScript Language: Statements and Declarations
     parseStatement: function() {
       if (this.isAsyncFunctionAhead()) {
-        this.next(); // consume 'async'
+        this.next(); // eat 'async'
         return this.parseFunctionDeclaration({ async: true });
       }
       switch (this.value) {
@@ -2136,12 +2227,16 @@
         case 'for':
           return this.parseForStatement();
         case 'import':
+          var nextValue = this.lookahead().value;
+          if (nextValue === '(' || nextValue === '.') {
+            // Dynamic import and import.meta are expressions, not statements
+            break;
+          }
           return this.parseImportDeclaration();
         case 'export':
           return this.parseExportDeclaration();
-        default:
-          return this.parseMaybeExpressionStatement();
       }
+      return this.parseMaybeExpressionStatement();
     },
     parseScriptBody: function(body, end) {
       while (this.value !== end) {
@@ -2159,7 +2254,7 @@
       node.body = body;
       return this.finishNode(node);
     },
-    // ECMA-262 13.3.2 Variable Statement
+    // ECMA-262, 16th: 14.3.2 Variable Statement
     parseVariableStatement: function(kind, inFor) {
       var node = this.startNode(_VariableDeclaration);
       var allowIn = !inFor;
@@ -2198,7 +2293,7 @@
       node.init = init;
       return this.finishNode(node);
     },
-    // ECMA-262 14.1 Function Definitions
+    // ECMA-262, 16th: 15.2 Function Definitions
     parseFunctionDeclaration: function(options) {
       return this.parseFunctionDefinition(options || {});
     },
@@ -2300,7 +2395,7 @@
       node.argument = this.parseAssignmentExpression(true);
       return this.finishNode(node);
     },
-    // ECMA-262 13.3.3 Destructuring Binding Patterns
+    // ECMA-262, 16th: 14.3.3 Destructuring Binding Patterns
     parseBindingPattern: function() {
       if (this.isContextualIdentifier()) {
         return this.parseContextualIdentifier();
@@ -2408,7 +2503,7 @@
       node.shorthand = shorthand;
       return this.finishNode(node);
     },
-    // ECMA-262 13 Statements and Declarations
+    // ECMA-262, 16th: 14 Statements and Declarations
     parseIfStatement: function() {
       var node = this.startNode(_IfStatement);
       this.expect('if');
@@ -2532,13 +2627,16 @@
     parseCatchClause: function() {
       var node = this.startNode(_CatchClause);
       this.expect('catch');
-      this.expect('(');
 
-      var param = this.parseBindingPattern();
-      this.expect(')');
+      // ES2019 optional catch binding: `catch {}` with no parameter.
+      var param = null;
+      if (this.value === '(') {
+        this.next();
+        param = this.parseBindingPattern();
+        this.expect(')');
+      }
 
       var body = this.parseBlockStatement();
-
       node.param = param;
       node.body = body;
       return this.finishNode(node);
@@ -2728,7 +2826,7 @@
       }
       return this.finishNode(node);
     },
-    // ECMA-262 15.2.2 Imports
+    // ECMA-262, 16th: 16.2.2 Imports
     parseImportDeclaration: function() {
       var node = this.startNode(_ImportDeclaration);
 
@@ -2805,16 +2903,16 @@
       node.local = this.parseIdentifier();
       return this.finishNode(node);
     },
-    // ECMA-262 15.2.3 Exports
+    // ECMA-262, 16th: 16.2.3 Exports
     parseExportDeclaration: function() {
       var node = this.startNode();
       this.expect('export');
-
-      if (this.value === 'default') {
+      var value = this.value;
+      if (value === 'default') {
         return this.parseExportDefaultDeclaration(node);
       }
 
-      if (this.value === '*') {
+      if (value === '*') {
         return this.parseExportAllDeclaration(node);
       }
 
@@ -2829,7 +2927,7 @@
         expr = this.parseFunctionDeclaration();
         skipSemicolon = true;
       } else if (this.isAsyncFunctionAhead()) {
-        this.next(); // consume 'async'
+        this.next(); // eat 'async'
         expr = this.parseFunctionDeclaration({ async: true });
         skipSemicolon = true;
       } else {
@@ -2847,8 +2945,16 @@
       node.type = _ExportAllDeclaration;
 
       this.expect('*');
-      this.expect('from');
 
+      // ES2020: `export * as foo from "mod"`
+      if (this.value === 'as') {
+        this.next();
+        node.exported = this.parseIdentifier(true);
+      } else {
+        node.exported = null;
+      }
+
+      this.expect('from');
       this.assertType(_String);
       node.source = this.parseLiteral();
       this.expectSemicolon();
@@ -2896,7 +3002,7 @@
       node.local = local;
       return this.finishNode(node);
     },
-    // ECMA-262 14.5 Class Definitions
+    // ECMA-262, 16th: 15.7 Class Definitions
     parseClassDeclaration: function() {
       return this.parseClass();
     },

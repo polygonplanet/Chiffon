@@ -1,0 +1,66 @@
+[
+  {
+    "type": "Keyword",
+    "value": "const"
+  },
+  {
+    "type": "Identifier",
+    "value": "re"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "RegularExpression",
+    "value": "/[\\p{ASCII}&&\\p{Letter}]/v",
+    "regex": {
+      "pattern": "[\\p{ASCII}&&\\p{Letter}]",
+      "flags": "v"
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "const"
+  },
+  {
+    "type": "Identifier",
+    "value": "matched"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Identifier",
+    "value": "re"
+  },
+  {
+    "type": "Punctuator",
+    "value": "."
+  },
+  {
+    "type": "Identifier",
+    "value": "test"
+  },
+  {
+    "type": "Punctuator",
+    "value": "("
+  },
+  {
+    "type": "String",
+    "value": "'A'"
+  },
+  {
+    "type": "Punctuator",
+    "value": ")"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

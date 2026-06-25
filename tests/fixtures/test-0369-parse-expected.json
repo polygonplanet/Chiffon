@@ -100,7 +100,8 @@
               "type": "Literal",
               "value": "mod",
               "raw": "\"mod\""
-            }
+            },
+            "options": null
           }
         }
       ],
@@ -156,7 +157,8 @@
           "type": "Literal",
           "value": "side-effect",
           "raw": "\"side-effect\""
-        }
+        },
+        "options": null
       }
     },
     {
@@ -227,6 +229,7 @@
             },
             "type": "MemberExpression",
             "computed": false,
+            "optional": false,
             "object": {
               "range": [
                 58,
@@ -439,7 +442,8 @@
                   },
                   "type": "Identifier",
                   "name": "name"
-                }
+                },
+                "options": null
               }
             }
           }

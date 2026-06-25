@@ -499,6 +499,7 @@
               },
               "type": "MemberExpression",
               "computed": true,
+              "optional": false,
               "object": {
                 "range": [
                   57,

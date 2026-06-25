@@ -1,0 +1,246 @@
+[
+  {
+    "type": "Keyword",
+    "value": "const"
+  },
+  {
+    "type": "Identifier",
+    "value": "obj"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "Identifier",
+    "value": "s"
+  },
+  {
+    "type": "Punctuator",
+    "value": ":"
+  },
+  {
+    "type": "String",
+    "value": "''"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Identifier",
+    "value": "n"
+  },
+  {
+    "type": "Punctuator",
+    "value": ":"
+  },
+  {
+    "type": "Numeric",
+    "value": "0"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "Punctuator",
+    "value": ":"
+  },
+  {
+    "type": "Null",
+    "value": "null"
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Identifier",
+    "value": "obj"
+  },
+  {
+    "type": "Punctuator",
+    "value": "."
+  },
+  {
+    "type": "Identifier",
+    "value": "s"
+  },
+  {
+    "type": "Punctuator",
+    "value": "||="
+  },
+  {
+    "type": "String",
+    "value": "'default value'"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Identifier",
+    "value": "obj"
+  },
+  {
+    "type": "Punctuator",
+    "value": "."
+  },
+  {
+    "type": "Identifier",
+    "value": "n"
+  },
+  {
+    "type": "Punctuator",
+    "value": "&&="
+  },
+  {
+    "type": "Identifier",
+    "value": "obj"
+  },
+  {
+    "type": "Punctuator",
+    "value": "."
+  },
+  {
+    "type": "Identifier",
+    "value": "n"
+  },
+  {
+    "type": "Punctuator",
+    "value": "*"
+  },
+  {
+    "type": "Numeric",
+    "value": "2"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Identifier",
+    "value": "obj"
+  },
+  {
+    "type": "Punctuator",
+    "value": "."
+  },
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "Punctuator",
+    "value": "??="
+  },
+  {
+    "type": "Punctuator",
+    "value": "["
+  },
+  {
+    "type": "Punctuator",
+    "value": "]"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "let"
+  },
+  {
+    "type": "Identifier",
+    "value": "c"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Numeric",
+    "value": "0"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Identifier",
+    "value": "c"
+  },
+  {
+    "type": "Punctuator",
+    "value": "||="
+  },
+  {
+    "type": "Numeric",
+    "value": "3"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "const"
+  },
+  {
+    "type": "Identifier",
+    "value": "obj2"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Identifier",
+    "value": "obj2"
+  },
+  {
+    "type": "Punctuator",
+    "value": "."
+  },
+  {
+    "type": "Identifier",
+    "value": "key"
+  },
+  {
+    "type": "Punctuator",
+    "value": "??="
+  },
+  {
+    "type": "String",
+    "value": "'abc'"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

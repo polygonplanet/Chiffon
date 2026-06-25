@@ -286,6 +286,7 @@
           "type": "Identifier",
           "name": "f"
         },
+        "optional": false,
         "arguments": [
           {
             "range": [

@@ -1,0 +1,474 @@
+{
+  "range": [
+    0,
+    134
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 13,
+      "column": 1
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        19
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 19
+        }
+      },
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "range": [
+            4,
+            18
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 4
+            },
+            "end": {
+              "line": 1,
+              "column": 18
+            }
+          },
+          "type": "VariableDeclarator",
+          "id": {
+            "range": [
+              4,
+              14
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 4
+              },
+              "end": {
+                "line": 1,
+                "column": 14
+              }
+            },
+            "type": "Identifier",
+            "name": "errorCount"
+          },
+          "init": {
+            "range": [
+              17,
+              18
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 17
+              },
+              "end": {
+                "line": 1,
+                "column": 18
+              }
+            },
+            "type": "Literal",
+            "value": 0,
+            "raw": "0"
+          }
+        }
+      ],
+      "kind": "let"
+    },
+    {
+      "range": [
+        20,
+        72
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 6,
+          "column": 1
+        }
+      },
+      "type": "TryStatement",
+      "block": {
+        "range": [
+          24,
+          46
+        ],
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 4
+          },
+          "end": {
+            "line": 4,
+            "column": 1
+          }
+        },
+        "type": "BlockStatement",
+        "body": [
+          {
+            "range": [
+              28,
+              44
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 2
+              },
+              "end": {
+                "line": 3,
+                "column": 18
+              }
+            },
+            "type": "ExpressionStatement",
+            "expression": {
+              "range": [
+                28,
+                43
+              ],
+              "loc": {
+                "start": {
+                  "line": 3,
+                  "column": 2
+                },
+                "end": {
+                  "line": 3,
+                  "column": 17
+                }
+              },
+              "type": "CallExpression",
+              "callee": {
+                "range": [
+                  28,
+                  41
+                ],
+                "loc": {
+                  "start": {
+                    "line": 3,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 15
+                  }
+                },
+                "type": "Identifier",
+                "name": "undefinedFunc"
+              },
+              "optional": false,
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "handler": {
+        "range": [
+          47,
+          72
+        ],
+        "loc": {
+          "start": {
+            "line": 4,
+            "column": 2
+          },
+          "end": {
+            "line": 6,
+            "column": 1
+          }
+        },
+        "type": "CatchClause",
+        "param": null,
+        "body": {
+          "range": [
+            53,
+            72
+          ],
+          "loc": {
+            "start": {
+              "line": 4,
+              "column": 8
+            },
+            "end": {
+              "line": 6,
+              "column": 1
+            }
+          },
+          "type": "BlockStatement",
+          "body": [
+            {
+              "range": [
+                57,
+                70
+              ],
+              "loc": {
+                "start": {
+                  "line": 5,
+                  "column": 2
+                },
+                "end": {
+                  "line": 5,
+                  "column": 15
+                }
+              },
+              "type": "ExpressionStatement",
+              "expression": {
+                "range": [
+                  57,
+                  69
+                ],
+                "loc": {
+                  "start": {
+                    "line": 5,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 5,
+                    "column": 14
+                  }
+                },
+                "type": "UpdateExpression",
+                "operator": "++",
+                "argument": {
+                  "range": [
+                    57,
+                    67
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 5,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 5,
+                      "column": 12
+                    }
+                  },
+                  "type": "Identifier",
+                  "name": "errorCount"
+                },
+                "prefix": false
+              }
+            }
+          ]
+        }
+      },
+      "finalizer": null
+    },
+    {
+      "range": [
+        74,
+        134
+      ],
+      "loc": {
+        "start": {
+          "line": 8,
+          "column": 0
+        },
+        "end": {
+          "line": 13,
+          "column": 1
+        }
+      },
+      "type": "TryStatement",
+      "block": {
+        "range": [
+          78,
+          102
+        ],
+        "loc": {
+          "start": {
+            "line": 8,
+            "column": 4
+          },
+          "end": {
+            "line": 10,
+            "column": 1
+          }
+        },
+        "type": "BlockStatement",
+        "body": [
+          {
+            "range": [
+              82,
+              100
+            ],
+            "loc": {
+              "start": {
+                "line": 9,
+                "column": 2
+              },
+              "end": {
+                "line": 9,
+                "column": 20
+              }
+            },
+            "type": "ThrowStatement",
+            "argument": {
+              "range": [
+                88,
+                99
+              ],
+              "loc": {
+                "start": {
+                  "line": 9,
+                  "column": 8
+                },
+                "end": {
+                  "line": 9,
+                  "column": 19
+                }
+              },
+              "type": "NewExpression",
+              "callee": {
+                "range": [
+                  92,
+                  97
+                ],
+                "loc": {
+                  "start": {
+                    "line": 9,
+                    "column": 12
+                  },
+                  "end": {
+                    "line": 9,
+                    "column": 17
+                  }
+                },
+                "type": "Identifier",
+                "name": "Error"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "handler": {
+        "range": [
+          103,
+          112
+        ],
+        "loc": {
+          "start": {
+            "line": 10,
+            "column": 2
+          },
+          "end": {
+            "line": 11,
+            "column": 1
+          }
+        },
+        "type": "CatchClause",
+        "param": null,
+        "body": {
+          "range": [
+            109,
+            112
+          ],
+          "loc": {
+            "start": {
+              "line": 10,
+              "column": 8
+            },
+            "end": {
+              "line": 11,
+              "column": 1
+            }
+          },
+          "type": "BlockStatement",
+          "body": []
+        }
+      },
+      "finalizer": {
+        "range": [
+          121,
+          134
+        ],
+        "loc": {
+          "start": {
+            "line": 11,
+            "column": 10
+          },
+          "end": {
+            "line": 13,
+            "column": 1
+          }
+        },
+        "type": "BlockStatement",
+        "body": [
+          {
+            "range": [
+              125,
+              132
+            ],
+            "loc": {
+              "start": {
+                "line": 12,
+                "column": 2
+              },
+              "end": {
+                "line": 12,
+                "column": 9
+              }
+            },
+            "type": "ExpressionStatement",
+            "expression": {
+              "range": [
+                125,
+                131
+              ],
+              "loc": {
+                "start": {
+                  "line": 12,
+                  "column": 2
+                },
+                "end": {
+                  "line": 12,
+                  "column": 8
+                }
+              },
+              "type": "UnaryExpression",
+              "operator": "void",
+              "argument": {
+                "range": [
+                  130,
+                  131
+                ],
+                "loc": {
+                  "start": {
+                    "line": 12,
+                    "column": 7
+                  },
+                  "end": {
+                    "line": 12,
+                    "column": 8
+                  }
+                },
+                "type": "Literal",
+                "value": 0,
+                "raw": "0"
+              },
+              "prefix": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

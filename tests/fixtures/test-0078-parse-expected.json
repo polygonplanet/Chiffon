@@ -64,6 +64,7 @@
           },
           "type": "MemberExpression",
           "computed": true,
+          "optional": false,
           "object": {
             "range": [
               0,
@@ -81,6 +82,7 @@
             },
             "type": "MemberExpression",
             "computed": true,
+            "optional": false,
             "object": {
               "range": [
                 0,
@@ -98,6 +100,7 @@
               },
               "type": "MemberExpression",
               "computed": false,
+              "optional": false,
               "object": {
                 "range": [
                   0,
@@ -115,6 +118,7 @@
                 },
                 "type": "MemberExpression",
                 "computed": false,
+                "optional": false,
                 "object": {
                   "range": [
                     0,
@@ -132,6 +136,7 @@
                   },
                   "type": "MemberExpression",
                   "computed": false,
+                  "optional": false,
                   "object": {
                     "range": [
                       0,
@@ -281,6 +286,7 @@
             }
           }
         },
+        "optional": false,
         "arguments": []
       }
     }
