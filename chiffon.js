@@ -145,7 +145,7 @@
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
           '(?:^(?:' + regexPrefixKeywords + ')$)' +
-    '|' + '(?:' + '(?![.\\]])' + punctuators + '$)' +
+    '|' + '(?:^' + '(?![.\\]]|[+][+]$|--$)' + punctuators + '$)' +
   ')');
   var regexParenKeywordsRe = new RegExp('^(?:' + regexParenKeywords + ')$');
 
