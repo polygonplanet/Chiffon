@@ -1,7 +1,7 @@
 {
   "range": [
     0,
-    16
+    23
   ],
   "loc": {
     "start": {
@@ -9,7 +9,7 @@
       "column": 0
     },
     "end": {
-      "line": 1,
+      "line": 2,
       "column": 16
     }
   },
@@ -18,7 +18,7 @@
     {
       "range": [
         0,
-        16
+        6
       ],
       "loc": {
         "start": {
@@ -27,6 +27,62 @@
         },
         "end": {
           "line": 1,
+          "column": 6
+        }
+      },
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "range": [
+            4,
+            5
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 4
+            },
+            "end": {
+              "line": 1,
+              "column": 5
+            }
+          },
+          "type": "VariableDeclarator",
+          "id": {
+            "range": [
+              4,
+              5
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 4
+              },
+              "end": {
+                "line": 1,
+                "column": 5
+              }
+            },
+            "type": "Identifier",
+            "name": "v"
+          },
+          "init": null
+        }
+      ],
+      "kind": "var"
+    },
+    {
+      "range": [
+        7,
+        23
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 2,
           "column": 16
         }
       },
@@ -35,32 +91,32 @@
       "specifiers": [
         {
           "range": [
-            8,
-            14
+            15,
+            21
           ],
           "loc": {
             "start": {
-              "line": 1,
+              "line": 2,
               "column": 8
             },
             "end": {
-              "line": 1,
+              "line": 2,
               "column": 14
             }
           },
           "type": "ExportSpecifier",
           "exported": {
             "range": [
-              13,
-              14
+              20,
+              21
             ],
             "loc": {
               "start": {
-                "line": 1,
+                "line": 2,
                 "column": 13
               },
               "end": {
-                "line": 1,
+                "line": 2,
                 "column": 14
               }
             },
@@ -69,16 +125,16 @@
           },
           "local": {
             "range": [
-              8,
-              9
+              15,
+              16
             ],
             "loc": {
               "start": {
-                "line": 1,
+                "line": 2,
                 "column": 8
               },
               "end": {
-                "line": 1,
+                "line": 2,
                 "column": 9
               }
             },
