@@ -8,6 +8,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const esprima = require(path.resolve(__dirname, 'thirdparty/esprima'));
+const acorn = require(path.resolve(__dirname, 'thirdparty/acorn'));
 
 const FIXTURES_DIR = path.resolve(__dirname, 'fixtures');
 const FIXTURES_MINIFY_DIR = path.resolve(FIXTURES_DIR, 'minify');
@@ -338,6 +339,35 @@ function runTest(description, parser) {
           }
         });
       });
+
+      Object.entries(fixtures.parse).forEach(([no, { expectError }]) => {
+        if (expectError) return;
+
+        // Skip fixtures with legitimate AST differences:
+        //   0337: chiffon keeps CRLF in template raw/cooked, acorn normalizes to LF (ES spec).
+        //   0350: chiffon keeps unicode escapes in Identifier.name (`a`),  acorn decodes to `a`.
+        if (no === '0337' || no === '0350') {
+          return;
+        }
+
+        it(`fixtures (acorn) ${no}`, () => {
+          const fixture = getTestFixture(methodName, no);
+          const code = readFixtureCode(methodName, fixture);
+
+          let acornAst;
+          try {
+            acornAst = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
+          } catch (e) {
+            acornAst = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'module' });
+          }
+
+          const chiffonAst = methods[methodName].execute(parser, code);
+          assert.deepStrictEqual(
+            toPlainAst(chiffonAst),
+            normalizeAcornAst(toPlainAst(acornAst))
+          );
+        });
+      });
     });
   });
 }
@@ -475,11 +505,11 @@ function fakeRequire(code) {
   /*jslint evil: true */
   return new Function(
     // provide `module` so `code` can do `module.exports = ...`
-    'var module = { exports: {} };' + code + ';' + 'return module.exports;'
+    `var module = { exports: {} };${code};return module.exports;`
   )();
 }
 
-// Normalize Esprima's token list so it can be compared against Chiffon's.
+// Normalize Esprima's token to be compared against Chiffon's token list
 function normalizeEsprimaTokens(tokens) {
   tokens.forEach((token) => {
     if (token.type === 'Identifier' && token.value === 'await') {
@@ -489,7 +519,7 @@ function normalizeEsprimaTokens(tokens) {
   return tokens;
 }
 
-// Normalize Esprima's AST so it can be compared against Chiffon's AST
+// Normalize Esprima's AST to be compared against Chiffon's AST
 function normalizeEsprimaAst(ast) {
   astFilter(ast, [
     {
@@ -551,6 +581,66 @@ function normalizeEsprimaAst(ast) {
   return ast;
 }
 
+// Normalize Acorn's AST to be compared against Chiffon's AST
+function normalizeAcornAst(ast) {
+  astFilter(ast, [
+    {
+      type: '*',
+      callback: (node) => {
+        delete node.start;
+        delete node.end;
+        delete node.directive;
+      }
+    },
+    {
+      type: 'Program',
+      callback: (node) => {
+        delete node.sourceType;
+      }
+    },
+    {
+      type: ['ImportDeclaration', 'ImportExpression', 'ExportNamedDeclaration', 'ExportAllDeclaration'],
+      callback: (node) => {
+        delete node.attributes;
+      }
+    },
+    {
+      type: 'ForInStatement',
+      callback: (node) => {
+        node.each = false;
+        delete node.await;
+      }
+    },
+    {
+      type: ['ForStatement', 'ForOfStatement'],
+      callback: (node) => {
+        if (!node.await) delete node.await;
+      }
+    },
+    {
+      type: ['FunctionDeclaration', 'FunctionExpression'],
+      callback: (node) => {
+        if (!node.async) delete node.async;
+      }
+    },
+    {
+      type: 'ArrowFunctionExpression',
+      callback: (node) => {
+        delete node.id;
+        delete node.generator;
+        if (!node.async) delete node.async;
+      }
+    }
+  ]);
+  return ast;
+}
+
+function toPlainAst(ast) {
+  return JSON.parse(JSON.stringify(ast, (key, value) =>
+    typeof value === 'bigint' ? String(value) + 'n' : value
+  ));
+}
+
 // Normalizes Literal `value` fields that JSON cannot represent
 function normalizeAstForJson(ast) {
   astFilter(ast, [
@@ -577,7 +667,8 @@ function astFilter(node, filters) {
     node.forEach((child) => astFilter(child, filters));
   } else if (node && typeof node === 'object') {
     filters.forEach((filter) => {
-      if (filter.type === '*' || node.type === filter.type) {
+      if (filter.type === '*' || node.type === filter.type ||
+        (Array.isArray(filter.type) && filter.type.includes(node.type))) {
         filter.callback(node);
       }
     });
