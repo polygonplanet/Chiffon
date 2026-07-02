@@ -2,7 +2,7 @@ const globals = require('globals');
 
 const styleRules = {
   'no-undef': 'error',
-  'no-unused-vars': ['error', { args: 'none' }],
+  'no-unused-vars': ['error', { args: 'none', caughtErrors: 'none' }],
   'no-useless-escape': 'warn',
   'no-empty': 'off',
   'no-console': 'warn',
