@@ -6,11 +6,13 @@
   "directories": {
     "test": "tests"
   },
-  "dependencies": {},
   "devDependencies": {
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
     "mocha": ""
   },
   "scripts": {
+    "lint": "eslint .",
     "test": "mocha --timeout 20000 tests/test",
     "test-min": "mocha --timeout 20000 tests/test --min",
     "pretest-min": "grunt"
