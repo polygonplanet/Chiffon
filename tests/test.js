@@ -1,4 +1,3 @@
-/* global describe, it, expect, require */
 'use strict';
 
 const Chiffon = require('../chiffon');
@@ -497,12 +496,10 @@ function getFileNames(dir) {
 }
 
 function testSyntax(code) {
-  /*jslint evil: true */
   new Function('return;' + code)();
 }
 
 function fakeRequire(code) {
-  /*jslint evil: true */
   return new Function(
     // provide `module` so `code` can do `module.exports = ...`
     `var module = { exports: {} };${code};return module.exports;`
