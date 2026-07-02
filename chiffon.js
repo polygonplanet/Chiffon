@@ -870,7 +870,7 @@
    *     Limit the line length in symbols.
    * @return {string} Return a minified source.
    */
-  var minify = Chiffon.minify = function(source, options) {
+  Chiffon.minify = function(source, options) {
     return new Minifier(options).minify(source);
   };
 
@@ -3135,7 +3135,7 @@
    *       Include line number and column-based location info
    * @return {Object} Return an abstract syntax tree object.
    */
-  var parse = Chiffon.parse = function(source, options) {
+  Chiffon.parse = function(source, options) {
     return new Parser(options).parse(source);
   };
 
