@@ -1,7 +1,6 @@
 'use strict';
 
-const Chiffon = require('../chiffon');
-let ChiffonMin;
+const chiffon = require('../chiffon');
 
 const assert = require('assert');
 const fs = require('fs');
@@ -14,6 +13,7 @@ const FIXTURES_MINIFY_DIR = path.resolve(FIXTURES_DIR, 'minify');
 const THIRDPARTY_DIR = path.resolve(__dirname, 'thirdparty');
 
 const THIRDPARTY_LIBS = [
+  //'acorn',
   'angular',
   'backbone',
   //'bluebird',
@@ -126,11 +126,11 @@ const fixtureCache = {};
 parseFixtures();
 
 const min = process.argv.slice().pop() === '--min';
-runTest('Chiffon', Chiffon);
+runTest('Chiffon', chiffon);
 
 if (min) {
-  ChiffonMin = require('../chiffon.min');
-  runTest('Chiffon (min)', ChiffonMin);
+  const chiffonMin = require('../chiffon.min');
+  runTest('Chiffon (min)', chiffonMin);
 }
 
 function runTest(description, parser) {
@@ -161,7 +161,7 @@ function runTest(description, parser) {
       const methodName = 'tokenize';
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(libraryName, () => {
+        it(`[esprima] ${libraryName}`, () => {
           assert(code.length > 0);
           const chiffonTokens = methods[methodName].execute(parser, code, { range: true });
           const esprimaTokens = normalizeEsprimaTokens(esprima.parse(code, { tokens: true, range: true }).tokens);
@@ -170,7 +170,7 @@ function runTest(description, parser) {
       });
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(`${libraryName} (CRLF)`, () => {
+        it(`[esprima] ${libraryName} (CRLF)`, () => {
           code = code.replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
@@ -275,7 +275,7 @@ function runTest(description, parser) {
       const methodName = 'parse';
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(libraryName, () => {
+        it(`[esprima] ${libraryName}`, () => {
           assert(code.length > 0);
           const chiffonAst = methods[methodName].execute(parser, code, { loc: true, range: true });
           const esprimaAst = normalizeEsprimaAst(esprima.parse(code, { loc: true, range: true }));
@@ -284,7 +284,7 @@ function runTest(description, parser) {
       });
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(`${libraryName} without location`, () => {
+        it(`[esprima] ${libraryName} without location`, () => {
           assert(code.length > 0);
           const chiffonAst = methods[methodName].execute(parser, code);
           const esprimaAst = normalizeEsprimaAst(esprima.parse(code));
@@ -293,7 +293,29 @@ function runTest(description, parser) {
       });
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(`${libraryName} (CRLF)`, () => {
+        it(`[acorn] ${libraryName}`, () => {
+          assert(code.length > 0);
+          const chiffonAst = methods[methodName].execute(parser, code, { loc: true, range: true });
+          const acornAst = normalizeAcornAst(acorn.parse(code, {
+            ecmaVersion: 'latest', sourceType: 'script', ranges: true, locations: true
+          }), { loc: true });
+          assert.deepEqual(chiffonAst, acornAst);
+        });
+      });
+
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(`[acorn] ${libraryName} without location`, () => {
+          assert(code.length > 0);
+          const chiffonAst = methods[methodName].execute(parser, code);
+          const acornAst = normalizeAcornAst(acorn.parse(code, {
+            ecmaVersion: 'latest', sourceType: 'script'
+          }));
+          assert.deepEqual(chiffonAst, acornAst);
+        });
+      });
+
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(`[esprima] ${libraryName} (CRLF)`, () => {
           code = code.replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
@@ -304,7 +326,7 @@ function runTest(description, parser) {
       });
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(`${libraryName} without location (CRLF)`, () => {
+        it(`[esprima] ${libraryName} without location (CRLF)`, () => {
           code = code.replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
@@ -349,7 +371,7 @@ function runTest(description, parser) {
           return;
         }
 
-        it(`fixtures (acorn) ${no}`, () => {
+        it(`[acorn] fixtures ${no}`, () => {
           const fixture = getTestFixture(methodName, no);
           const code = readFixtureCode(methodName, fixture);
 
@@ -579,13 +601,14 @@ function normalizeEsprimaAst(ast) {
 }
 
 // Normalize Acorn's AST to be compared against Chiffon's AST
-function normalizeAcornAst(ast) {
+// Pass { loc: true } when positions (loc/range) are being compared
+function normalizeAcornAst(ast, options = {}) {
   astFilter(ast, [
     {
       type: '*',
       callback: (node) => {
-        delete node.start;
-        delete node.end;
+        if (typeof node.start === 'number') delete node.start;
+        if (typeof node.end === 'number') delete node.end;
         delete node.directive;
       }
     },
@@ -593,6 +616,16 @@ function normalizeAcornAst(ast) {
       type: 'Program',
       callback: (node) => {
         delete node.sourceType;
+
+        // Fix positions to compare with chiffon. Acorn spans Program over
+        // the whole source (leading comments and the trailing line break
+        // included), and chiffon spans it from the first token to the last.
+        if (options.loc && node.body && node.body.length) {
+          const first = node.body[0];
+          const last = node.body[node.body.length - 1];
+          node.range = [first.range[0], last.range[1]];
+          node.loc = { start: first.loc.start, end: last.loc.end };
+        }
       }
     },
     {
