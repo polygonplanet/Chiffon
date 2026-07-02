@@ -141,6 +141,7 @@
   var signLeftRe = /^[+-]/;
   var signRightRe = /[+-]$/;
   var notPunctRe = /[^{}()[\]<>=!+*%\/&|^~?:;,.-]/;
+  var stmtEndPunctRe = /^(?:[)\]}]|\+\+|--)$/;
 
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
@@ -761,7 +762,6 @@
     return new Untokenizer(options).untokenize(tokens);
   };
 
-
   var TOKEN_END = {};
   var minifyDefaultOptions = {
     maxLineLen: 32000
@@ -814,12 +814,19 @@
 
       while (this.index < this.length) {
         if (this.type === _LineTerminator) {
-          if (this.prev.type === _Punctuator ||
-              this.prev.type === _LineTerminator ||
-              this.lookahead.type === _Punctuator) {
+          var lookahead = this.lookahead;
+          var lookaheadValue = lookahead.value;
+          var prev = this.prev;
+
+          if ((lookaheadValue !== '++' && lookaheadValue !== '--') &&
+            (lookahead === TOKEN_END ||
+            lookahead.type === _Punctuator || prev.type === _LineTerminator ||
+            (prev.type === _Punctuator && !stmtEndPunctRe.test(prev.value)))) {
             this.eat();
             continue;
-          } else if (this.lookahead.type === _LineTerminator) {
+          }
+
+          if (lookahead.type === _LineTerminator) {
             this.next();
             this.eat();
             continue;
