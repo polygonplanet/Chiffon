@@ -170,8 +170,11 @@
   function getPattern(ignore) {
     return new RegExp(
       '(' +
+            // ECMA-262, 16th: 12.5 Hashbang Comments
+            '^#![^' + lineTerminator + ']*' +
+
             // MultiLine Comment
-            '/[*][\\s\\S]*?[*]/' +
+      '|' + '/[*][\\s\\S]*?[*]/' +
 
             // SingleLine Comment
       '|' + '//[^' + lineTerminator + ']*' +
@@ -416,6 +419,11 @@
           return _Comment;
         case '`':
           return _Template;
+        case '#':
+          if (value.charAt(1) === '!') {
+            return _Comment;
+          }
+          return _Identifier;
         case '}':
           if (len === 1) {
             return _Punctuator;
