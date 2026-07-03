@@ -1,0 +1,39 @@
+{
+  "range": [
+    99,
+    109
+  ],
+  "loc": {
+    "start": {
+      "line": 4,
+      "column": 0
+    },
+    "end": {
+      "line": 4,
+      "column": 10
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        99,
+        109
+      ],
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 0
+        },
+        "end": {
+          "line": 4,
+          "column": 10
+        }
+      },
+      "type": "ExportNamedDeclaration",
+      "declaration": null,
+      "specifiers": [],
+      "source": null
+    }
+  ]
+}
