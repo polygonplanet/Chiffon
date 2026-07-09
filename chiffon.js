@@ -104,7 +104,7 @@
     '|' + '[^`\\\\]' +
     ')*`';
 
-  var identToken = '(?:' +
+  var identToken = '#?(?:' +
         '\\\\u(?:[0-9a-fA-F]{4}|[{][0-9a-fA-F]+[}])' +
   '|' + '[^\\s\\\\+/%*=&|^~<>!?:;,.()[\\]{}\'"`@#-]' +
   ')+';
@@ -938,12 +938,15 @@
       _NewExpression = 'NewExpression',
       _ObjectExpression = 'ObjectExpression',
       _ObjectPattern = 'ObjectPattern',
+      _PrivateIdentifier = 'PrivateIdentifier',
       _Program = 'Program',
       _Property = 'Property',
+      _PropertyDefinition = 'PropertyDefinition',
       _RestElement = 'RestElement',
       _ReturnStatement = 'ReturnStatement',
       _SequenceExpression = 'SequenceExpression',
       _SpreadElement = 'SpreadElement',
+      _StaticBlock = 'StaticBlock',
       _Super = 'Super',
       _SwitchCase = 'SwitchCase',
       _SwitchStatement = 'SwitchStatement',
@@ -1297,8 +1300,9 @@
       return this.finishNode(node);
     },
     parseIdentifier: function(allowKeyword) {
-      var node = this.startNode(_Identifier);
       var name = this.value;
+      var isPrivate = name.charAt(0) === '#';
+      var node = this.startNode(isPrivate ? _PrivateIdentifier : _Identifier);
 
       if (allowKeyword) {
         this.next();
@@ -1306,7 +1310,7 @@
         this.expectType(_Identifier);
       }
 
-      node.name = name;
+      node.name = isPrivate ? name.substring(1) : name;
       return this.finishNode(node);
     },
     // `yield` and `await` are allowed as identifiers outside their context
@@ -1580,7 +1584,7 @@
           generator: generator,
           async: isAsync
         });
-      } else if (key.type === _Identifier) {
+      } else if (key.type === _Identifier || key.type === _PrivateIdentifier) {
         shorthand = true;
         if (this.value === '=') {
           value = this.parseAssignmentPattern(key);
@@ -3069,26 +3073,48 @@
     parseMethodDefinition: function() {
       var startNode = this.startNode(_MethodDefinition);
       var isStatic = false;
-      // `static` is the static modifier unless it is itself the method name,
+      // `static` is the static modifier unless it is itself the element name,
       // e.g. `class A { static() {} }`.
       if (this.value === 'static' && this.lookahead().value !== '(') {
         isStatic = true;
         this.next();
+
+        // ES2022: class static initialization block `static { ... }`
+        if (this.value === '{') {
+          return this.parseStaticBlock(startNode);
+        }
       }
 
       var node = this.parseObjectDefinition();
       this.startNodeAt(node, startNode);
-      node.type = _MethodDefinition;
       node['static'] = isStatic;
+      var method = node.method;
+      var kind = node.kind;
       delete node.method;
       delete node.shorthand;
 
-      if (node.key.name === 'constructor') {
-        node.kind = 'constructor';
-      } else if (node.kind === 'init') {
-        node.kind = 'method';
+      if (method || kind === 'get' || kind === 'set') {
+        node.type = _MethodDefinition;
+        if (node.key.type === _Identifier && node.key.name === 'constructor') {
+          node.kind = 'constructor';
+        } else if (kind === 'init') {
+          node.kind = 'method';
+        }
+      } else {
+        node.type = _PropertyDefinition;
+        var value = node.value;
+        node.value = value.type === _AssignmentPattern ? value.right : null;
+        delete node.kind;
       }
 
+      return this.finishNode(node);
+    },
+    parseStaticBlock: function(node) {
+      node.type = _StaticBlock;
+      node.body = [];
+      this.expect('{');
+      this.parseScriptBody(node.body, '}');
+      this.expect('}');
       return this.finishNode(node);
     },
     parseMaybeExpressionStatement: function() {
