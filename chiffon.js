@@ -51,6 +51,20 @@
       _Boolean = 'Boolean',
       _Keyword = 'Keyword';
 
+  var binaryPrecedence = {
+    '*': 1, '/': 1, '%': 1,
+    '+': 2, '-': 2,
+    '<<': 3, '>>': 3, '>>>': 3,
+    '<': 4, '>': 4, '<=': 4, '>=': 4, 'instanceof': 4, 'in': 4,
+    '==': 5, '!=': 5, '===': 5, '!==': 5,
+    '&': 6,
+    '^': 7,
+    '|': 8,
+    '&&': 9,
+    '||': 10,
+    '??': 11
+  };
+
   // ECMA-262, 16th: 12.3 Line Terminators
   var lineTerminator = '\\r\\n\\u2028\\u2029';
   var lineTerminatorSequence = '(?:\\r\\n|[' + lineTerminator + '])';
@@ -372,6 +386,12 @@
           type: type,
           value: value
         };
+
+        if (optParse) {
+          // Check types first to avoid prototype properties ('constructor', etc.)
+          token.prec = (type === _Punctuator || type === _Keyword) ?
+            (binaryPrecedence[value] || 0) : 0;
+        }
 
         if (hasLineTerminator) {
           token.hasLineTerminator = true;
@@ -1869,45 +1889,12 @@
       return this.finishNode(node);
     },
     getBinaryPrecedence: function(allowIn) {
-      switch (this.value) {
-        case '*':
-        case '/':
-        case '%':
-          return 1;
-        case '+':
-        case '-':
-          return 2;
-        case '<<':
-        case '>>':
-        case '>>>':
-          return 3;
-        case '<':
-        case '>':
-        case '<=':
-        case '>=':
-        case 'instanceof':
-          return 4;
-        case 'in':
-          return allowIn ? 4 : 0;
-        case '==':
-        case '!=':
-        case '===':
-        case '!==':
-          return 5;
-        case '&':
-          return 6;
-        case '^':
-          return 7;
-        case '|':
-          return 8;
-        case '&&':
-          return 9;
-        case '||':
-          return 10;
-        case '??':
-          return 11;
+      var prec = this.token.prec || 0;
+      // `in` (precedence 4) is disallowed inside e.g. for-init headers.
+      if (!allowIn && prec === 4 && this.value === 'in') {
+        return 0;
       }
-      return 0;
+      return prec;
     },
     parseBinaryExpression: function(allowIn, base) {
       if (base == null) {
@@ -1922,30 +1909,26 @@
       }
       var right, operator, node;
 
-      for (var i = 1; i <= 11; i++) {
-        while ((prec = this.getBinaryPrecedence(allowIn)) === i) {
-          operator = this.value;
+      while (prec && prec <= base) {
+        operator = this.value;
 
-          node = this.startNode(i < 9 ? _BinaryExpression : _LogicalExpression);
-          this.startNodeAt(node, startNode);
-          node.operator = operator;
-          node.left = left;
+        node = this.startNode(prec < 9 ? _BinaryExpression : _LogicalExpression);
+        this.startNodeAt(node, startNode);
+        node.operator = operator;
+        node.left = left;
 
-          this.next();
+        this.next();
 
-          if (prec === 1) {
-            right = this.parseExponentiationExpression();
-          } else {
-            right = this.parseBinaryExpression(allowIn, prec - 1);
-          }
-
-          node.right = right;
-          left = this.finishNode(node);
+        if (prec === 1) {
+          right = this.parseExponentiationExpression();
+        } else {
+          right = this.parseBinaryExpression(allowIn, prec - 1);
         }
 
-        if (base < prec) {
-          break;
-        }
+        node.right = right;
+        left = this.finishNode(node);
+
+        prec = this.getBinaryPrecedence(allowIn);
       }
 
       this.startNodeAt(left, startNode);
