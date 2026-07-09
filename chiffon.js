@@ -1,7 +1,7 @@
 /**
  * Chiffon
  *
- * @description  A small ECMAScript parser, tokenizer and minifier written in JavaScript
+ * @description  A small JavaScript (ECMAScript) parser and tokenizer with zero dependencies
  * @fileoverview JavaScript parser, tokenizer and minifier library
  * @version      2.5.4
  * @date         2016-04-17
