@@ -185,10 +185,10 @@ function runTest(description, parser) {
         it(`fixtures ${no}`, () => {
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
           const expectedCode = readFixtureFile(methodName, expectedFileName);
           const expected = JSON.parse(expectedCode);
-          const tokens = methods[methodName].execute(parser, code);
+          const tokens = methods[methodName].execute(parser, code, options);
           assert.deepEqual(tokens, expected);
         });
       });
@@ -198,10 +198,10 @@ function runTest(description, parser) {
           const methodName = 'tokenizeLocRange';
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
           const expectedCode = readFixtureFile(methodName, expectedFileName);
           const expected = JSON.parse(expectedCode);
-          const tokens = methods[methodName].execute(parser, code, { loc: true, range: true });
+          const tokens = methods[methodName].execute(parser, code, { loc: true, range: true, ...options });
           assert.deepEqual(tokens, expected);
         });
       });
@@ -214,7 +214,7 @@ function runTest(description, parser) {
         it('fixtures ' + no, () => {
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
 
           const func = requireFixture(methodName, fixture);
           assert(func() === true);
@@ -222,12 +222,14 @@ function runTest(description, parser) {
           const tokens = methods.tokenize.execute(parser, code, {
             comment: true,
             whiteSpace: true,
-            lineTerminator: true
+            lineTerminator: true,
+            ...options
           });
           assert(Array.isArray(tokens));
 
           const untokenized = methods[methodName].executeUntokenize(parser, tokens, {
-            unsafe: true
+            unsafe: true,
+            ...options
           });
           assert(untokenized === code);
           const resFunc = fakeRequire(untokenized);
@@ -254,13 +256,13 @@ function runTest(description, parser) {
         it('fixtures ' + no, () => {
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
           const expectedCode = readFixtureFile(methodName, expectedFileName);
 
           const func = requireFixture(methodName, fixture);
           assert(func() === true);
 
-          const minCode = methods[methodName].execute(parser, code);
+          const minCode = methods[methodName].execute(parser, code, options);
           assert(code.length > minCode.length);
           testSyntax(minCode);
           assert.strictEqual(minCode, expectedCode.replace(/\n$/, ''));
@@ -340,13 +342,13 @@ function runTest(description, parser) {
         it(`fixtures ${no}`, () => {
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
           const expectedCode = readFixtureFile(methodName, expectedFileName);
           const expected = JSON.parse(expectedCode);
 
           if (expectError) {
             assert.throws(
-              () => methods[methodName].execute(parser, code, { loc: true, range: true }),
+              () => methods[methodName].execute(parser, code, { loc: true, range: true, ...options }),
               (e) => {
                 assert.strictEqual(e.name, expected.name);
                 assert.strictEqual(e.message, expected.message);
@@ -354,7 +356,7 @@ function runTest(description, parser) {
               }
             );
           } else {
-            const ast = methods[methodName].execute(parser, code, { loc: true, range: true });
+            const ast = methods[methodName].execute(parser, code, { loc: true, range: true, ...options });
             normalizeAstForJson(ast);
             assert.deepEqual(ast, expected);
           }
@@ -373,7 +375,7 @@ function runTest(description, parser) {
 
         it(`[acorn] fixtures ${no}`, () => {
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
 
           let acornAst;
           try {
@@ -382,7 +384,7 @@ function runTest(description, parser) {
             acornAst = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'module' });
           }
 
-          const chiffonAst = methods[methodName].execute(parser, code);
+          const chiffonAst = methods[methodName].execute(parser, code, options);
           assert.deepStrictEqual(
             toPlainAst(chiffonAst),
             normalizeAcornAst(toPlainAst(acornAst))
@@ -502,9 +504,15 @@ function readFixtureCode(methodName, fixture) {
 
   if (isModule) {
     const mod = require(path.join(dir, fileName));
-    return mod.code;
+    return {
+      code: mod.code,
+      options: mod.options || {}
+    };
   }
-  return readFixtureFile(methodName, fileName);
+  return {
+    code: readFixtureFile(methodName, fileName),
+    options: {}
+  };
 }
 
 function requireFixture(methodName, fixture) {
