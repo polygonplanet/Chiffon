@@ -119,19 +119,27 @@
   var regexParenKeywords = 'if|while|for|with';
 
   // Reserved Words
-  var keywordsRe = new RegExp('^(?:' +
-    regexParenKeywords + '|' + regexPrefixKeywords + '|' +
-    'var|function|this|new|break|catch|finally|try|default|continue|' +
-    'switch|const|export|import|class|extends|debugger|super|enum|' +
+  var keywordTypeMap = (function() {
+    var map = { 'true': _Boolean, 'false': _Boolean, 'null': _Null };
+    var words = (
+      regexParenKeywords + '|' + regexPrefixKeywords + '|' +
+      'var|function|this|new|break|catch|finally|try|default|continue|' +
+      'switch|const|export|import|class|extends|debugger|super|enum|' +
 
-    // ECMA-262, 16th: 12.7.2 Keywords and Reserved Words
-    // Contextually disallowed as identifiers, in strict mode code:
-    // `await` is listed in `regexPrefixKeywords` above because ECMA-262
-    // includes it in the ReservedWord production; it is reserved only inside
-    // async contexts and modules, but otherwise may be used as an identifier.
-    'let|static|' +
-    'implements|package|protected|interface|private|public' +
-  ')$');
+      // ECMA-262, 16th: 12.7.2 Keywords and Reserved Words
+      // Contextually disallowed as identifiers, in strict mode code:
+      // `await` is listed in `regexPrefixKeywords` above because ECMA-262
+      // includes it in the ReservedWord production; it is reserved only inside
+      // async contexts and modules, but otherwise may be used as an identifier.
+      'let|static|' +
+      'implements|package|protected|interface|private|public'
+    ).split('|');
+
+    for (var i = 0; i < words.length; i++) {
+      map[words[i]] = _Keyword;
+    }
+    return map;
+  }());
 
   var lineTerminatorSequenceRe = new RegExp(lineTerminatorSequence);
 
@@ -140,9 +148,7 @@
   var identRightRe = new RegExp(identToken + '$');
   var signLeftRe = /^[+-]/;
   var signRightRe = /[+-]$/;
-  var notPunctRe = /[^{}()[\]<>=!+*%\/&|^~?:;,.-]/;
   var stmtEndPunctRe = /^(?:[)\]}]|\+\+|--)$/;
-
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
           '(?:^(?:' + regexPrefixKeywords + ')$)' +
@@ -155,6 +161,20 @@
   var tokenizeNotRegExpRe = getPattern(_RegularExpression);
   var tokenizeRe = getPattern();
 
+  // Punctuator first-character table for performance
+  var punctCharTable = (function() {
+    var table = [];
+    var chars = '{}()[]<>=!+*%/&|^~?:;,.-';
+    var i = 0;
+    for (; i < 0x80; i++) {
+      table[i] = 0;
+    }
+    for (i = 0; i < chars.length; i++) {
+      table[chars.charCodeAt(i)] = 1;
+    }
+    return table;
+  }());
+
   lineTerminator =
   lineTerminatorSequence =
   whiteSpace =
@@ -165,7 +185,6 @@
   identToken =
   regexPrefixKeywords =
   regexParenKeywords = null;
-
 
   function getPattern(ignore) {
     return new RegExp(
@@ -181,9 +200,11 @@
       '|' + '<!--[^' + lineTerminator + ']*' +
 
             // Line Terminators
+            // SingleLine HTML Close Comment `-->` (Annex B): Sequences starting
+            // from `^` are typed as Comment, but those starting from a newline
+            // are typed as LineTerminator due to regex limitations.
       '|' + '(?:^|' + lineTerminatorSequence + ')' +
             '(?:' + whiteSpace + ')?' +
-            // SingleLine Comment
             '-->[^' + lineTerminator + ']*' +
 
             // Template Literal
@@ -243,27 +264,22 @@
     return fromCharCode((c >> 10) + 0xD800, (c % 0x400) + 0xDC00);
   }
 
-
   function isLineTerminator(c) {
     return c === 0x0A || c === 0x0D || c === 0x2028 || c === 0x2029;
   }
 
-
-  function isPunctuator(c) {
-    return !notPunctRe.test(c);
+  function isPunctuator(ch) {
+    return ch < 128 && punctCharTable[ch] === 1;
   }
-
 
   function isDigit(c) {
     return c >= 0x30 && c <= 0x39;
   }
 
-
   function isOctalDigit(c) {
     var ch = c.charCodeAt(0);
     return ch >= 0x30 && ch <= 0x37;
   }
-
 
   function mixin(target) {
     slice.call(arguments, 1).forEach(function(source) {
@@ -275,7 +291,6 @@
     });
     return target;
   }
-
 
   function Tokenizer(options) {
     this.options = mixin({}, options || {});
@@ -290,6 +305,9 @@
       var lineStart, columnStart, columnEnd, hasLineTerminator;
       var type, regex;
       var options = this.options;
+      var optComment = options.comment, optWhiteSpace = options.whiteSpace,
+          optLineTerminator = options.lineTerminator, optRange = options.range,
+          optLoc = options.loc, optParse = options.parse;
 
       for (var i = 0; i < matches.length; i++) {
         value = matches[i];
@@ -304,7 +322,7 @@
         regex = null;
         type = this.getTokenType(value);
 
-        if (options.loc) {
+        if (optLoc) {
           if (type === _String ||
               (type === _Comment && value.charAt(1) === '*')) {
             lines = value.split(lineTerminatorSequenceRe);
@@ -339,14 +357,14 @@
           continue;
         }
 
-        if (options.parse && type === _LineTerminator) {
+        if (optParse && type === _LineTerminator) {
           hasLineTerminator = true;
           continue;
         }
 
-        if ((type === _Comment && !options.comment) ||
-            (type === _WhiteSpace && !options.whiteSpace) ||
-            (type === _LineTerminator && !options.lineTerminator)) {
+        if ((type === _Comment && !optComment) ||
+            (type === _WhiteSpace && !optWhiteSpace) ||
+            (type === _LineTerminator && !optLineTerminator)) {
           continue;
         }
 
@@ -364,10 +382,10 @@
           token.regex = regex;
         }
 
-        if (options.range) {
+        if (optRange) {
           token.range = [this.index - len, this.index];
         }
-        if (options.loc) {
+        if (optLoc) {
           columnEnd = this.index - this.prevLineIndex;
           this.addLoc(token, lineStart, columnStart, this.line, columnEnd);
         }
@@ -378,7 +396,7 @@
     getTokenType: function(value) {
       var len = value.length;
       var c = value.charAt(0);
-      var ch;
+      var ch, type;
 
       switch (c) {
         case '"':
@@ -430,32 +448,30 @@
           }
           return _Template;
         default:
-          if (value === 'true' || value === 'false') {
-            return _Boolean;
-          }
-          if (value === 'null') {
-            return _Null;
-          }
-          if (whiteSpaceRe.test(c)) {
-            return _WhiteSpace;
-          }
-          if (isPunctuator(c)) {
+          ch = c.charCodeAt(0);
+          if (isPunctuator(ch)) {
             return _Punctuator;
           }
-
-          ch = c.charCodeAt(0);
           if (isLineTerminator(ch)) {
             return _LineTerminator;
           }
           if (isDigit(ch)) {
             return _Numeric;
           }
-
-          if (keywordsRe.test(value)) {
-            return _Keyword;
+          if (ch === 0x20 || ch === 0x09) {
+            return _WhiteSpace;
           }
+
+          type = keywordTypeMap[value];
+          if (typeof type === 'string') {
+            return type;
+          }
+
           if (identRe.test(value)) {
             return _Identifier;
+          }
+          if (whiteSpaceRe.test(c)) {
+            return _WhiteSpace;
           }
       }
     },
@@ -721,7 +737,6 @@
     return new Tokenizer(options).tokenize(source);
   };
 
-
   function Untokenizer(options) {
     this.options = mixin({}, options || {});
   }
@@ -889,7 +904,6 @@
     return new Minifier(options).minify(source);
   };
 
-
   // Parser based Esprima. (http://esprima.org/)
   // Abstract syntax tree specified by ESTree. (https://github.com/estree/estree)
   var _AssignmentExpression = 'AssignmentExpression',
@@ -964,11 +978,9 @@
       _WithStatement = 'WithStatement',
       _YieldExpression = 'YieldExpression';
 
-
   var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=|\*\*=|&&=|\|\|=|\?\?=)$/;
   var unaryOpRe = /^(?:[-+!~]|\+\+|--|typeof|void|delete)$/;
   var octalDigitRe = /^0[0-7]+$/;
-
 
   function Parser(options) {
     this.options = mixin({}, options || {});
