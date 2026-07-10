@@ -144,7 +144,8 @@ function runTest(description, parser) {
         0x20, 0x09, 0x0b, 0x0c, 0xa0, 0x1680,
         // 0x180E (Mongolian Vowel Separator) was removed because it was
         // reclassified as a non-whitespace character in Unicode 6.3.0.
-        0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200a, 0x202f, 0x205f, 0x3000,
+        0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007,
+        0x2008, 0x2009, 0x200a, 0x202f, 0x205f, 0x3000,
         0xfeff
       ];
 
@@ -157,6 +158,11 @@ function runTest(description, parser) {
           const chiffonTokens = methods.tokenize.execute(parser, code);
           const esprimaTokens = esprima.parse(code, { tokens: true }).tokens;
           assert.deepEqual(chiffonTokens, esprimaTokens);
+
+          const withWs = methods.tokenize.execute(parser, code, { whiteSpace: true });
+          const last = withWs.length - 1;
+          assert.deepEqual(withWs[0], { type: 'WhiteSpace', value: c });
+          assert.deepEqual(withWs[last], { type: 'WhiteSpace', value: c });
         });
       });
     });

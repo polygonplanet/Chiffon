@@ -1,0 +1,130 @@
+[
+  {
+    "type": "Keyword",
+    "value": "var"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Numeric",
+    "value": "1"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "let"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Identifier",
+    "value": "b"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Identifier",
+    "value": "b"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Punctuator",
+    "value": "||"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Numeric",
+    "value": "2"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "const"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Identifier",
+    "value": "total"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "　"
+  },
+  {
+    "type": "Identifier",
+    "value": "a"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "　"
+  },
+  {
+    "type": "Punctuator",
+    "value": "+"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "　"
+  },
+  {
+    "type": "Identifier",
+    "value": "b"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

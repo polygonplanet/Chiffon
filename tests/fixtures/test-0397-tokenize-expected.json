@@ -1,0 +1,206 @@
+[
+  {
+    "type": "Keyword",
+    "value": "var"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\t"
+  },
+  {
+    "type": "Identifier",
+    "value": "sum"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\t"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\t"
+  },
+  {
+    "type": "Numeric",
+    "value": "1"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\t"
+  },
+  {
+    "type": "Punctuator",
+    "value": "+"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\t"
+  },
+  {
+    "type": "Numeric",
+    "value": "2"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "let"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\u000b"
+  },
+  {
+    "type": "Identifier",
+    "value": "greeting"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\u000b"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\u000b"
+  },
+  {
+    "type": "String",
+    "value": "'hello'"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "const"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\f"
+  },
+  {
+    "type": "Identifier",
+    "value": "nums"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\f"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\f"
+  },
+  {
+    "type": "Punctuator",
+    "value": "["
+  },
+  {
+    "type": "Numeric",
+    "value": "1"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\f"
+  },
+  {
+    "type": "Numeric",
+    "value": "2"
+  },
+  {
+    "type": "Punctuator",
+    "value": ","
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\f"
+  },
+  {
+    "type": "Numeric",
+    "value": "3"
+  },
+  {
+    "type": "Punctuator",
+    "value": "]"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "function"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Identifier",
+    "value": "identity"
+  },
+  {
+    "type": "Punctuator",
+    "value": "("
+  },
+  {
+    "type": "Identifier",
+    "value": "x"
+  },
+  {
+    "type": "Punctuator",
+    "value": ")"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Punctuator",
+    "value": "{"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Keyword",
+    "value": "return"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Identifier",
+    "value": "x"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Punctuator",
+    "value": "}"
+  }
+]

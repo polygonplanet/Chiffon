@@ -1,0 +1,94 @@
+[
+  {
+    "type": "WhiteSpace",
+    "value": "﻿"
+  },
+  {
+    "type": "Keyword",
+    "value": "var"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "﻿"
+  },
+  {
+    "type": "Identifier",
+    "value": "counter"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "﻿"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "﻿"
+  },
+  {
+    "type": "Numeric",
+    "value": "0"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Keyword",
+    "value": "let"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Identifier",
+    "value": "step"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "\t"
+  },
+  {
+    "type": "Punctuator",
+    "value": "="
+  },
+  {
+    "type": "WhiteSpace",
+    "value": " "
+  },
+  {
+    "type": "Numeric",
+    "value": "1"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  },
+  {
+    "type": "Identifier",
+    "value": "counter"
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "﻿"
+  },
+  {
+    "type": "Punctuator",
+    "value": "+="
+  },
+  {
+    "type": "WhiteSpace",
+    "value": "﻿"
+  },
+  {
+    "type": "Identifier",
+    "value": "step"
+  },
+  {
+    "type": "Punctuator",
+    "value": ";"
+  }
+]

@@ -1,0 +1,238 @@
+{
+  "range": [
+    1,
+    48
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 1
+    },
+    "end": {
+      "line": 3,
+      "column": 16
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        1,
+        17
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "line": 1,
+          "column": 17
+        }
+      },
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "range": [
+            5,
+            16
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 5
+            },
+            "end": {
+              "line": 1,
+              "column": 16
+            }
+          },
+          "type": "VariableDeclarator",
+          "id": {
+            "range": [
+              5,
+              12
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 5
+              },
+              "end": {
+                "line": 1,
+                "column": 12
+              }
+            },
+            "type": "Identifier",
+            "name": "counter"
+          },
+          "init": {
+            "range": [
+              15,
+              16
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 15
+              },
+              "end": {
+                "line": 1,
+                "column": 16
+              }
+            },
+            "type": "Literal",
+            "value": 0,
+            "raw": "0"
+          }
+        }
+      ],
+      "kind": "var"
+    },
+    {
+      "range": [
+        18,
+        31
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 2,
+          "column": 13
+        }
+      },
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "range": [
+            22,
+            30
+          ],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 4
+            },
+            "end": {
+              "line": 2,
+              "column": 12
+            }
+          },
+          "type": "VariableDeclarator",
+          "id": {
+            "range": [
+              22,
+              26
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 4
+              },
+              "end": {
+                "line": 2,
+                "column": 8
+              }
+            },
+            "type": "Identifier",
+            "name": "step"
+          },
+          "init": {
+            "range": [
+              29,
+              30
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 11
+              },
+              "end": {
+                "line": 2,
+                "column": 12
+              }
+            },
+            "type": "Literal",
+            "value": 1,
+            "raw": "1"
+          }
+        }
+      ],
+      "kind": "let"
+    },
+    {
+      "range": [
+        32,
+        48
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 0
+        },
+        "end": {
+          "line": 3,
+          "column": 16
+        }
+      },
+      "type": "ExpressionStatement",
+      "expression": {
+        "range": [
+          32,
+          47
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 0
+          },
+          "end": {
+            "line": 3,
+            "column": 15
+          }
+        },
+        "type": "AssignmentExpression",
+        "operator": "+=",
+        "left": {
+          "range": [
+            32,
+            39
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 0
+            },
+            "end": {
+              "line": 3,
+              "column": 7
+            }
+          },
+          "type": "Identifier",
+          "name": "counter"
+        },
+        "right": {
+          "range": [
+            43,
+            47
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 11
+            },
+            "end": {
+              "line": 3,
+              "column": 15
+            }
+          },
+          "type": "Identifier",
+          "name": "step"
+        }
+      }
+    }
+  ]
+}
