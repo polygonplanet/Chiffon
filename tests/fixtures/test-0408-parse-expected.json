@@ -1,0 +1,370 @@
+{
+  "range": [
+    0,
+    172
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 3,
+      "column": 60
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        59
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 59
+        }
+      },
+      "type": "ExportNamedDeclaration",
+      "declaration": null,
+      "specifiers": [
+        {
+          "range": [
+            9,
+            12
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 9
+            },
+            "end": {
+              "line": 1,
+              "column": 12
+            }
+          },
+          "type": "ExportSpecifier",
+          "exported": {
+            "range": [
+              9,
+              12
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 9
+              },
+              "end": {
+                "line": 1,
+                "column": 12
+              }
+            },
+            "type": "Identifier",
+            "name": "foo"
+          },
+          "local": {
+            "range": [
+              9,
+              12
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 9
+              },
+              "end": {
+                "line": 1,
+                "column": 12
+              }
+            },
+            "type": "Identifier",
+            "name": "foo"
+          }
+        }
+      ],
+      "source": {
+        "range": [
+          20,
+          36
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 20
+          },
+          "end": {
+            "line": 1,
+            "column": 36
+          }
+        },
+        "type": "Literal",
+        "value": "./example.json",
+        "raw": "'./example.json'"
+      },
+      "attributes": [
+        {
+          "range": [
+            44,
+            56
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 44
+            },
+            "end": {
+              "line": 1,
+              "column": 56
+            }
+          },
+          "type": "ImportAttribute",
+          "key": {
+            "range": [
+              44,
+              48
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 44
+              },
+              "end": {
+                "line": 1,
+                "column": 48
+              }
+            },
+            "type": "Identifier",
+            "name": "type"
+          },
+          "value": {
+            "range": [
+              50,
+              56
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 50
+              },
+              "end": {
+                "line": 1,
+                "column": 56
+              }
+            },
+            "type": "Literal",
+            "value": "json",
+            "raw": "'json'"
+          }
+        }
+      ]
+    },
+    {
+      "range": [
+        60,
+        111
+      ],
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 0
+        },
+        "end": {
+          "line": 2,
+          "column": 51
+        }
+      },
+      "type": "ExportAllDeclaration",
+      "exported": null,
+      "source": {
+        "range": [
+          74,
+          88
+        ],
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 14
+          },
+          "end": {
+            "line": 2,
+            "column": 28
+          }
+        },
+        "type": "Literal",
+        "value": "./other.json",
+        "raw": "\"./other.json\""
+      },
+      "attributes": [
+        {
+          "range": [
+            96,
+            108
+          ],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 36
+            },
+            "end": {
+              "line": 2,
+              "column": 48
+            }
+          },
+          "type": "ImportAttribute",
+          "key": {
+            "range": [
+              96,
+              100
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 36
+              },
+              "end": {
+                "line": 2,
+                "column": 40
+              }
+            },
+            "type": "Identifier",
+            "name": "type"
+          },
+          "value": {
+            "range": [
+              102,
+              108
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 42
+              },
+              "end": {
+                "line": 2,
+                "column": 48
+              }
+            },
+            "type": "Literal",
+            "value": "json",
+            "raw": "\"json\""
+          }
+        }
+      ]
+    },
+    {
+      "range": [
+        112,
+        172
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 0
+        },
+        "end": {
+          "line": 3,
+          "column": 60
+        }
+      },
+      "type": "ExportAllDeclaration",
+      "exported": {
+        "range": [
+          124,
+          127
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 12
+          },
+          "end": {
+            "line": 3,
+            "column": 15
+          }
+        },
+        "type": "Identifier",
+        "name": "bar"
+      },
+      "source": {
+        "range": [
+          133,
+          149
+        ],
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 21
+          },
+          "end": {
+            "line": 3,
+            "column": 37
+          }
+        },
+        "type": "Literal",
+        "value": "./example.json",
+        "raw": "'./example.json'"
+      },
+      "attributes": [
+        {
+          "range": [
+            157,
+            169
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 45
+            },
+            "end": {
+              "line": 3,
+              "column": 57
+            }
+          },
+          "type": "ImportAttribute",
+          "key": {
+            "range": [
+              157,
+              161
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 45
+              },
+              "end": {
+                "line": 3,
+                "column": 49
+              }
+            },
+            "type": "Identifier",
+            "name": "type"
+          },
+          "value": {
+            "range": [
+              163,
+              169
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 51
+              },
+              "end": {
+                "line": 3,
+                "column": 57
+              }
+            },
+            "type": "Literal",
+            "value": "json",
+            "raw": "'json'"
+          }
+        }
+      ]
+    }
+  ]
+}

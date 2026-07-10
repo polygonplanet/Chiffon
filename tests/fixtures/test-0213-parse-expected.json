@@ -33,7 +33,8 @@
       "type": "ExportNamedDeclaration",
       "declaration": null,
       "specifiers": [],
-      "source": null
+      "source": null,
+      "attributes": []
     }
   ]
 }

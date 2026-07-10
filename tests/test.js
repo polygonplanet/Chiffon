@@ -647,12 +647,6 @@ function normalizeAcornAst(ast, options = {}) {
       }
     },
     {
-      type: ['ImportDeclaration', 'ImportExpression', 'ExportNamedDeclaration', 'ExportAllDeclaration'],
-      callback: (node) => {
-        delete node.attributes;
-      }
-    },
-    {
       type: 'ForInStatement',
       callback: (node) => {
         node.each = false;

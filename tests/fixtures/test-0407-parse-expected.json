@@ -1,0 +1,296 @@
+{
+  "range": [
+    0,
+    88
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 3,
+      "column": 27
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        59
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 59
+        }
+      },
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "range": [
+            7,
+            14
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 7
+            },
+            "end": {
+              "line": 1,
+              "column": 14
+            }
+          },
+          "type": "ImportNamespaceSpecifier",
+          "local": {
+            "range": [
+              12,
+              14
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 12
+              },
+              "end": {
+                "line": 1,
+                "column": 14
+              }
+            },
+            "type": "Identifier",
+            "name": "ns"
+          }
+        }
+      ],
+      "source": {
+        "range": [
+          20,
+          36
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 20
+          },
+          "end": {
+            "line": 1,
+            "column": 36
+          }
+        },
+        "type": "Literal",
+        "value": "./example.json",
+        "raw": "'./example.json'"
+      },
+      "attributes": [
+        {
+          "range": [
+            44,
+            56
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 44
+            },
+            "end": {
+              "line": 1,
+              "column": 56
+            }
+          },
+          "type": "ImportAttribute",
+          "key": {
+            "range": [
+              44,
+              48
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 44
+              },
+              "end": {
+                "line": 1,
+                "column": 48
+              }
+            },
+            "type": "Identifier",
+            "name": "type"
+          },
+          "value": {
+            "range": [
+              50,
+              56
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 50
+              },
+              "end": {
+                "line": 1,
+                "column": 56
+              }
+            },
+            "type": "Literal",
+            "value": "json",
+            "raw": "'json'"
+          }
+        }
+      ]
+    },
+    {
+      "range": [
+        61,
+        88
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 0
+        },
+        "end": {
+          "line": 3,
+          "column": 27
+        }
+      },
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "range": [
+            65,
+            87
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 4
+            },
+            "end": {
+              "line": 3,
+              "column": 26
+            }
+          },
+          "type": "VariableDeclarator",
+          "id": {
+            "range": [
+              65,
+              69
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 4
+              },
+              "end": {
+                "line": 3,
+                "column": 8
+              }
+            },
+            "type": "Identifier",
+            "name": "keys"
+          },
+          "init": {
+            "range": [
+              72,
+              87
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 11
+              },
+              "end": {
+                "line": 3,
+                "column": 26
+              }
+            },
+            "type": "CallExpression",
+            "callee": {
+              "range": [
+                72,
+                83
+              ],
+              "loc": {
+                "start": {
+                  "line": 3,
+                  "column": 11
+                },
+                "end": {
+                  "line": 3,
+                  "column": 22
+                }
+              },
+              "type": "MemberExpression",
+              "computed": false,
+              "optional": false,
+              "object": {
+                "range": [
+                  72,
+                  78
+                ],
+                "loc": {
+                  "start": {
+                    "line": 3,
+                    "column": 11
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 17
+                  }
+                },
+                "type": "Identifier",
+                "name": "Object"
+              },
+              "property": {
+                "range": [
+                  79,
+                  83
+                ],
+                "loc": {
+                  "start": {
+                    "line": 3,
+                    "column": 18
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 22
+                  }
+                },
+                "type": "Identifier",
+                "name": "keys"
+              }
+            },
+            "optional": false,
+            "arguments": [
+              {
+                "range": [
+                  84,
+                  86
+                ],
+                "loc": {
+                  "start": {
+                    "line": 3,
+                    "column": 23
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 25
+                  }
+                },
+                "type": "Identifier",
+                "name": "ns"
+              }
+            ]
+          }
+        }
+      ],
+      "kind": "let"
+    }
+  ]
+}

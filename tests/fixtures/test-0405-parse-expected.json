@@ -1,0 +1,258 @@
+{
+  "range": [
+    0,
+    81
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 3,
+      "column": 24
+    }
+  },
+  "type": "Program",
+  "body": [
+    {
+      "range": [
+        0,
+        55
+      ],
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 1,
+          "column": 55
+        }
+      },
+      "type": "ImportDeclaration",
+      "specifiers": [
+        {
+          "range": [
+            7,
+            10
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 7
+            },
+            "end": {
+              "line": 1,
+              "column": 10
+            }
+          },
+          "type": "ImportDefaultSpecifier",
+          "local": {
+            "range": [
+              7,
+              10
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 7
+              },
+              "end": {
+                "line": 1,
+                "column": 10
+              }
+            },
+            "type": "Identifier",
+            "name": "obj"
+          }
+        }
+      ],
+      "source": {
+        "range": [
+          16,
+          32
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 16
+          },
+          "end": {
+            "line": 1,
+            "column": 32
+          }
+        },
+        "type": "Literal",
+        "value": "./example.json",
+        "raw": "'./example.json'"
+      },
+      "attributes": [
+        {
+          "range": [
+            40,
+            52
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 40
+            },
+            "end": {
+              "line": 1,
+              "column": 52
+            }
+          },
+          "type": "ImportAttribute",
+          "key": {
+            "range": [
+              40,
+              44
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 40
+              },
+              "end": {
+                "line": 1,
+                "column": 44
+              }
+            },
+            "type": "Identifier",
+            "name": "type"
+          },
+          "value": {
+            "range": [
+              46,
+              52
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 46
+              },
+              "end": {
+                "line": 1,
+                "column": 52
+              }
+            },
+            "type": "Literal",
+            "value": "json",
+            "raw": "'json'"
+          }
+        }
+      ]
+    },
+    {
+      "range": [
+        57,
+        81
+      ],
+      "loc": {
+        "start": {
+          "line": 3,
+          "column": 0
+        },
+        "end": {
+          "line": 3,
+          "column": 24
+        }
+      },
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "range": [
+            63,
+            80
+          ],
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 6
+            },
+            "end": {
+              "line": 3,
+              "column": 23
+            }
+          },
+          "type": "VariableDeclarator",
+          "id": {
+            "range": [
+              63,
+              68
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 6
+              },
+              "end": {
+                "line": 3,
+                "column": 11
+              }
+            },
+            "type": "Identifier",
+            "name": "value"
+          },
+          "init": {
+            "range": [
+              71,
+              80
+            ],
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 14
+              },
+              "end": {
+                "line": 3,
+                "column": 23
+              }
+            },
+            "type": "MemberExpression",
+            "computed": false,
+            "optional": false,
+            "object": {
+              "range": [
+                71,
+                74
+              ],
+              "loc": {
+                "start": {
+                  "line": 3,
+                  "column": 14
+                },
+                "end": {
+                  "line": 3,
+                  "column": 17
+                }
+              },
+              "type": "Identifier",
+              "name": "obj"
+            },
+            "property": {
+              "range": [
+                75,
+                80
+              ],
+              "loc": {
+                "start": {
+                  "line": 3,
+                  "column": 18
+                },
+                "end": {
+                  "line": 3,
+                  "column": 23
+                }
+              },
+              "type": "Identifier",
+              "name": "value"
+            }
+          }
+        }
+      ],
+      "kind": "const"
+    }
+  ]
+}

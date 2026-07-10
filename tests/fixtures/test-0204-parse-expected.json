@@ -88,7 +88,8 @@
         "kind": "var"
       },
       "specifiers": [],
-      "source": null
+      "source": null,
+      "attributes": []
     }
   ]
 }

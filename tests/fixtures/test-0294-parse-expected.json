@@ -89,7 +89,8 @@
         "expression": false
       },
       "specifiers": [],
-      "source": null
+      "source": null,
+      "attributes": []
     },
     {
       "range": [

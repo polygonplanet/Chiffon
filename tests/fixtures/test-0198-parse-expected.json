@@ -86,7 +86,8 @@
         "type": "Literal",
         "value": "mod",
         "raw": "'mod'"
-      }
+      },
+      "attributes": []
     },
     {
       "range": [
@@ -159,7 +160,8 @@
         "type": "Literal",
         "value": "mod2",
         "raw": "'mod2'"
-      }
+      },
+      "attributes": []
     }
   ]
 }
