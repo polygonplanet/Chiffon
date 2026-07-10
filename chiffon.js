@@ -958,6 +958,7 @@
       _FunctionDeclaration = 'FunctionDeclaration',
       _FunctionExpression = 'FunctionExpression',
       _IfStatement = 'IfStatement',
+      _ImportAttribute = 'ImportAttribute',
       _ImportDeclaration = 'ImportDeclaration',
       _ImportDefaultSpecifier = 'ImportDefaultSpecifier',
       _ImportExpression = 'ImportExpression',
@@ -2853,8 +2854,30 @@
 
       this.assertType(_String);
       node.source = this.parseLiteral();
+      node.attributes = this.parseImportAttributes();
       this.expectSemicolon();
 
+      return this.finishNode(node);
+    },
+    // ECMA-262, 16th: 16.2.2 Imports (WithClause)
+    parseImportAttributes: function() {
+      var attributes = [];
+
+      if (this.value === 'with') {
+        this.next();
+        this.parseCommaSeparatedElements('{', '}', attributes,
+          this.parseImportAttribute);
+      }
+
+      return attributes;
+    },
+    parseImportAttribute: function() {
+      var node = this.startNode(_ImportAttribute);
+      node.key = this.type === _String ?
+        this.parseLiteral() : this.parseIdentifier(true);
+      this.expect(':');
+      this.assertType(_String);
+      node.value = this.parseLiteral();
       return this.finishNode(node);
     },
     parseImportClause: function() {
@@ -2971,6 +2994,7 @@
       this.expect('from');
       this.assertType(_String);
       node.source = this.parseLiteral();
+      node.attributes = this.parseImportAttributes();
       this.expectSemicolon();
 
       return this.finishNode(node);
@@ -2981,6 +3005,7 @@
       var decl = null;
       var specs = [];
       var source = null;
+      var attributes = [];
 
       if (this.type === _Keyword || this.isAsyncFunctionAhead()) {
         // export var|let|const|function|async function|...
@@ -2993,6 +3018,7 @@
           this.next();
           this.assertType(_String);
           source = this.parseLiteral();
+          attributes = this.parseImportAttributes();
         }
         this.expectSemicolon();
       }
@@ -3000,6 +3026,7 @@
       node.declaration = decl;
       node.specifiers = specs;
       node.source = source;
+      node.attributes = attributes;
       return this.finishNode(node);
     },
     parseExportSpecifier: function() {
