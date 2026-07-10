@@ -1,0 +1,438 @@
+[
+  {
+    "type": "Keyword",
+    "value": "const",
+    "range": [
+      0,
+      5
+    ],
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 0
+      },
+      "end": {
+        "line": 1,
+        "column": 5
+      }
+    }
+  },
+  {
+    "type": "Identifier",
+    "value": "url",
+    "range": [
+      6,
+      9
+    ],
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 6
+      },
+      "end": {
+        "line": 1,
+        "column": 9
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": "=",
+    "range": [
+      10,
+      11
+    ],
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 10
+      },
+      "end": {
+        "line": 1,
+        "column": 11
+      }
+    }
+  },
+  {
+    "type": "String",
+    "value": "'https://example.com/path'",
+    "range": [
+      12,
+      38
+    ],
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 12
+      },
+      "end": {
+        "line": 1,
+        "column": 38
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": ";",
+    "range": [
+      38,
+      39
+    ],
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 38
+      },
+      "end": {
+        "line": 1,
+        "column": 39
+      }
+    }
+  },
+  {
+    "type": "Comment",
+    "value": "// trailing, not //example",
+    "range": [
+      40,
+      66
+    ],
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 40
+      },
+      "end": {
+        "line": 1,
+        "column": 66
+      }
+    }
+  },
+  {
+    "type": "Keyword",
+    "value": "const",
+    "range": [
+      67,
+      72
+    ],
+    "loc": {
+      "start": {
+        "line": 2,
+        "column": 0
+      },
+      "end": {
+        "line": 2,
+        "column": 5
+      }
+    }
+  },
+  {
+    "type": "Identifier",
+    "value": "re",
+    "range": [
+      73,
+      75
+    ],
+    "loc": {
+      "start": {
+        "line": 2,
+        "column": 6
+      },
+      "end": {
+        "line": 2,
+        "column": 8
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": "=",
+    "range": [
+      76,
+      77
+    ],
+    "loc": {
+      "start": {
+        "line": 2,
+        "column": 9
+      },
+      "end": {
+        "line": 2,
+        "column": 10
+      }
+    }
+  },
+  {
+    "type": "RegularExpression",
+    "value": "/ab+c/g",
+    "regex": {
+      "pattern": "ab+c",
+      "flags": "g"
+    },
+    "range": [
+      78,
+      85
+    ],
+    "loc": {
+      "start": {
+        "line": 2,
+        "column": 11
+      },
+      "end": {
+        "line": 2,
+        "column": 18
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": ";",
+    "range": [
+      85,
+      86
+    ],
+    "loc": {
+      "start": {
+        "line": 2,
+        "column": 18
+      },
+      "end": {
+        "line": 2,
+        "column": 19
+      }
+    }
+  },
+  {
+    "type": "Comment",
+    "value": "// a real regex, then a comment with /slashes/",
+    "range": [
+      87,
+      133
+    ],
+    "loc": {
+      "start": {
+        "line": 2,
+        "column": 20
+      },
+      "end": {
+        "line": 2,
+        "column": 66
+      }
+    }
+  },
+  {
+    "type": "Comment",
+    "value": "/* block with \"quotes\", 'apostrophes' and a fake /* open */",
+    "range": [
+      134,
+      193
+    ],
+    "loc": {
+      "start": {
+        "line": 3,
+        "column": 0
+      },
+      "end": {
+        "line": 3,
+        "column": 59
+      }
+    }
+  },
+  {
+    "type": "Keyword",
+    "value": "const",
+    "range": [
+      194,
+      199
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 0
+      },
+      "end": {
+        "line": 4,
+        "column": 5
+      }
+    }
+  },
+  {
+    "type": "Identifier",
+    "value": "ok",
+    "range": [
+      200,
+      202
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 6
+      },
+      "end": {
+        "line": 4,
+        "column": 8
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": "=",
+    "range": [
+      203,
+      204
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 9
+      },
+      "end": {
+        "line": 4,
+        "column": 10
+      }
+    }
+  },
+  {
+    "type": "Identifier",
+    "value": "re",
+    "range": [
+      205,
+      207
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 11
+      },
+      "end": {
+        "line": 4,
+        "column": 13
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": ".",
+    "range": [
+      207,
+      208
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 13
+      },
+      "end": {
+        "line": 4,
+        "column": 14
+      }
+    }
+  },
+  {
+    "type": "Identifier",
+    "value": "test",
+    "range": [
+      208,
+      212
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 14
+      },
+      "end": {
+        "line": 4,
+        "column": 18
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": "(",
+    "range": [
+      212,
+      213
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 18
+      },
+      "end": {
+        "line": 4,
+        "column": 19
+      }
+    }
+  },
+  {
+    "type": "Identifier",
+    "value": "url",
+    "range": [
+      213,
+      216
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 19
+      },
+      "end": {
+        "line": 4,
+        "column": 22
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": ")",
+    "range": [
+      216,
+      217
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 22
+      },
+      "end": {
+        "line": 4,
+        "column": 23
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": ";",
+    "range": [
+      217,
+      218
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 23
+      },
+      "end": {
+        "line": 4,
+        "column": 24
+      }
+    }
+  },
+  {
+    "type": "Comment",
+    "value": "// done",
+    "range": [
+      219,
+      226
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 25
+      },
+      "end": {
+        "line": 4,
+        "column": 32
+      }
+    }
+  }
+]
