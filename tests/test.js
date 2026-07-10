@@ -135,6 +135,10 @@ if (min) {
 
 function runTest(description, parser) {
   describe(description, () => {
+    it('version matches package.json', () => {
+      assert.strictEqual(parser.version, require('../package.json').version);
+    });
+
     describe('WhiteSpace', () => {
       const whiteSpaces = [
         0x20, 0x09, 0x0b, 0x0c, 0xa0, 0x1680,

@@ -29,7 +29,7 @@
 }('Chiffon', this, function() {
   'use strict';
 
-  var Chiffon = {};
+  var Chiffon = { version: '2.5.4' };
 
   var arrayProto = Array.prototype;
   var push = arrayProto.push;
