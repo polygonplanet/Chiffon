@@ -33,32 +33,32 @@ const methods = {
     pathName: 'parse',
     errorPathName: 'parse-error',
     expectedExt: 'json',
-    method: (code) => {
-      return Chiffon.parse(code, { loc: true, range: true });
+    method: (code, options) => {
+      return Chiffon.parse(code, { loc: true, range: true, ...options });
     }
   },
   tokenize: {
     dir: FIXTURES_DIR,
     pathName: 'tokenize',
     expectedExt: 'json',
-    method: (code) => {
-      return Chiffon.tokenize(code);
+    method: (code, options) => {
+      return Chiffon.tokenize(code, options);
     }
   },
   tokenizeLocRange: {
     dir: FIXTURES_DIR,
     pathName: 'tokenize-loc-range',
     expectedExt: 'json',
-    method: (code) => {
-      return Chiffon.tokenize(code, { loc: true, range: true });
+    method: (code, options) => {
+      return Chiffon.tokenize(code, { loc: true, range: true, ...options });
     }
   },
   minify: {
     dir: FIXTURES_MINIFY_DIR,
     pathName: 'minify',
     expectedExt: 'js',
-    method: (code) => {
-      return Chiffon.minify(code);
+    method: (code, options) => {
+      return Chiffon.minify(code, options);
     }
   }
 };
@@ -84,9 +84,11 @@ function generateExpected(selectedMethods = []) {
       const testPath = path.join(targetDir, testFile);
 
       let code;
+      let options = {};
       if (isModule) {
         const mod = require(testPath);
         code = mod.code;
+        options = mod.options || {};
       } else {
         code = fs.readFileSync(testPath).toString();
       }
@@ -104,7 +106,7 @@ function generateExpected(selectedMethods = []) {
 
         let result;
         try {
-          result = method(code);
+          result = method(code, options);
         } catch (e) {
           if (errorPathName) {
             const errorResult = {

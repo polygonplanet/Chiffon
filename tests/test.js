@@ -1,19 +1,19 @@
-/* global describe, it, expect, require */
 'use strict';
 
-const Chiffon = require('../chiffon');
-let ChiffonMin;
+const chiffon = require('../chiffon');
 
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const esprima = require(path.resolve(__dirname, 'thirdparty/esprima'));
+const acorn = require(path.resolve(__dirname, 'thirdparty/acorn'));
 
 const FIXTURES_DIR = path.resolve(__dirname, 'fixtures');
 const FIXTURES_MINIFY_DIR = path.resolve(FIXTURES_DIR, 'minify');
 const THIRDPARTY_DIR = path.resolve(__dirname, 'thirdparty');
 
 const THIRDPARTY_LIBS = [
+  //'acorn',
   'angular',
   'backbone',
   //'bluebird',
@@ -126,11 +126,11 @@ const fixtureCache = {};
 parseFixtures();
 
 const min = process.argv.slice().pop() === '--min';
-runTest('Chiffon', Chiffon);
+runTest('Chiffon', chiffon);
 
 if (min) {
-  ChiffonMin = require('../chiffon.min');
-  runTest('Chiffon (min)', ChiffonMin);
+  const chiffonMin = require('../chiffon.min');
+  runTest('Chiffon (min)', chiffonMin);
 }
 
 function runTest(description, parser) {
@@ -161,7 +161,7 @@ function runTest(description, parser) {
       const methodName = 'tokenize';
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(libraryName, () => {
+        it(`[esprima] ${libraryName}`, () => {
           assert(code.length > 0);
           const chiffonTokens = methods[methodName].execute(parser, code, { range: true });
           const esprimaTokens = normalizeEsprimaTokens(esprima.parse(code, { tokens: true, range: true }).tokens);
@@ -170,7 +170,7 @@ function runTest(description, parser) {
       });
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(`${libraryName} (CRLF)`, () => {
+        it(`[esprima] ${libraryName} (CRLF)`, () => {
           code = code.replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
@@ -185,10 +185,10 @@ function runTest(description, parser) {
         it(`fixtures ${no}`, () => {
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
           const expectedCode = readFixtureFile(methodName, expectedFileName);
           const expected = JSON.parse(expectedCode);
-          const tokens = methods[methodName].execute(parser, code);
+          const tokens = methods[methodName].execute(parser, code, options);
           assert.deepEqual(tokens, expected);
         });
       });
@@ -198,10 +198,10 @@ function runTest(description, parser) {
           const methodName = 'tokenizeLocRange';
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
           const expectedCode = readFixtureFile(methodName, expectedFileName);
           const expected = JSON.parse(expectedCode);
-          const tokens = methods[methodName].execute(parser, code, { loc: true, range: true });
+          const tokens = methods[methodName].execute(parser, code, { loc: true, range: true, ...options });
           assert.deepEqual(tokens, expected);
         });
       });
@@ -214,7 +214,7 @@ function runTest(description, parser) {
         it('fixtures ' + no, () => {
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
 
           const func = requireFixture(methodName, fixture);
           assert(func() === true);
@@ -222,12 +222,14 @@ function runTest(description, parser) {
           const tokens = methods.tokenize.execute(parser, code, {
             comment: true,
             whiteSpace: true,
-            lineTerminator: true
+            lineTerminator: true,
+            ...options
           });
           assert(Array.isArray(tokens));
 
           const untokenized = methods[methodName].executeUntokenize(parser, tokens, {
-            unsafe: true
+            unsafe: true,
+            ...options
           });
           assert(untokenized === code);
           const resFunc = fakeRequire(untokenized);
@@ -254,13 +256,13 @@ function runTest(description, parser) {
         it('fixtures ' + no, () => {
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
           const expectedCode = readFixtureFile(methodName, expectedFileName);
 
           const func = requireFixture(methodName, fixture);
           assert(func() === true);
 
-          const minCode = methods[methodName].execute(parser, code);
+          const minCode = methods[methodName].execute(parser, code, options);
           assert(code.length > minCode.length);
           testSyntax(minCode);
           assert.strictEqual(minCode, expectedCode.replace(/\n$/, ''));
@@ -275,7 +277,7 @@ function runTest(description, parser) {
       const methodName = 'parse';
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(libraryName, () => {
+        it(`[esprima] ${libraryName}`, () => {
           assert(code.length > 0);
           const chiffonAst = methods[methodName].execute(parser, code, { loc: true, range: true });
           const esprimaAst = normalizeEsprimaAst(esprima.parse(code, { loc: true, range: true }));
@@ -284,7 +286,7 @@ function runTest(description, parser) {
       });
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(`${libraryName} without location`, () => {
+        it(`[esprima] ${libraryName} without location`, () => {
           assert(code.length > 0);
           const chiffonAst = methods[methodName].execute(parser, code);
           const esprimaAst = normalizeEsprimaAst(esprima.parse(code));
@@ -293,7 +295,29 @@ function runTest(description, parser) {
       });
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(`${libraryName} (CRLF)`, () => {
+        it(`[acorn] ${libraryName}`, () => {
+          assert(code.length > 0);
+          const chiffonAst = methods[methodName].execute(parser, code, { loc: true, range: true });
+          const acornAst = normalizeAcornAst(acorn.parse(code, {
+            ecmaVersion: 'latest', sourceType: 'script', ranges: true, locations: true
+          }), { loc: true });
+          assert.deepEqual(chiffonAst, acornAst);
+        });
+      });
+
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(`[acorn] ${libraryName} without location`, () => {
+          assert(code.length > 0);
+          const chiffonAst = methods[methodName].execute(parser, code);
+          const acornAst = normalizeAcornAst(acorn.parse(code, {
+            ecmaVersion: 'latest', sourceType: 'script'
+          }));
+          assert.deepEqual(chiffonAst, acornAst);
+        });
+      });
+
+      Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
+        it(`[esprima] ${libraryName} (CRLF)`, () => {
           code = code.replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
@@ -304,7 +328,7 @@ function runTest(description, parser) {
       });
 
       Object.entries(THIRDPARTY_LIBS).forEach(([libraryName, code]) => {
-        it(`${libraryName} without location (CRLF)`, () => {
+        it(`[esprima] ${libraryName} without location (CRLF)`, () => {
           code = code.replace(/\r\n|\r|\n/g, '\r\n');
           assert(code.length > 0);
           assert(/\r\n/.test(code));
@@ -318,13 +342,13 @@ function runTest(description, parser) {
         it(`fixtures ${no}`, () => {
           assert.equal(getFixturesNo(expectedFileName), no);
           const fixture = getTestFixture(methodName, no);
-          const code = readFixtureCode(methodName, fixture);
+          const { code, options } = readFixtureCode(methodName, fixture);
           const expectedCode = readFixtureFile(methodName, expectedFileName);
           const expected = JSON.parse(expectedCode);
 
           if (expectError) {
             assert.throws(
-              () => methods[methodName].execute(parser, code, { loc: true, range: true }),
+              () => methods[methodName].execute(parser, code, { loc: true, range: true, ...options }),
               (e) => {
                 assert.strictEqual(e.name, expected.name);
                 assert.strictEqual(e.message, expected.message);
@@ -332,10 +356,39 @@ function runTest(description, parser) {
               }
             );
           } else {
-            const ast = methods[methodName].execute(parser, code, { loc: true, range: true });
+            const ast = methods[methodName].execute(parser, code, { loc: true, range: true, ...options });
             normalizeAstForJson(ast);
             assert.deepEqual(ast, expected);
           }
+        });
+      });
+
+      Object.entries(fixtures.parse).forEach(([no, { expectError }]) => {
+        if (expectError) return;
+
+        // Skip fixtures with legitimate AST differences:
+        //   0337: chiffon keeps CRLF in template raw/cooked, acorn normalizes to LF (ES spec).
+        //   0350: chiffon keeps unicode escapes in Identifier.name (`a`),  acorn decodes to `a`.
+        if (no === '0337' || no === '0350') {
+          return;
+        }
+
+        it(`[acorn] fixtures ${no}`, () => {
+          const fixture = getTestFixture(methodName, no);
+          const { code, options } = readFixtureCode(methodName, fixture);
+
+          let acornAst;
+          try {
+            acornAst = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
+          } catch (e) {
+            acornAst = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'module' });
+          }
+
+          const chiffonAst = methods[methodName].execute(parser, code, options);
+          assert.deepStrictEqual(
+            toPlainAst(chiffonAst),
+            normalizeAcornAst(toPlainAst(acornAst))
+          );
         });
       });
     });
@@ -451,9 +504,15 @@ function readFixtureCode(methodName, fixture) {
 
   if (isModule) {
     const mod = require(path.join(dir, fileName));
-    return mod.code;
+    return {
+      code: mod.code,
+      options: mod.options || {}
+    };
   }
-  return readFixtureFile(methodName, fileName);
+  return {
+    code: readFixtureFile(methodName, fileName),
+    options: {}
+  };
 }
 
 function requireFixture(methodName, fixture) {
@@ -467,19 +526,17 @@ function getFileNames(dir) {
 }
 
 function testSyntax(code) {
-  /*jslint evil: true */
   new Function('return;' + code)();
 }
 
 function fakeRequire(code) {
-  /*jslint evil: true */
   return new Function(
     // provide `module` so `code` can do `module.exports = ...`
-    'var module = { exports: {} };' + code + ';' + 'return module.exports;'
+    `var module = { exports: {} };${code};return module.exports;`
   )();
 }
 
-// Normalize Esprima's token list so it can be compared against Chiffon's.
+// Normalize Esprima's token to be compared against Chiffon's token list
 function normalizeEsprimaTokens(tokens) {
   tokens.forEach((token) => {
     if (token.type === 'Identifier' && token.value === 'await') {
@@ -489,7 +546,7 @@ function normalizeEsprimaTokens(tokens) {
   return tokens;
 }
 
-// Normalize Esprima's AST so it can be compared against Chiffon's AST
+// Normalize Esprima's AST to be compared against Chiffon's AST
 function normalizeEsprimaAst(ast) {
   astFilter(ast, [
     {
@@ -551,6 +608,77 @@ function normalizeEsprimaAst(ast) {
   return ast;
 }
 
+// Normalize Acorn's AST to be compared against Chiffon's AST
+// Pass { loc: true } when positions (loc/range) are being compared
+function normalizeAcornAst(ast, options = {}) {
+  astFilter(ast, [
+    {
+      type: '*',
+      callback: (node) => {
+        if (typeof node.start === 'number') delete node.start;
+        if (typeof node.end === 'number') delete node.end;
+        delete node.directive;
+      }
+    },
+    {
+      type: 'Program',
+      callback: (node) => {
+        delete node.sourceType;
+
+        // Fix positions to compare with chiffon. Acorn spans Program over
+        // the whole source (leading comments and the trailing line break
+        // included), and chiffon spans it from the first token to the last.
+        if (options.loc && node.body && node.body.length) {
+          const first = node.body[0];
+          const last = node.body[node.body.length - 1];
+          node.range = [first.range[0], last.range[1]];
+          node.loc = { start: first.loc.start, end: last.loc.end };
+        }
+      }
+    },
+    {
+      type: ['ImportDeclaration', 'ImportExpression', 'ExportNamedDeclaration', 'ExportAllDeclaration'],
+      callback: (node) => {
+        delete node.attributes;
+      }
+    },
+    {
+      type: 'ForInStatement',
+      callback: (node) => {
+        node.each = false;
+        delete node.await;
+      }
+    },
+    {
+      type: ['ForStatement', 'ForOfStatement'],
+      callback: (node) => {
+        if (!node.await) delete node.await;
+      }
+    },
+    {
+      type: ['FunctionDeclaration', 'FunctionExpression'],
+      callback: (node) => {
+        if (!node.async) delete node.async;
+      }
+    },
+    {
+      type: 'ArrowFunctionExpression',
+      callback: (node) => {
+        delete node.id;
+        delete node.generator;
+        if (!node.async) delete node.async;
+      }
+    }
+  ]);
+  return ast;
+}
+
+function toPlainAst(ast) {
+  return JSON.parse(JSON.stringify(ast, (key, value) =>
+    typeof value === 'bigint' ? String(value) + 'n' : value
+  ));
+}
+
 // Normalizes Literal `value` fields that JSON cannot represent
 function normalizeAstForJson(ast) {
   astFilter(ast, [
@@ -577,7 +705,8 @@ function astFilter(node, filters) {
     node.forEach((child) => astFilter(child, filters));
   } else if (node && typeof node === 'object') {
     filters.forEach((filter) => {
-      if (filter.type === '*' || node.type === filter.type) {
+      if (filter.type === '*' || node.type === filter.type ||
+        (Array.isArray(filter.type) && filter.type.includes(node.type))) {
         filter.callback(node);
       }
     });

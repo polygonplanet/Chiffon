@@ -1,16 +1,18 @@
 {
   "name": "chiffon",
   "version": "2.5.4",
-  "description": "A small ECMAScript parser, tokenizer and minifier written in JavaScript.",
+  "description": "A small JavaScript (ECMAScript) parser and tokenizer with zero dependencies",
   "main": "chiffon.js",
   "directories": {
     "test": "tests"
   },
-  "dependencies": {},
   "devDependencies": {
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
     "mocha": ""
   },
   "scripts": {
+    "lint": "eslint .",
     "test": "mocha --timeout 20000 tests/test",
     "test-min": "mocha --timeout 20000 tests/test --min",
     "pretest-min": "grunt"
@@ -20,13 +22,15 @@
     "url": "https://github.com/polygonplanet/Chiffon.git"
   },
   "keywords": [
-    "ecmascript",
-    "javascript",
     "parser",
-    "ast",
     "tokenizer",
     "lexer",
+    "minifier",
     "minify",
+    "ast",
+    "estree",
+    "ecmascript",
+    "javascript",
     "syntax"
   ],
   "author": "polygonplanet <polygon.planet.aqua@gmail.com>",

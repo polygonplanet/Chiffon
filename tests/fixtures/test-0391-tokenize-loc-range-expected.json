@@ -1,0 +1,74 @@
+[
+  {
+    "type": "Keyword",
+    "value": "export",
+    "range": [
+      99,
+      105
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 0
+      },
+      "end": {
+        "line": 4,
+        "column": 6
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": "{",
+    "range": [
+      106,
+      107
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 7
+      },
+      "end": {
+        "line": 4,
+        "column": 8
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": "}",
+    "range": [
+      107,
+      108
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 8
+      },
+      "end": {
+        "line": 4,
+        "column": 9
+      }
+    }
+  },
+  {
+    "type": "Punctuator",
+    "value": ";",
+    "range": [
+      108,
+      109
+    ],
+    "loc": {
+      "start": {
+        "line": 4,
+        "column": 9
+      },
+      "end": {
+        "line": 4,
+        "column": 10
+      }
+    }
+  }
+]

@@ -1,7 +1,7 @@
 /**
  * Chiffon
  *
- * @description  A small ECMAScript parser, tokenizer and minifier written in JavaScript
+ * @description  A small JavaScript (ECMAScript) parser and tokenizer with zero dependencies
  * @fileoverview JavaScript parser, tokenizer and minifier library
  * @version      2.5.4
  * @date         2016-04-17
@@ -50,6 +50,20 @@
       _Null = 'Null',
       _Boolean = 'Boolean',
       _Keyword = 'Keyword';
+
+  var binaryPrecedence = {
+    '*': 1, '/': 1, '%': 1,
+    '+': 2, '-': 2,
+    '<<': 3, '>>': 3, '>>>': 3,
+    '<': 4, '>': 4, '<=': 4, '>=': 4, 'instanceof': 4, 'in': 4,
+    '==': 5, '!=': 5, '===': 5, '!==': 5,
+    '&': 6,
+    '^': 7,
+    '|': 8,
+    '&&': 9,
+    '||': 10,
+    '??': 11
+  };
 
   // ECMA-262, 16th: 12.3 Line Terminators
   var lineTerminator = '\\r\\n\\u2028\\u2029';
@@ -104,7 +118,7 @@
     '|' + '[^`\\\\]' +
     ')*`';
 
-  var identToken = '(?:' +
+  var identToken = '#?(?:' +
         '\\\\u(?:[0-9a-fA-F]{4}|[{][0-9a-fA-F]+[}])' +
   '|' + '[^\\s\\\\+/%*=&|^~<>!?:;,.()[\\]{}\'"`@#-]' +
   ')+';
@@ -119,19 +133,27 @@
   var regexParenKeywords = 'if|while|for|with';
 
   // Reserved Words
-  var keywordsRe = new RegExp('^(?:' +
-    regexParenKeywords + '|' + regexPrefixKeywords + '|' +
-    'var|function|this|new|break|catch|finally|try|default|continue|' +
-    'switch|const|export|import|class|extends|debugger|super|enum|' +
+  var keywordTypeMap = (function() {
+    var map = { 'true': _Boolean, 'false': _Boolean, 'null': _Null };
+    var words = (
+      regexParenKeywords + '|' + regexPrefixKeywords + '|' +
+      'var|function|this|new|break|catch|finally|try|default|continue|' +
+      'switch|const|export|import|class|extends|debugger|super|enum|' +
 
-    // ECMA-262, 16th: 12.7.2 Keywords and Reserved Words
-    // Contextually disallowed as identifiers, in strict mode code:
-    // `await` is listed in `regexPrefixKeywords` above because ECMA-262
-    // includes it in the ReservedWord production; it is reserved only inside
-    // async contexts and modules, but otherwise may be used as an identifier.
-    'let|static|' +
-    'implements|package|protected|interface|private|public' +
-  ')$');
+      // ECMA-262, 16th: 12.7.2 Keywords and Reserved Words
+      // Contextually disallowed as identifiers, in strict mode code:
+      // `await` is listed in `regexPrefixKeywords` above because ECMA-262
+      // includes it in the ReservedWord production; it is reserved only inside
+      // async contexts and modules, but otherwise may be used as an identifier.
+      'let|static|' +
+      'implements|package|protected|interface|private|public'
+    ).split('|');
+
+    for (var i = 0; i < words.length; i++) {
+      map[words[i]] = _Keyword;
+    }
+    return map;
+  }());
 
   var lineTerminatorSequenceRe = new RegExp(lineTerminatorSequence);
 
@@ -140,8 +162,7 @@
   var identRightRe = new RegExp(identToken + '$');
   var signLeftRe = /^[+-]/;
   var signRightRe = /[+-]$/;
-  var notPunctRe = /[^{}()[\]<>=!+*%\/&|^~?:;,.-]/;
-
+  var stmtEndPunctRe = /^(?:[)\]}]|\+\+|--)$/;
   var whiteSpaceRe = new RegExp('^' + whiteSpace);
   var regexPrefixRe = new RegExp('(?:' +
           '(?:^(?:' + regexPrefixKeywords + ')$)' +
@@ -154,6 +175,20 @@
   var tokenizeNotRegExpRe = getPattern(_RegularExpression);
   var tokenizeRe = getPattern();
 
+  // Punctuator first-character table for performance
+  var punctCharTable = (function() {
+    var table = [];
+    var chars = '{}()[]<>=!+*%/&|^~?:;,.-';
+    var i = 0;
+    for (; i < 0x80; i++) {
+      table[i] = 0;
+    }
+    for (i = 0; i < chars.length; i++) {
+      table[chars.charCodeAt(i)] = 1;
+    }
+    return table;
+  }());
+
   lineTerminator =
   lineTerminatorSequence =
   whiteSpace =
@@ -165,21 +200,25 @@
   regexPrefixKeywords =
   regexParenKeywords = null;
 
-
   function getPattern(ignore) {
     return new RegExp(
       '(' +
+            // ECMA-262, 16th: 12.5 Hashbang Comments
+            '^#![^' + lineTerminator + ']*' +
+
             // MultiLine Comment
-            '/[*][\\s\\S]*?[*]/' +
+      '|' + '/[*][\\s\\S]*?[*]/' +
 
             // SingleLine Comment
       '|' + '//[^' + lineTerminator + ']*' +
       '|' + '<!--[^' + lineTerminator + ']*' +
 
             // Line Terminators
+            // SingleLine HTML Close Comment `-->` (Annex B): Sequences starting
+            // from `^` are typed as Comment, but those starting from a newline
+            // are typed as LineTerminator due to regex limitations.
       '|' + '(?:^|' + lineTerminatorSequence + ')' +
             '(?:' + whiteSpace + ')?' +
-            // SingleLine Comment
             '-->[^' + lineTerminator + ']*' +
 
             // Template Literal
@@ -239,27 +278,22 @@
     return fromCharCode((c >> 10) + 0xD800, (c % 0x400) + 0xDC00);
   }
 
-
   function isLineTerminator(c) {
     return c === 0x0A || c === 0x0D || c === 0x2028 || c === 0x2029;
   }
 
-
-  function isPunctuator(c) {
-    return !notPunctRe.test(c);
+  function isPunctuator(ch) {
+    return ch < 128 && punctCharTable[ch] === 1;
   }
-
 
   function isDigit(c) {
     return c >= 0x30 && c <= 0x39;
   }
 
-
   function isOctalDigit(c) {
     var ch = c.charCodeAt(0);
     return ch >= 0x30 && ch <= 0x37;
   }
-
 
   function mixin(target) {
     slice.call(arguments, 1).forEach(function(source) {
@@ -271,7 +305,6 @@
     });
     return target;
   }
-
 
   function Tokenizer(options) {
     this.options = mixin({}, options || {});
@@ -286,6 +319,9 @@
       var lineStart, columnStart, columnEnd, hasLineTerminator;
       var type, regex;
       var options = this.options;
+      var optComment = options.comment, optWhiteSpace = options.whiteSpace,
+          optLineTerminator = options.lineTerminator, optRange = options.range,
+          optLoc = options.loc, optParse = options.parse;
 
       for (var i = 0; i < matches.length; i++) {
         value = matches[i];
@@ -300,7 +336,7 @@
         regex = null;
         type = this.getTokenType(value);
 
-        if (options.loc) {
+        if (optLoc) {
           if (type === _String ||
               (type === _Comment && value.charAt(1) === '*')) {
             lines = value.split(lineTerminatorSequenceRe);
@@ -335,14 +371,14 @@
           continue;
         }
 
-        if (options.parse && type === _LineTerminator) {
+        if (optParse && type === _LineTerminator) {
           hasLineTerminator = true;
           continue;
         }
 
-        if ((type === _Comment && !options.comment) ||
-            (type === _WhiteSpace && !options.whiteSpace) ||
-            (type === _LineTerminator && !options.lineTerminator)) {
+        if ((type === _Comment && !optComment) ||
+            (type === _WhiteSpace && !optWhiteSpace) ||
+            (type === _LineTerminator && !optLineTerminator)) {
           continue;
         }
 
@@ -350,6 +386,12 @@
           type: type,
           value: value
         };
+
+        if (optParse) {
+          // Check types first to avoid prototype properties ('constructor', etc.)
+          token.prec = (type === _Punctuator || type === _Keyword) ?
+            (binaryPrecedence[value] || 0) : 0;
+        }
 
         if (hasLineTerminator) {
           token.hasLineTerminator = true;
@@ -360,10 +402,10 @@
           token.regex = regex;
         }
 
-        if (options.range) {
+        if (optRange) {
           token.range = [this.index - len, this.index];
         }
-        if (options.loc) {
+        if (optLoc) {
           columnEnd = this.index - this.prevLineIndex;
           this.addLoc(token, lineStart, columnStart, this.line, columnEnd);
         }
@@ -374,7 +416,7 @@
     getTokenType: function(value) {
       var len = value.length;
       var c = value.charAt(0);
-      var ch;
+      var ch, type;
 
       switch (c) {
         case '"':
@@ -415,38 +457,41 @@
           return _Comment;
         case '`':
           return _Template;
+        case '#':
+          if (value.charAt(1) === '!') {
+            return _Comment;
+          }
+          return _Identifier;
         case '}':
           if (len === 1) {
             return _Punctuator;
           }
           return _Template;
         default:
-          if (value === 'true' || value === 'false') {
-            return _Boolean;
-          }
-          if (value === 'null') {
-            return _Null;
-          }
-          if (whiteSpaceRe.test(c)) {
-            return _WhiteSpace;
-          }
-          if (isPunctuator(c)) {
+          ch = c.charCodeAt(0);
+          if (isPunctuator(ch)) {
             return _Punctuator;
           }
-
-          ch = c.charCodeAt(0);
           if (isLineTerminator(ch)) {
             return _LineTerminator;
           }
           if (isDigit(ch)) {
             return _Numeric;
           }
-
-          if (keywordsRe.test(value)) {
-            return _Keyword;
+          if (ch === 0x20 || ch === 0x09) {
+            return _WhiteSpace;
           }
+
+          type = keywordTypeMap[value];
+          if (typeof type === 'string') {
+            return type;
+          }
+
           if (identRe.test(value)) {
             return _Identifier;
+          }
+          if (whiteSpaceRe.test(c)) {
+            return _WhiteSpace;
           }
       }
     },
@@ -712,7 +757,6 @@
     return new Tokenizer(options).tokenize(source);
   };
 
-
   function Untokenizer(options) {
     this.options = mixin({}, options || {});
   }
@@ -760,7 +804,6 @@
   var untokenize = Chiffon.untokenize = function(tokens, options) {
     return new Untokenizer(options).untokenize(tokens);
   };
-
 
   var TOKEN_END = {};
   var minifyDefaultOptions = {
@@ -814,12 +857,19 @@
 
       while (this.index < this.length) {
         if (this.type === _LineTerminator) {
-          if (this.prev.type === _Punctuator ||
-              this.prev.type === _LineTerminator ||
-              this.lookahead.type === _Punctuator) {
+          var lookahead = this.lookahead;
+          var lookaheadValue = lookahead.value;
+          var prev = this.prev;
+
+          if ((lookaheadValue !== '++' && lookaheadValue !== '--') &&
+            (lookahead === TOKEN_END ||
+            lookahead.type === _Punctuator || prev.type === _LineTerminator ||
+            (prev.type === _Punctuator && !stmtEndPunctRe.test(prev.value)))) {
             this.eat();
             continue;
-          } else if (this.lookahead.type === _LineTerminator) {
+          }
+
+          if (lookahead.type === _LineTerminator) {
             this.next();
             this.eat();
             continue;
@@ -870,10 +920,9 @@
    *     Limit the line length in symbols.
    * @return {string} Return a minified source.
    */
-  var minify = Chiffon.minify = function(source, options) {
+  Chiffon.minify = function(source, options) {
     return new Minifier(options).minify(source);
   };
-
 
   // Parser based Esprima. (http://esprima.org/)
   // Abstract syntax tree specified by ESTree. (https://github.com/estree/estree)
@@ -923,12 +972,15 @@
       _NewExpression = 'NewExpression',
       _ObjectExpression = 'ObjectExpression',
       _ObjectPattern = 'ObjectPattern',
+      _PrivateIdentifier = 'PrivateIdentifier',
       _Program = 'Program',
       _Property = 'Property',
+      _PropertyDefinition = 'PropertyDefinition',
       _RestElement = 'RestElement',
       _ReturnStatement = 'ReturnStatement',
       _SequenceExpression = 'SequenceExpression',
       _SpreadElement = 'SpreadElement',
+      _StaticBlock = 'StaticBlock',
       _Super = 'Super',
       _SwitchCase = 'SwitchCase',
       _SwitchStatement = 'SwitchStatement',
@@ -946,11 +998,9 @@
       _WithStatement = 'WithStatement',
       _YieldExpression = 'YieldExpression';
 
-
   var assignOpRe = /^(?:[-+*%\/&|]?=|>>>?=|<<=|\*\*=|&&=|\|\|=|\?\?=)$/;
   var unaryOpRe = /^(?:[-+!~]|\+\+|--|typeof|void|delete)$/;
   var octalDigitRe = /^0[0-7]+$/;
-
 
   function Parser(options) {
     this.options = mixin({}, options || {});
@@ -1282,8 +1332,9 @@
       return this.finishNode(node);
     },
     parseIdentifier: function(allowKeyword) {
-      var node = this.startNode(_Identifier);
       var name = this.value;
+      var isPrivate = name.charAt(0) === '#';
+      var node = this.startNode(isPrivate ? _PrivateIdentifier : _Identifier);
 
       if (allowKeyword) {
         this.next();
@@ -1291,7 +1342,7 @@
         this.expectType(_Identifier);
       }
 
-      node.name = name;
+      node.name = isPrivate ? name.substring(1) : name;
       return this.finishNode(node);
     },
     // `yield` and `await` are allowed as identifiers outside their context
@@ -1565,7 +1616,7 @@
           generator: generator,
           async: isAsync
         });
-      } else if (key.type === _Identifier) {
+      } else if (key.type === _Identifier || key.type === _PrivateIdentifier) {
         shorthand = true;
         if (this.value === '=') {
           value = this.parseAssignmentPattern(key);
@@ -1838,45 +1889,12 @@
       return this.finishNode(node);
     },
     getBinaryPrecedence: function(allowIn) {
-      switch (this.value) {
-        case '*':
-        case '/':
-        case '%':
-          return 1;
-        case '+':
-        case '-':
-          return 2;
-        case '<<':
-        case '>>':
-        case '>>>':
-          return 3;
-        case '<':
-        case '>':
-        case '<=':
-        case '>=':
-        case 'instanceof':
-          return 4;
-        case 'in':
-          return allowIn ? 4 : 0;
-        case '==':
-        case '!=':
-        case '===':
-        case '!==':
-          return 5;
-        case '&':
-          return 6;
-        case '^':
-          return 7;
-        case '|':
-          return 8;
-        case '&&':
-          return 9;
-        case '||':
-          return 10;
-        case '??':
-          return 11;
+      var prec = this.token.prec || 0;
+      // `in` (precedence 4) is disallowed inside e.g. for-init headers.
+      if (!allowIn && prec === 4 && this.value === 'in') {
+        return 0;
       }
-      return 0;
+      return prec;
     },
     parseBinaryExpression: function(allowIn, base) {
       if (base == null) {
@@ -1891,30 +1909,26 @@
       }
       var right, operator, node;
 
-      for (var i = 1; i <= 11; i++) {
-        while ((prec = this.getBinaryPrecedence(allowIn)) === i) {
-          operator = this.value;
+      while (prec && prec <= base) {
+        operator = this.value;
 
-          node = this.startNode(i < 9 ? _BinaryExpression : _LogicalExpression);
-          this.startNodeAt(node, startNode);
-          node.operator = operator;
-          node.left = left;
+        node = this.startNode(prec < 9 ? _BinaryExpression : _LogicalExpression);
+        this.startNodeAt(node, startNode);
+        node.operator = operator;
+        node.left = left;
 
-          this.next();
+        this.next();
 
-          if (prec === 1) {
-            right = this.parseExponentiationExpression();
-          } else {
-            right = this.parseBinaryExpression(allowIn, prec - 1);
-          }
-
-          node.right = right;
-          left = this.finishNode(node);
+        if (prec === 1) {
+          right = this.parseExponentiationExpression();
+        } else {
+          right = this.parseBinaryExpression(allowIn, prec - 1);
         }
 
-        if (base < prec) {
-          break;
-        }
+        node.right = right;
+        left = this.finishNode(node);
+
+        prec = this.getBinaryPrecedence(allowIn);
       }
 
       this.startNodeAt(left, startNode);
@@ -3054,26 +3068,48 @@
     parseMethodDefinition: function() {
       var startNode = this.startNode(_MethodDefinition);
       var isStatic = false;
-      // `static` is the static modifier unless it is itself the method name,
+      // `static` is the static modifier unless it is itself the element name,
       // e.g. `class A { static() {} }`.
       if (this.value === 'static' && this.lookahead().value !== '(') {
         isStatic = true;
         this.next();
+
+        // ES2022: class static initialization block `static { ... }`
+        if (this.value === '{') {
+          return this.parseStaticBlock(startNode);
+        }
       }
 
       var node = this.parseObjectDefinition();
       this.startNodeAt(node, startNode);
-      node.type = _MethodDefinition;
       node['static'] = isStatic;
+      var method = node.method;
+      var kind = node.kind;
       delete node.method;
       delete node.shorthand;
 
-      if (node.key.name === 'constructor') {
-        node.kind = 'constructor';
-      } else if (node.kind === 'init') {
-        node.kind = 'method';
+      if (method || kind === 'get' || kind === 'set') {
+        node.type = _MethodDefinition;
+        if (node.key.type === _Identifier && node.key.name === 'constructor') {
+          node.kind = 'constructor';
+        } else if (kind === 'init') {
+          node.kind = 'method';
+        }
+      } else {
+        node.type = _PropertyDefinition;
+        var value = node.value;
+        node.value = value.type === _AssignmentPattern ? value.right : null;
+        delete node.kind;
       }
 
+      return this.finishNode(node);
+    },
+    parseStaticBlock: function(node) {
+      node.type = _StaticBlock;
+      node.body = [];
+      this.expect('{');
+      this.parseScriptBody(node.body, '}');
+      this.expect('}');
       return this.finishNode(node);
     },
     parseMaybeExpressionStatement: function() {
@@ -3135,7 +3171,7 @@
    *       Include line number and column-based location info
    * @return {Object} Return an abstract syntax tree object.
    */
-  var parse = Chiffon.parse = function(source, options) {
+  Chiffon.parse = function(source, options) {
     return new Parser(options).parse(source);
   };
 

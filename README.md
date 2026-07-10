@@ -3,7 +3,7 @@ Chiffon
 
 [![Build Status](https://travis-ci.org/polygonplanet/Chiffon.svg?branch=master)](https://travis-ci.org/polygonplanet/Chiffon)
 
-A small ECMAScript parser, tokenizer and minifier written in JavaScript.
+A small JavaScript (ECMAScript) parser and tokenizer with zero dependencies.
 
 ## Features
 
