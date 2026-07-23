@@ -5,6 +5,8 @@
   "main": "chiffon.js",
   "directories": {
     "test": "tests"
+  "engines": {
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "eslint": "^10.6.0",
