@@ -818,27 +818,37 @@
     init: function() {
       this.index = 0;
       this.lineLen = 0;
+      this.prev = TOKEN_END;
       this.current();
     },
     next: function() {
+      this.prev = this.token;
       this.index++;
       return this.current();
     },
     current: function() {
       this.length = this.tokens.length;
-      this.prev = this.tokens[this.index - 1] || {};
       this.token = this.tokens[this.index] || TOKEN_END;
       this.value = this.token.value;
       this.type = this.token.type;
       this.lookahead = this.tokens[this.index + 1] || TOKEN_END;
       return this.token;
     },
-    remove: function(index) {
-      if (index == null) {
-        index = this.index;
-      }
-      this.tokens.splice(index, 1);
+    remove: function() {
+      this.tokens[this.index++] = null;
       this.current();
+    },
+    compact: function() {
+      var tokens = this.tokens;
+      var i = 0, j = 0, len = tokens.length, token;
+
+      for (; i < len; i++) {
+        token = tokens[i];
+        if (token !== null) {
+          tokens[j++] = token;
+        }
+      }
+      tokens.length = j;
     },
     insert: function(token) {
       this.tokens.splice(this.index + 1, 0, token);
@@ -901,6 +911,7 @@
     },
     compress: function() {
       this.flatten();
+      this.compact();
       this.breakLine();
     },
     minify: function(source) {
